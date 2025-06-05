@@ -1,10 +1,12 @@
-import { Slot } from 'expo-router'
-import React from 'react'
+import { Stack } from 'expo-router';
 
-const _layout = () => {
+export default function Layout() {
   return (
-    <Slot />
-  )
+    <Stack
+      screenOptions={{
+        animation: 'ios_from_right',
+        headerShown: false,
+      }}
+    />
+  );
 }
-
-export default _layout

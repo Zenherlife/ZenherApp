@@ -2,35 +2,17 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useNavigation, useRouter } from 'expo-router';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
 export default function LoginScreen() {
-  const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
+    const navigation = useNavigation();
+    const router = useRouter()
 
   GoogleSignin.configure({
     webClientId: '646539268053-8fp7icsebfmut1k3elqt4ll38754oiko.apps.googleusercontent.com',
   });
 
-  function onAuthStateChanged(user) {
-    setUser(user);
-    if (initializing) setInitializing(false);
-  }
-
-  useEffect(() => {
-    const checkUserLoggedIn = async () => {
-      const user = await AsyncStorage.getItem('@user');
-      if (user) {
-        console.log(user)
-        router.replace('./(tabs)');
-      }
-    };
-    checkUserLoggedIn();
-    const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber;
-  }, []);
 
   const onGoogleButtonPress = async () => {
     try {
@@ -52,14 +34,15 @@ export default function LoginScreen() {
           displayName: displayName || '',
           photoURL: photoURL || '',
         });
-        router.replace('./(tabs)');
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'home' }],
+        });
       }
     } catch (error) {
       console.log('Error:', error.message);
     }
   };
-
-  if (initializing) return null;
 
   return (
     <View className="flex-1 bg-black items-center px-5 pt-24">
@@ -79,7 +62,7 @@ export default function LoginScreen() {
         Sign in to your Zenher account to start tracking again.
       </Text>
         <View className='flex-1'/>
-      <TouchableOpacity className="bg-cyan-400 w-full py-4 rounded-full mb-4">
+      <TouchableOpacity className="bg-cyan-400 w-full py-4 rounded-full mb-4" onPress={() => router.push('/auth/emailLogin')}>
         <Text className="text-center font-semibold text-black">Sign in with email</Text>
       </TouchableOpacity>
 
