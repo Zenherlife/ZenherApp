@@ -1,17 +1,18 @@
-import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 
+import GoogleSignInButton from '@/modules/auth/components/GoogleSignInButton';
 import { Feather } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 
 export default function SignupOptionsScreen() {
-  const navigation = useNavigation();
+  const router = useRouter();
 
   return (
     <View className="flex-1 bg-black px-6 justify-center">
       {/* Back button */}
-      <TouchableOpacity onPress={() => navigation.goBack()} className="absolute top-12 left-4">
+      <TouchableOpacity onPress={() => router.back()} className="absolute top-12 left-4">
         <Feather name="arrow-left" size={28} color="white" />
       </TouchableOpacity>
 
@@ -28,22 +29,19 @@ export default function SignupOptionsScreen() {
 
         {/* Subtext */}
         <Text className="text-gray-400 text-sm text-center mt-2">
-          Create a Clue account where all your{'\n'}preferences are stored.
+          Create a Zenher account where all your{'\n'}preferences are stored.
         </Text>
       </View>
 
       {/* Buttons */}
       <View className="space-y-4 mt-4">
         {/* Google Sign Up */}
-        <TouchableOpacity className="flex-row items-center justify-center rounded-full border border-white py-3 mb-3">
-         
-          <Text className="text-white font-semibold">Sign up with Google</Text>
-        </TouchableOpacity>
+        <GoogleSignInButton />
 
         {/* Email Sign Up */}
         <TouchableOpacity
-          onPress={() => navigation.navigate('SignupForm')}
-          className="rounded-full border border-blue-400 py-3"
+          onPress={() => router.push('./signupmail')}
+          className="rounded-full border border-blue-400 py-4"
         >
           <Text className="text-blue-400 text-center font-semibold">Sign up with email</Text>
         </TouchableOpacity>
@@ -54,7 +52,7 @@ export default function SignupOptionsScreen() {
         Already have an account?{' '}
         <Text
           className="text-blue-400 font-semibold"
-          onPress={() => navigation.navigate('../')}
+          onPress={() => router.push('../login')}
         >
           Sign in
         </Text>

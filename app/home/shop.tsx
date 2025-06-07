@@ -31,8 +31,8 @@ const products = [
 
 export default function ShopScreen() {
   return (
-    <View className="flex-1 mt-12 bg-gray-50 dark:bg-gray-900">
-      <Text className="text-3xl font-extrabold text-gray-900 dark:text-white mt-8 mb-6 px-6">Shop</Text>
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <Text className="text-3xl font-extrabold text-gray-900 dark:text-white pt-8 mb-6 px-6">Shop</Text>
       <FlatList
         data={products}
         keyExtractor={item => item.id.toString()}

@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const logo = require('../assets/images/project/logo.png');
 
 export default function LayoutHeader({ right }: { right?: React.ReactNode }) {
   return (
-    <View className="absolute top-0 left-0 right-0 z-10 bg-white dark:bg-gray-900 flex-row items-center justify-between px-6 h-16 shadow-md" style={{ elevation: 4 }}>
+    <SafeAreaView className="left-0 right-0 z-10 bg-white dark:bg-gray-900 flex-row items-center justify-between px-6 shadow-md" style={{ elevation: 4 }}>
       <View className="flex-row items-center">
         <Image
           source={logo}
@@ -24,6 +25,6 @@ export default function LayoutHeader({ right }: { right?: React.ReactNode }) {
           </Pressable>
         </View>
       )}
-    </View>
+    </SafeAreaView>
   );
 } 

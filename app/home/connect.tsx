@@ -1,10 +1,7 @@
+import { useAuthStore } from '@/modules/auth/store/useAuthStore';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Linking, Pressable, ScrollView, Text, View } from 'react-native';
-
-const user = {
-  name: 'Animesh Shukla',
-  email: 'animeshshuklafoundation@gmail.com',
-};
 
 const healthProfile = [
   { title: 'My health record', icon: 'document-text-outline', onPress: () => {} },
@@ -24,15 +21,19 @@ const resources = [
 ];
 
 export default function ConnectScreen() {
+  const router = useRouter()
+  const user = useAuthStore(state => state.user);
+  console.log(user)
+  
   return (
-    <ScrollView className="flex-1 mt-12 bg-gray-50 dark:bg-gray-900" contentContainerStyle={{ paddingBottom: 32 }}>
+    <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900" contentContainerStyle={{ paddingBottom: 65 }}>
       {/* Profile Card */}
-      <View className="bg-white dark:bg-gray-800 rounded-2xl shadow-md mx-4 mt-8 mb-4 p-6 flex-row items-center justify-between">
+      <View className="bg-white dark:bg-gray-800 rounded-2xl shadow-md mx-4 mt-4 mb-4 p-6 flex-row items-center justify-between">
         <View>
-          <Text className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1">{user.name}</Text>
-          <Text className="text-gray-500 dark:text-gray-300">{user.email}</Text>
+          <Text className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1">{user?.displayName || ""}</Text>
+          <Text className="text-gray-500 dark:text-gray-300">{user?.email || ""}</Text>
         </View>
-        <Pressable onPress={() => {}}>
+        <Pressable onPress={() => router.push('/auth/logout')}>
           <Ionicons name="chevron-forward" size={28} color="#a21caf" />
         </Pressable>
       </View>

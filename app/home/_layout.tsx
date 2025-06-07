@@ -2,12 +2,12 @@ import LayoutHeader from '@/components/LayoutHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Tabs } from 'expo-router';
-import { Platform, View } from 'react-native';
+import { Platform, SafeAreaView, View } from 'react-native';
 import "../../global.css";
 
 export default function TabLayout() {
   return (
-    <View className="flex-1 bg-white">
+    <SafeAreaView className="flex-1">
       <LayoutHeader />
       <Tabs
         screenOptions={({ route }) => ({
@@ -48,6 +48,7 @@ export default function TabLayout() {
           },
           tabBarIcon: ({ color, size, focused }) => {
             let iconName = '';
+            const iconSize = 14
             switch (route.name) {
               case 'index':
                 iconName = focused ? 'home' : 'home-outline';
@@ -69,7 +70,7 @@ export default function TabLayout() {
             }
             return (
               <View className={`${focused ? 'bg-violet-100' : ''} p-2 rounded-full`}>
-                <Ionicons name={iconName as any} size={size} color={color} />
+                <Ionicons name={iconName as any} size={iconSize} color={color} />
               </View>
             );
           },
@@ -111,6 +112,6 @@ export default function TabLayout() {
           }} 
         />
       </Tabs>
-    </View>
+    </SafeAreaView>
   );
 } 

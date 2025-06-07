@@ -30,7 +30,7 @@ const doctors = [
 
 export default function ConsultScreen() {
   return (
-    <View className="flex-1 mt-12 bg-white dark:bg-gray-900">
+    <View className="flex-1 bg-white dark:bg-gray-900">
       <View className="px-6 pt-12 pb-4">
         <Text className="text-2xl font-semibold text-gray-900 dark:text-white">Find a Doctor</Text>
         <Text className="text-sm text-gray-500 dark:text-gray-400 mt-1">Browse and book consultations with expert doctors</Text>

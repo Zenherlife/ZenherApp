@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
@@ -107,31 +106,13 @@ export default function HomeScreen() {
   return (
     <View className="flex-1 bg-white dark:bg-gray-900">
       {/* Fixed Header */}
-      <View className="absolute top-0 left-0 right-0 z-10 bg-white dark:bg-gray-900 flex-row items-center justify-between px-6 h-16 shadow-md" style={{ elevation: 4 }}>
-        <View className="flex-row items-center">
-          <Image
-            source={logo}
-            className="h-7 w-7 mr-2"
-            contentFit="contain"
-          />
-          <Text className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">Zenher</Text>
-        </View>
-        <View className="flex-row items-center space-x-4">
-          <Pressable className="p-2 rounded-full bg-gray-100 dark:bg-gray-800">
-            <Ionicons name="notifications-outline" size={22} color="#6B7280" />
-          </Pressable>
-          <View className="h-8 w-8 rounded-full bg-black items-center justify-center">
-            <Text className="text-white font-bold">SM</Text>
-          </View>
-        </View>
-      </View>
       <ScrollView
         className="flex-1"
-        contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 80, alignItems: 'center', paddingBottom: 48 }}
+        contentContainerStyle={{ paddingHorizontal: 24, alignItems: 'center', paddingBottom: 48 }}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Section */}
-        <View className="flex-row items-center mb-8">
+        <View className="flex-row items-center my-8">
           <Image
             source={logo}
             className="h-8 w-8 mr-2"

@@ -1,13 +1,13 @@
-import auth from '@react-native-firebase/auth';
+import { useEmailSignIn } from '@/modules/auth/hooks/useEmailSignIn';
 import { useNavigation } from '@react-navigation/native';
 import { useState } from 'react';
 import {
-    ActivityIndicator,
-    Image,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Image,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 
 export default function EmailLoginScreen() {
@@ -15,48 +15,24 @@ export default function EmailLoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secure, setSecure] = useState(true);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const { signIn, loading, error } = useEmailSignIn();
 
   const handleLogin = async () => {
-    setError('');
     if (!email || !password) {
-      setError('Please fill in both email and password.');
+      alert('Please fill in both email and password.');
       return;
     }
 
-    setLoading(true);
     try {
-      await auth().signInWithEmailAndPassword(email.trim(), password);
+      await signIn(email, password);
       navigation.reset({
         index: 0,
         routes: [{ name: 'home' }],
       });
-    } catch (e) {
-      switch (e.code) {
-        case 'auth/invalid-email':
-            setError('Invalid email format.');
-            break;
-        case 'auth/user-not-found':
-            setError('No account found with this email.');
-            break;
-        case 'auth/wrong-password':
-            setError('Incorrect password. Please try again.');
-            break;
-        case 'auth/invalid-credential':
-            setError('Incorrect credentials.');
-            break;
-        case 'auth/too-many-requests':
-            setError('Too many attempts. Try again later.');
-            break;
-        default:
-            setError('Login failed. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+    } catch (e: any) {
+      alert(e.message || 'Login failed');
     }
   };
-
   return (
     <View className="flex-1 bg-black px-6 pt-20">
       {/* Back Arrow */}
@@ -77,7 +53,7 @@ export default function EmailLoginScreen() {
       {/* Headings */}
       <Text className="text-white text-xl font-bold text-center">Sign in with email</Text>
       <Text className="text-gray-400 text-center mt-1 mb-6">
-        Enter your details to continue. If you’ve forgotten, we’ll help you out.
+        Enter your details to continue. If you've forgotten, we'll help you out.
       </Text>
 
       {/* Error Message */}
