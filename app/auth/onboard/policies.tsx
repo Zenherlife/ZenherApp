@@ -1,8 +1,8 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { ArrowLeft } from 'lucide-react-native';
 import React, { useState } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ConsentScreen() {
   const [checks, setChecks] = useState([false, false, false, false]);
@@ -15,10 +15,10 @@ export default function ConsentScreen() {
   };
 
   return (
-    <View className="flex-1 bg-black px-6 pt-10">
-      {/* Back Arrow */}
-      <TouchableOpacity onPress={() => router.back()} className="absolute top-10 left-6 z-10">
-        <ArrowLeft color="white" size={24} />
+  <SafeAreaView className="flex-1 bg-gray-900 px-6">
+      {/* Back Button */}
+      <TouchableOpacity className="mt-4" onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -53,7 +53,7 @@ export default function ConsentScreen() {
           >
             <View
               className={`w-6 h-6 rounded-md border-2 ${
-                checks[index] ? 'bg-cyan-400 border-cyan-400' : 'border-white/60'
+                checks[index] ? 'bg-white border-white' : 'border-white/60'
               } items-center justify-center`}
             >
               {checks[index] && <MaterialCommunityIcons name="check" color="black" size={18} />}
@@ -64,13 +64,13 @@ export default function ConsentScreen() {
 
         {/* Next Button */}
         <TouchableOpacity
-         disabled={checks.some(item => item === false)}
-          className="bg-cyan-400 rounded-full py-4 mt-6 mb-10"
+          disabled={checks.some(item => item === false)}
+          className="bg-white rounded-full py-4 mt-6 mb-10"
           onPress={() => router.push('./signup')}
         >
           <Text className="text-center text-black font-semibold text-base">Next</Text>
         </TouchableOpacity>
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

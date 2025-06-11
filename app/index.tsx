@@ -1,53 +1,152 @@
 import auth from '@react-native-firebase/auth';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Image,
+  StatusBar,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Animated, {
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function InitialScreen() {
+export default function WelcomeScreen() {
   const router = useRouter();
+  const [showOptions, setShowOptions] = useState(false);
   const [initializing, setInitializing] = useState(true);
 
-  useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged((user) => {
-      setInitializing(false);
+  // Initial screen animation
+  const screenOpacity = useSharedValue(0);
+  const screenTranslate = useSharedValue(20);
 
-      setTimeout(() => {
-        if (user) {
-          router.replace('/home');
-        }
-      }, 0);
+  // Button transitions
+  const getStartedOpacity = useSharedValue(1);
+  const optionsOpacity = useSharedValue(0);
+  const optionsTranslate = useSharedValue(15);
+
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged((authUser) => {
+      if (authUser) {
+        // User is logged in, navigate immediately
+        router.replace('/home');
+      } else {
+        // User is not logged in, show welcome screen
+        setInitializing(false);
+      }
     });
 
     return unsubscribe;
-  }, []);
+  }, [router]);
 
-  if (initializing) return null;
+  useEffect(() => {
+    if (!initializing) {
+      screenOpacity.value = withTiming(1, { duration: 700 });
+      screenTranslate.value = withTiming(0, { duration: 700 });
+    }
+  }, [initializing]);
+
+  const screenAnimatedStyle = useAnimatedStyle(() => ({
+    opacity: screenOpacity.value,
+    transform: [{ translateY: screenTranslate.value }],
+  }));
+
+  const getStartedStyle = useAnimatedStyle(() => ({
+    opacity: getStartedOpacity.value,
+  }));
+
+  const optionsStyle = useAnimatedStyle(() => ({
+    opacity: optionsOpacity.value,
+    transform: [{ translateY: optionsTranslate.value }],
+  }));
+
+  const handleGetStarted = () => {
+    // Fade out Get Started button
+    getStartedOpacity.value = withTiming(0, { duration: 300 }, (finished) => {
+      if (finished) {
+        runOnJS(setShowOptions)(true);
+        optionsOpacity.value = withTiming(1, { duration: 500 });
+        optionsTranslate.value = withTiming(0, { duration: 500 });
+      }
+    });
+  };
+
+  if (initializing) {
+    return null;
+  }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#004b5c]">
-      <StatusBar barStyle="light-content" backgroundColor="#004b5c" />
-      <View className="mt-8 px-6">
-        <Text className="text-white text-2xl font-semibold">Connecting the dots.</Text>
-        <Text className="text-cyan-300 text-lg mt-1">Your cycle, decoded.</Text>
-      </View>
+    <SafeAreaView className="flex-1 bg-gray-900">
+      <StatusBar barStyle="light-content" backgroundColor="transparent" />
 
-      <View className="flex-1 justify-center items-center">
-        <View className="bg-[#004b5c] rounded-full border border-white/20 w-64 h-64 justify-center items-center">
-          <Text className="text-white text-base mb-1">Today, 2025-06-05</Text>
-          <Text className="text-white text-xl font-bold text-center">6 more days until{'\n'}next period</Text>
-          <Text className="text-cyan-300 mt-2 text-sm underline">Learn about your cycle</Text>
+      <Animated.View className="flex-1" style={screenAnimatedStyle}>
+        {/* Logo */}
+        <View className="flex-row items-center justify-center mt-20 gap-1">
+          <Image
+            source={require('@/assets/images/project/logo.png')}
+            className="w-12 h-12"
+            resizeMode="contain"
+          />
+          <Text className="text-white text-2xl font-semibold mt-2">Zenher</Text>
         </View>
-      </View>
 
-      <View className="px-6 mb-6">
-        <TouchableOpacity onPress={() => router.push('/auth/login')}>
-          <Text className="text-cyan-300 text-lg font-semibold text-center mb-6">I have an account</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="bg-cyan-300 rounded-full py-3" onPress={() => router.push('/auth/onboard')}>
-          <Text className="text-center text-[#004b5c] font-semibold text-lg">Create account</Text>
-        </TouchableOpacity>
-      </View>
+        {/* Heading */}
+        <View className="px-8 mt-6">
+          <Text className="text-white text-3xl font-bold text-center">Discover Zenher</Text>
+          <Text className="text-gray-300 text-base text-center mt-4 leading-6">
+            Effortlessly track your cycle, connect with wellness experts, and unlock personalized
+            health insights—all in one beautifully designed space.
+          </Text>
+        </View>
+
+        {/* Welcome Image */}
+        <View className="items-center py-12">
+          <Image
+            source={require('@/assets/images/project/hero-image.png')}
+            className="w-64 h-64"
+            resizeMode="contain"
+          />
+        </View>
+
+        {/* Buttons Area */}
+        <View className="px-8 mb-10">
+          {/* Get Started */}
+          {!showOptions && (
+            <Animated.View style={getStartedStyle}>
+              <TouchableOpacity
+                className="bg-white py-3 rounded-full"
+                onPress={handleGetStarted}
+              >
+                <Text className="text-center text-gray-900 font-bold text-lg">Get Started</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+
+          {/* Two Option Buttons */}
+          {showOptions && (
+            <Animated.View style={optionsStyle}>
+              <TouchableOpacity
+                className="py-3 rounded-full border border-white mb-4"
+                onPress={() => router.push('/auth/login')}
+              >
+                <Text className="text-center text-white font-semibold text-lg">I have an account</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="bg-white py-3 rounded-full"
+                onPress={() => router.push('/auth/onboard')}
+              >
+                <Text className="text-center text-gray-900 font-bold text-lg">Create account</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
+        </View>
+      </Animated.View>
     </SafeAreaView>
   );
 }

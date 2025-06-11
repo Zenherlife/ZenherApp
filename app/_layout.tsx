@@ -9,7 +9,7 @@ export default function Layout() {
   return (
     <Stack
       screenOptions={{
-        animation: 'ios_from_right',
+        animation: 'simple_push',
         headerShown: false,
       }}
     />

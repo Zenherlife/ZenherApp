@@ -1,36 +1,51 @@
 // app/auth/login.tsx
 import GoogleSignInButton from '@/modules/auth/components/GoogleSignInButton';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { Mail } from 'lucide-react-native';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function LoginScreen() {
   const router = useRouter();
 
   return (
-    <View className="flex-1 bg-black items-center px-5 pt-24">
-      <TouchableOpacity className="absolute top-12 left-5" onPress={() => router.back()}>
-        <Text className="text-white text-2xl">←</Text>
+    <SafeAreaView className="flex-1 bg-gray-900 px-6">
+      {/* Back Button */}
+      <TouchableOpacity className="mt-4" onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
 
-      <Image
-        source={{ uri: 'https://res.cloudinary.com/denlloigs/image/upload/v1742224838/zenher-logo_lgfkwg.png' }}
-        className="w-20 h-20 mb-6"
-      />
+      {/* Logo */}
+      <View className="items-center mt-10 mb-6 px-6">
+        <Image
+          source={require('@/assets/images/project/logo.png')}
+          className="w-20 h-20"
+          resizeMode="contain"
+        />
+      </View>
 
-      <Text className="text-white text-xl font-bold mb-2 text-center">Nice to have you back</Text>
-      <Text className="text-gray-400 text-base text-center mb-10">
+      {/* Text */}
+      <Text className="text-white text-2xl font-bold text-center">Nice to have you back</Text>
+      <Text className="text-gray-400 text-base text-center mt-2">
         Sign in to your Zenher account to start tracking again.
       </Text>
 
-      <View className="flex-1" />
+      <View className="flex-1 justify-end mb-20 px-2">
 
-      <TouchableOpacity className="bg-cyan-400 w-full py-4 rounded-full mb-4" onPress={() => router.push('/auth/emailLogin')}>
-        <Text className="text-center font-semibold text-black">Sign in with email</Text>
-      </TouchableOpacity>
+        {/* Email Sign-in Button */}
+        <TouchableOpacity
+          className="flex-row justify-center items-center w-full py-3 rounded-full mb-4 gap-4 bg-white"
+          onPress={() => router.push('/auth/emailLogin')}
+        >
+          <Mail color="black" size={20} strokeWidth={2} />
+          <Text className="text-center text-gray-900 font-semibold text-lg">Sign in with email</Text>
+        </TouchableOpacity>
 
-      <GoogleSignInButton />
+        {/* Google Sign-in Button */}
+        <GoogleSignInButton />
 
-      <View className="h-6" />
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }

@@ -1,5 +1,7 @@
 import { useEmailSignIn } from '@/modules/auth/hooks/useEmailSignIn';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
   ActivityIndicator,
@@ -9,9 +11,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function EmailLoginScreen() {
   const navigation = useNavigation();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secure, setSecure] = useState(true);
@@ -34,25 +38,24 @@ export default function EmailLoginScreen() {
     }
   };
   return (
-    <View className="flex-1 bg-black px-6 pt-20">
-      {/* Back Arrow */}
-      <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Text className="text-cyan-400 text-2xl">←</Text>
+    <SafeAreaView className="flex-1 bg-gray-900 px-6">
+      {/* Back Button */}
+      <TouchableOpacity className="mt-4" onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={24} color="white" />
       </TouchableOpacity>
 
       {/* Logo */}
-      <View className="items-center mt-6 mb-4">
+      <View className="items-center mt-10 mb-6 px-6">
         <Image
-          source={{
-            uri: 'https://res.cloudinary.com/denlloigs/image/upload/v1742224838/zenher-logo_lgfkwg.png',
-          }}
+          source={require('@/assets/images/project/logo.png')}
           className="w-20 h-20"
+          resizeMode="contain"
         />
       </View>
 
       {/* Headings */}
-      <Text className="text-white text-xl font-bold text-center">Sign in with email</Text>
-      <Text className="text-gray-400 text-center mt-1 mb-6">
+      <Text className="text-white text-2xl font-bold text-center mb-2">Sign in with email</Text>
+      <Text className="text-gray-400 text-base text-center mb-12">
         Enter your details to continue. If you've forgotten, we'll help you out.
       </Text>
 
@@ -64,49 +67,51 @@ export default function EmailLoginScreen() {
       {/* Email Input */}
       <TextInput
         placeholder="Email"
-        placeholderTextColor="#999"
+        placeholderTextColor="#888"
         keyboardType="email-address"
         autoCapitalize="none"
-        className="bg-neutral-900 text-white rounded-md p-4 mb-4"
-        value={email}
-        onChangeText={setEmail}
+        autoComplete='email'
+        className="bg-[#080e20] text-white border border-white/10 rounded-xl px-4 py-4 mb-4 text-base"
       />
 
       {/* Password Input */}
-      <View className="relative">
+      <View className="relative mb-2 justify-center">
         <TextInput
           placeholder="Password"
-          placeholderTextColor="#999"
+          placeholderTextColor="#888"
           secureTextEntry={secure}
-          className="bg-neutral-900 text-white rounded-md p-4 pr-12"
-          value={password}
-          onChangeText={setPassword}
+          className="bg-[#080e20] text-white border border-white/10 rounded-xl px-4 py-4 pr-12 text-base"
         />
         <TouchableOpacity
-          className="absolute right-4 top-4"
+          className="absolute right-4 top-3.5"
           onPress={() => setSecure(!secure)}
         >
-          <Text className="text-white">{secure ? '👁️‍🗨️' : '👁️'}</Text>
+          <Ionicons
+            name={secure ? 'eye-off' : 'eye'}
+            size={20}
+            color="#aaa"
+          />
         </TouchableOpacity>
       </View>
 
+
       {/* Forgot Password Placeholder */}
-      <TouchableOpacity className="mt-4 mb-8">
-        <Text className="text-cyan-400 text-center font-semibold">I forgot my password</Text>
+      <TouchableOpacity className="mt-2 mb-12">
+        <Text className="text-white text-center font-semibold">I forgot my password</Text>
       </TouchableOpacity>
 
       {/* Continue Button */}
       <TouchableOpacity
-        className={`bg-cyan-400 py-4 rounded-full ${loading ? 'opacity-60' : ''}`}
+        className={`bg-white py-3 mx-2 rounded-full ${loading ? 'opacity-60' : ''}`}
         disabled={loading}
         onPress={handleLogin}
       >
         {loading ? (
           <ActivityIndicator color="#000" />
         ) : (
-          <Text className="text-center font-semibold text-black">Continue</Text>
+          <Text className="text-center text-lg font-semibold text-black">Continue</Text>
         )}
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }

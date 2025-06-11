@@ -1,8 +1,9 @@
 import { useOnboardingStore } from '@/modules/auth/store/onboardingStore';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BirthdateScreen() {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -107,7 +108,7 @@ export default function BirthdateScreen() {
     if (age < 16) {
       setShowParentalConsent(true);
     } else {
-      router.push('./onboard/policies');
+      router.push('./onboard/Policies');
     }
   };
 
@@ -118,7 +119,7 @@ export default function BirthdateScreen() {
   const handleGotIt = () => {
     if(selectedDate) {
       setField('dateOfBirth', selectedDate)
-      router.push('./onboard/policies')
+      router.push('./onboard/Policies')
       setShowParentalConsent(false);
     } 
     
@@ -127,14 +128,14 @@ export default function BirthdateScreen() {
   const calendarDays = generateCalendarDays();
 
   return (
-    <View className="flex-1 bg-black">
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="px-5 pt-12">
-        <TouchableOpacity onPress={() => router.back()} className="mb-8">
-          <Feather name="arrow-left" size={28} color="#22d3ee" />
-        </TouchableOpacity>
+    <SafeAreaView className="flex-1 bg-gray-900">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="px-6">
+      <TouchableOpacity className="mt-4" onPress={() => router.back()}>
+        <Ionicons name="arrow-back" size={24} color="white" />
+      </TouchableOpacity>
 
         <View className="items-center mb-8">
-          <View className="bg-orange-500 rounded-full w-20 h-20 justify-center items-center mb-6">
+          <View className="bg-[#ed6372] rounded-full w-20 h-20 justify-center items-center mb-6">
             <Feather name="gift" size={32} color="white" />
           </View>
           <Text className="text-white text-2xl font-bold mb-2">When were you born?</Text>
@@ -173,39 +174,49 @@ export default function BirthdateScreen() {
           ))}
         </View>
 
-        {/* Calendar Grid */}
-        <View className="mb-8">
-          {Array.from({ length: Math.ceil(calendarDays.length / 7) }, (_, weekIndex) => (
-            <View key={weekIndex} className="flex-row mb-2">
-              {calendarDays.slice(weekIndex * 7, weekIndex * 7 + 7).map((day, dayIndex) => (
-                <View key={dayIndex} className="flex-1 items-center">
-                  {day ? (
-                    <TouchableOpacity
-                      onPress={() => handleDayPress(day)}
-                      className={`w-10 h-10 rounded-full items-center justify-center ${
-                        isSelected(day) ? 'bg-cyan-400' : ''
-                      }`}
-                    >
-                      <Text className={`text-base ${
-                        isSelected(day) ? 'text-black font-semibold' : 'text-white'
-                      }`}>
-                        {day}
-                      </Text>
-                    </TouchableOpacity>
-                  ) : (
-                    <View className="w-10 h-10" />
-                  )}
-                </View>
-              ))}
-            </View>
-          ))}
+        <View className="flex-1">
+          {Array.from({ length: Math.ceil(calendarDays.length / 7) }, (_, weekIndex) => {
+            const weekDays = calendarDays.slice(weekIndex * 7, weekIndex * 7 + 7);
+            const isFirstRow = weekIndex === 0;
+            const isLastRow = weekIndex === Math.ceil(calendarDays.length / 7) - 1;
+
+            return (
+              <View
+                key={weekIndex}
+                className={`flex-row mb-2 ${isFirstRow || isLastRow ? 'justify-start' : ''}`}
+              >
+                {weekDays.map((day, dayIndex) => (
+                  <View key={dayIndex} className="w-[14.28%] items-center">
+                    {day ? (
+                      <TouchableOpacity
+                        onPress={() => handleDayPress(day)}
+                        className={`w-10 h-10 rounded-full items-center justify-center ${
+                          isSelected(day) ? 'bg-white' : ''
+                        }`}
+                      >
+                        <Text
+                          className={`text-base ${
+                            isSelected(day) ? 'text-black font-semibold' : 'text-white'
+                          }`}
+                        >
+                          {day}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <View className="w-10 h-10" />
+                    )}
+                  </View>
+                ))}
+              </View>
+            );
+          })}
         </View>
 
         {/* Next Button */}
         <TouchableOpacity
           disabled={!selectedDate}
-          className={`mx-4 py-4 rounded-full mb-8 ${
-            selectedDate ? 'bg-cyan-400' : 'bg-gray-700'
+          className={`mx-4 py-4 rounded-full mb-20 ${
+            selectedDate ? 'bg-white' : 'bg-gray-700'
           }`}
           onPress={handleNext}
         >
@@ -295,18 +306,15 @@ export default function BirthdateScreen() {
         animationType="fade"
         onRequestClose={handleParentalConsentClose}
       >
-        <View className="flex-1 px-5 pt-2 bg-black">
-          <TouchableOpacity onPress={handleParentalConsentClose}>
-            <Feather name="arrow-left" size={28} color="#22d3ee" />
+        <View className="flex-1 px-6 bg-gray-900">
+          <TouchableOpacity className="mt-4" onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="white" />
           </TouchableOpacity>
 
-          <View className="flex-1 justify-center items-center px-6">
+          <View className="flex-1 justify-center items-center px-4">
             {/* Icon */}
-            <View className="bg-blue-500 rounded-full w-24 h-24 justify-center items-center mb-8">
-              <View className="bg-blue-300 rounded-full w-16 h-16 justify-center items-center">
-                <View className="w-3 h-3 bg-blue-600 rounded-full mb-1" />
-                <View className="w-8 h-1 bg-blue-600 rounded-full" />
-              </View>
+            <View className="bg-blue-400 rounded-full w-20 h-20 justify-center items-center mb-8">
+              <Ionicons name='happy' color='#d7e0fd' size={44} />
             </View>
 
             {/* Title */}
@@ -317,7 +325,7 @@ export default function BirthdateScreen() {
             {/* Description */}
             <View className="mb-12">
               <Text className="text-white text-lg text-center mb-6">
-                Please ask your parent or guardian to help you set up your Clue account.
+                Please ask your parent or guardian to help you set up your Zenher account.
               </Text>
               
               <Text className="text-white text-base text-center mb-6">
@@ -328,7 +336,7 @@ export default function BirthdateScreen() {
                 <View className="flex-row items-start">
                   <Text className="text-white text-base mr-2">•</Text>
                   <Text className="text-white text-base flex-1">
-                    Their permission for you to use the Clue app
+                    Their permission for you to use the Zenher app
                   </Text>
                 </View>
                 
@@ -343,11 +351,11 @@ export default function BirthdateScreen() {
           </View>
 
           {/* Got it Button */}
-          <View className="pb-8 px-4">
+          <View className="pb-20 px-4">
             <TouchableOpacity
             disabled={!selectedDate}
               onPress={handleGotIt}
-              className="bg-cyan-400 py-4 rounded-full"
+              className="bg-white py-4 rounded-full"
             >
               <Text className="text-black text-center text-base font-semibold">
                 Got it
@@ -356,6 +364,6 @@ export default function BirthdateScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }

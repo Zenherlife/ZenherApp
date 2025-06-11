@@ -29,7 +29,7 @@ export default function useGoogleAuth() {
 
       if (userDoc.exists()) {
         const data = userDoc.data();
-        setUser({data } as any);
+        setUser(data);
       } else {
         const newUser = {
           uid,
