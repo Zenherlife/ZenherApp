@@ -1,5 +1,5 @@
 import { useSignUp } from '@/modules/auth/hooks/useSignUp';
-import { useOnboardingStore } from '@/modules/auth/store/onboardingStore';
+import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useRouter } from 'expo-router';
@@ -22,7 +22,7 @@ export default function PeriodReminderScreen() {
   const [time, setTime] = useState(new Date());
   const [messageHeading, setMessageHeading] = useState('Zenher');
   const [messageBody, setMessageBody] = useState('Your new cycle will start soon');
-  const setField = useOnboardingStore((state) => state.setField);
+  const setField = useUserDataStore((state) => state.setField);
   const [modalType, setModalType] = useState<'schedule' | 'message' | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const { signup, loading, error } = useSignUp();
@@ -129,9 +129,10 @@ export default function PeriodReminderScreen() {
             disabled={loading}
             className="bg-white w-auto rounded-full py-3 mx-2"
             onPress={handleTurnOn}
-        > {loading ? (<ActivityIndicator size={24} color='black' />) : (
-          <Text className="text-center text-black font-semibold text-lg">Yes, turn on</Text>
-        )}
+        > 
+          {loading ? (<ActivityIndicator size={24} color='black' />) : (
+            <Text className="text-center text-black font-semibold text-lg">Yes, turn on</Text>
+          )}
         </TouchableOpacity>
         {error && (
           <Text className="text-red-400 text-center mt-2">
@@ -142,8 +143,8 @@ export default function PeriodReminderScreen() {
 
       {/* SCHEDULE MODAL */}
       <Modal visible={modalType === 'schedule'} transparent animationType="slide">
-        <View className="flex-1 bg-black/70 justify-end">
-          <View className="bg-neutral-900 px-6 pt-6 pb-10 rounded-t-3xl max-h-[75%]">
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-gray-900 px-6 pt-6 pb-10 rounded-t-3xl max-h-[75%]">
             <Text className="text-white text-xl font-semibold mb-6 text-center">Choose Reminder Schedule</Text>
 
             <FlatList
@@ -172,8 +173,8 @@ export default function PeriodReminderScreen() {
 
       {/* MESSAGE MODAL */}
       <Modal visible={modalType === 'message'} transparent animationType="slide">
-        <View className="flex-1 bg-black/70 justify-end">
-          <View className="bg-neutral-900 px-6 pt-6 pb-10 rounded-t-3xl">
+        <View className="flex-1 bg-black/50 justify-end">
+          <View className="bg-gray-900 px-6 pt-6 pb-10 rounded-t-3xl">
             <Text className="text-white text-xl font-semibold mb-6 text-center">Customize Notification</Text>
 
             <TextInput
@@ -215,6 +216,7 @@ export default function PeriodReminderScreen() {
       {/* TIME PICKER */}
       {showTimePicker && (
         <DateTimePicker
+          design='default'
           value={time}
           mode="time"
           is24Hour={false}

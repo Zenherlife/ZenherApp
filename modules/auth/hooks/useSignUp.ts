@@ -3,23 +3,23 @@ import firestore from '@react-native-firebase/firestore';
 import { CommonActions } from '@react-navigation/native';
 import { useNavigation } from 'expo-router';
 import { useState } from 'react';
-import { useOnboardingStore } from '../store/onboardingStore';
-import { useAuthStore } from '../store/useAuthStore';
+import { useUserDataStore } from '../store/useUserDataStore';
 
 export const useSignUp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const setUser = useAuthStore((state) => state.setUser);
+  const listenToUser = useUserDataStore((state) => state.listenToUser);
   const navigation = useNavigation()
   const signup = async () => {
     const {
-      name,
+      displayName,
       email,
       password,
       dateOfBirth,
       lastPeriodDate,
+      averageCycle,
       reminder,
-    } = useOnboardingStore.getState();
+    } = useUserDataStore.getState();
 
     setLoading(true);
     setError(null);
@@ -27,9 +27,9 @@ export const useSignUp = () => {
     try {
       const userCredential = await auth().createUserWithEmailAndPassword(email, password);
       const uid = userCredential.user.uid;
-      const user = { uid, email: email || '', displayName: name || '', photoURL: '', dateOfBirth, lastPeriodDate, reminder };
+      const user = { uid, email: email || '', displayName: displayName || '', photoURL: '', dateOfBirth, lastPeriodDate, averageCycle, reminder };
       await firestore().collection('users').doc(uid).set(user, { merge: true });
-      setUser(user)
+      listenToUser(uid)
       navigation.dispatch(
         CommonActions.reset({
           index: 0,

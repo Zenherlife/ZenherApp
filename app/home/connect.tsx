@@ -1,18 +1,23 @@
-import { useAuthStore } from '@/modules/auth/store/useAuthStore';
+import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import SettingSection from '@/modules/home/components/SettingSection';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
 import React from 'react';
 import {
+  Image,
   Linking,
+  Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   View
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
 export default function ConnectScreen() {
   const router = useRouter();
-  const user = useAuthStore(state => state.user);
+  const user = useUserDataStore.getState().getUser()
   const { colorScheme } = useColorScheme();
 
   const profileCompletion = 0.7;
@@ -25,37 +30,66 @@ export default function ConnectScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View className="mx-4 mb-8">
-          <View className="bg-white dark:bg-gray-800 rounded-3xl p-4 border border-gray-200 dark:border-gray-700 shadow-lg">
-            
-            <View className="flex-row items-center mb-6">
-              <View className="w-16 h-16 bg-[#976bc6] rounded-full items-center justify-center shadow-lg">
-                <Text className="text-white text-2xl font-bold">
-                  {(user?.displayName || " ")[0].toUpperCase()}
-                </Text>
+          <View className="bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-lg shadow-indigo-100 dark:shadow-none">
+            <View className="flex-row items-center mb-6 gap-4">
+              <View className="w-16 h-16 rounded-full bg-indigo-500 items-center justify-center shadow-lg shadow-indigo-300 overflow-hidden">
+                {user?.photoURL ? (
+                  <Image
+                    source={{ uri: user.photoURL }}
+                    className="w-full h-full"
+                    resizeMode="cover"
+                  />
+                ) : (
+                  <Text className="text-white text-2xl font-black">
+                    {(user?.displayName || " ")[0].toUpperCase()}
+                  </Text>
+                )}
               </View>
-              
-              <View className="flex-1 ml-4">
-                <Text className="text-2xl font-black text-gray-900 dark:text-white mb-1">
+
+              <View className="flex-1">
+                <Text className="text-2xl font-extrabold text-gray-900 dark:text-white mb-1">
                   {user?.displayName || " "}
                 </Text>
-                <Text className="text-gray-600 dark:text-gray-300 font-medium">
+                <Text className="text-gray-500 dark:text-gray-300 font-medium text-sm" numberOfLines={1}>
                   {user?.email || " "}
                 </Text>
               </View>
+
+              <Pressable
+                onPress={() => router.push('/auth/logout')}
+                className="rounded-full border-2 border-white/20 active:opacity-80"
+              >
+                <View className="bg-gray-100 dark:bg-gray-700 rounded-full p-2">
+                  <Ionicons name="chevron-forward" size={20} color="#6366f1" />
+                </View>
+              </Pressable>
             </View>
 
             <View className="bg-gray-100 dark:bg-gray-700 rounded-2xl p-4">
               <View className="flex-row justify-between items-center mb-3">
-                <Text className="text-gray-900 dark:text-white font-bold">Profile Completion</Text>
-                <Text className="text-purple-600 dark:text-purple-400 font-black text-lg">
+                <Text className="text-gray-900 dark:text-white font-bold tracking-tight">
+                  Profile Completion
+                </Text>
+                <Text className="text-indigo-500 font-extrabold text-lg tracking-wider">
                   {Math.round(profileCompletion * 100)}%
                 </Text>
               </View>
-              
-              <View className="h-3 bg-gray-800 rounded-full overflow-hidden">
-                <View 
-                  className="h-full bg-purple-500 rounded-full"
-                  style={{ width: `${profileCompletion * 100}%` }}
+
+              <View className="h-3 bg-gray-800 rounded-full overflow-hidden w-full relative">
+                <LinearGradient
+                  colors={['#6366f1', '#4f46e5', '#4338ca', '#818cf8']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={StyleSheet.absoluteFill}
+                />
+
+                <View
+                  className="absolute h-full bg-gray-800 right-0"
+                  style={{
+                    width: `${(1 - profileCompletion) * 100}%`,
+                    borderTopRightRadius: 9999,
+                    borderBottomRightRadius: 9999,
+                  }}
                 />
               </View>
             </View>

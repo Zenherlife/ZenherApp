@@ -1,12 +1,13 @@
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { useState } from 'react';
-import { useAuthStore } from '../store/useAuthStore';
+import { useUserDataStore } from '../store/useUserDataStore';
 
 export const useEmailSignIn = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const setUser = useAuthStore((state) => state.setUser);
+
+  const { listenToUser } = useUserDataStore((state) => state);
 
   const signIn = async (email: string, password: string) => {
     setLoading(true);
@@ -14,19 +15,17 @@ export const useEmailSignIn = () => {
 
     try {
       const userCredential = await auth().signInWithEmailAndPassword(email.trim(), password);
-      const uid = userCredential.user.uid;
+      const user = userCredential.user;
+      const uid = user.uid;
 
-      // Fetch user data from Firestore
-      const userDoc = await firestore().collection('users').doc(uid).get();
+      const userRef = firestore().collection('users').doc(uid);
+      const userDoc = await userRef.get();
 
-      if (!userDoc.exists) {
+      if (!userDoc.exists()) {
         throw new Error('User data not found in Firestore.');
       }
 
-      const userData = userDoc.data();
-
-      // Save user data in auth store
-      setUser({ uid, email: userCredential.user.email || '', ...userData });
+      listenToUser(uid); 
 
       return uid;
     } catch (err: any) {

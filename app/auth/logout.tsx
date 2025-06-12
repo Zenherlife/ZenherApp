@@ -1,52 +1,46 @@
-import { useAuthStore } from '@/modules/auth/store/useAuthStore';
+import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
+import { Ionicons } from '@expo/vector-icons';
 import auth from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { CommonActions, useNavigation } from '@react-navigation/native';
 import React from 'react';
-import { Pressable, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function AccountScreen() {
   const navigation = useNavigation();
-  const {user, logout} = useAuthStore(state => state)
-const signOut = async () => {
-  try {
-    logout();
+  const user = useUserDataStore.getState().getUser();
 
-    const userInfo = await GoogleSignin.getCurrentUser();
-  const isGoogleSignedIn = userInfo != null;
+  const signOut = async () => {
+    try {
+      const userInfo = await GoogleSignin.getCurrentUser();
+      const isGoogleSignedIn = userInfo != null;
 
-    if (isGoogleSignedIn) {
-      await GoogleSignin.revokeAccess();
-      await GoogleSignin.signOut();
+      if (isGoogleSignedIn) {
+        await GoogleSignin.revokeAccess();
+        await GoogleSignin.signOut();
+      }
+
+      await auth().signOut();
+
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'index' }],
+        })
+      );
+    } catch (error) {
+      console.error('SignOut error:', error);
     }
-
-    // Always sign out from Firebase auth (handles email/pass or Google)
-    await auth().signOut();
-
-    // Reset navigation stack to 'index' screen
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{ name: 'index' }],
-      })
-    );
-  } catch (error) {
-    console.error('SignOut error:', error);
-  }
-};
+  };
 
   return (
-    <View className="flex-1 bg-black px-4 pt-10">
+    <SafeAreaView className="flex-1 bg-gray-900 px-6">
       {/* Header */}
-      <Pressable
-        onPress={() => navigation.goBack()}
-        className="mb-6 w-8 h-8 justify-center items-center"
-        android_ripple={{ color: '#444' }}
-      >
-        <Text className="text-white text-2xl">{'←'}</Text>
-      </Pressable>
-
-      <Text className="text-white text-xl font-semibold mb-8">Account</Text>
+      <TouchableOpacity className="flex-row mt-4 gap-6" onPress={() => navigation.goBack()}>
+        <Ionicons name="arrow-back" size={24} color="white" />
+        <Text className="text-white text-xl font-semibold mb-8">Account</Text>
+      </TouchableOpacity>
 
       {/* Name field */}
       <TouchableOpacity
@@ -62,7 +56,7 @@ const signOut = async () => {
 
       {/* Email field */}
       <TouchableOpacity
-        className="bg-gray-800 rounded-lg px-4 py-3 mb-2"
+        className="bg-gray-800 rounded-lg px-4 py-3 mb-6"
         activeOpacity={0.7}
         onPress={() => console.log('Go to edit email')}
       >
@@ -72,15 +66,13 @@ const signOut = async () => {
         </View>
       </TouchableOpacity>
 
-
-      {/* Sign out button */}
       <TouchableOpacity
-        className="bg-blue-700 rounded-full py-3"
-        activeOpacity={0.8}
+        className="bg-white rounded-full py-3"
+        activeOpacity={0.85}
         onPress={signOut}
       >
-        <Text className="text-center text-blue-300 font-semibold text-lg">Sign out</Text>
+        <Text className="text-center text-black font-semibold text-lg">Sign out</Text>
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }

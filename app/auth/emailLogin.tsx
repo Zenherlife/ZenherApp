@@ -66,6 +66,7 @@ export default function EmailLoginScreen() {
 
       {/* Email Input */}
       <TextInput
+      onChangeText={(value) => setEmail(value)}
         placeholder="Email"
         placeholderTextColor="#888"
         keyboardType="email-address"
@@ -77,6 +78,7 @@ export default function EmailLoginScreen() {
       {/* Password Input */}
       <View className="relative mb-2 justify-center">
         <TextInput
+        onChangeText={(value) => setPassword(value)}
           placeholder="Password"
           placeholderTextColor="#888"
           secureTextEntry={secure}

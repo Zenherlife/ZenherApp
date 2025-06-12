@@ -1,4 +1,4 @@
-import { useOnboardingStore } from '@/modules/auth/store/onboardingStore';
+import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -17,7 +17,7 @@ export default function CreateAccountScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const setField = useOnboardingStore((state) => state.setField);
+  const setField = useUserDataStore((state) => state.setField);
   const router = useRouter();
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
@@ -25,7 +25,7 @@ export default function CreateAccountScreen() {
 
   const handleCreateAccount = () => {
     if (isFormValid) {
-      setField('name', name);
+      setField('displayName', name);
       setField('email', email);
       setField('password', password);
       router.push('./PeriodDate');

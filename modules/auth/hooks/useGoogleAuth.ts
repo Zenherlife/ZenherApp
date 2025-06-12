@@ -1,15 +1,14 @@
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { useRouter } from 'expo-router';
+import { useNavigation } from 'expo-router';
 import { useState } from 'react';
-import { useAuthStore } from '../store/useAuthStore';
+import { useUserDataStore } from '../store/useUserDataStore';
 
 export default function useGoogleAuth() {
-  const router = useRouter();
+  const navigation = useNavigation();
   const [loading, setLoading] = useState(false);
-  const setUser = useAuthStore((state) => state.setUser);
-  const updateUser = useAuthStore((state) => state.updateUser);
+  const { listenToUser } = useUserDataStore((state) => state);
 
   const signInWithGoogle = async () => {
     setLoading(true);
@@ -25,24 +24,37 @@ export default function useGoogleAuth() {
 
       const { uid, email, displayName, photoURL } = userData.user;
 
-      const userDoc = await firestore().collection('users').doc(uid).get();
+      const userRef = firestore().collection('users').doc(uid);
+      const userDoc = await userRef.get();
 
-      if (userDoc.exists()) {
-        const data = userDoc.data();
-        setUser(data);
-      } else {
+      if (!userDoc.exists()) {
         const newUser = {
           uid,
-          email,
+          email: email || '',
           displayName: displayName || '',
           photoURL: photoURL || '',
+          name: '',
+          password: '',
+          dateOfBirth: '',
+          lastPeriodDate: '',
+          averageCycle: 0,
+          reminder: {
+            time: '',
+            schedule: '',
+            title: '',
+            body: '',
+          },
         };
 
-        await firestore().collection('users').doc(uid).set(newUser);
-        updateUser(newUser);
+        await userRef.set(newUser);
       }
 
-      router.replace('/home');
+      listenToUser(uid);
+
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'home' }],
+      });
     } catch (error: any) {
       console.log('Google Sign-In Error:', error.message);
     } finally {

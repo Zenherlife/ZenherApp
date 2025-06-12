@@ -1,12 +1,10 @@
-import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
-
 import GoogleSignInButton from '@/modules/auth/components/GoogleSignInButton';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Mail } from 'lucide-react-native';
+import React from 'react';
+import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 
 export default function SignupOptionsScreen() {
   const router = useRouter();

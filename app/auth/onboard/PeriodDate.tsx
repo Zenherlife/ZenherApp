@@ -1,4 +1,4 @@
-import { useOnboardingStore } from '@/modules/auth/store/onboardingStore';
+import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function PeriodScreen() {
   const [selectedDate, setSelectedDate] = useState('');
-  const setField = useOnboardingStore((state) => state.setField);
+  const setField = useUserDataStore((state) => state.setField);
   const router = useRouter()
 
   return (
@@ -58,7 +58,7 @@ export default function PeriodScreen() {
     <View className="flex-row justify-between mt-6 px-2 gap-4">
       <TouchableOpacity className="flex-1 h-14 bg-white/30 rounded-full  items-center justify-center px-8" 
         onPress={() => {
-          router.push('./Reminder')
+          router.push('./AverageCycle')
         }}
         >
         <Text className="text-white font-semibold text-lg">Not sure</Text>
@@ -67,7 +67,7 @@ export default function PeriodScreen() {
       <TouchableOpacity className="flex-1 h-14 bg-white rounded-full items-center justify-center px-8" 
         onPress={() => {
         setField('lastPeriodDate', selectedDate)
-          router.push('./Reminder')
+          router.push('./AverageCycle')
       }}
       >
         <Text className="text-black font-semibold text-lg">Next</Text>

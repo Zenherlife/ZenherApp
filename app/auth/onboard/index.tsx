@@ -1,4 +1,4 @@
-import { useOnboardingStore } from '@/modules/auth/store/onboardingStore';
+import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -11,7 +11,7 @@ export default function BirthdateScreen() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [showParentalConsent, setShowParentalConsent] = useState(false);
-  const setField = useOnboardingStore((state) => state.setField);
+  const setField = useUserDataStore((state) => state.setField);
   const router = useRouter();
 
   const months = [

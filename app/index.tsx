@@ -1,3 +1,4 @@
+import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import auth from '@react-native-firebase/auth';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
@@ -18,6 +19,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function WelcomeScreen() {
   const router = useRouter();
+  const { listenToUser } = useUserDataStore((state) => state);
   const [showOptions, setShowOptions] = useState(false);
   const [initializing, setInitializing] = useState(true);
 
@@ -33,7 +35,7 @@ export default function WelcomeScreen() {
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authUser) => {
       if (authUser) {
-        // User is logged in, navigate immediately
+        listenToUser(authUser.uid)
         router.replace('/home');
       } else {
         // User is not logged in, show welcome screen
