@@ -108,7 +108,7 @@ export default function BirthdateScreen() {
     if (age < 16) {
       setShowParentalConsent(true);
     } else {
-      router.push('./onboard/Policies');
+      router.push('/auth/onboard/Policies');
     }
   };
 
@@ -119,7 +119,7 @@ export default function BirthdateScreen() {
   const handleGotIt = () => {
     if(selectedDate) {
       setField('dateOfBirth', selectedDate)
-      router.push('./onboard/Policies')
+      router.push('/auth/onboard/Policies')
       setShowParentalConsent(false);
     } 
     
