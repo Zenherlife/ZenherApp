@@ -8,7 +8,7 @@ interface ReminderData {
   body: string;
 }
 
-interface UserState {
+export interface UserState {
   uid: string,
   photoURL?: string,
   displayName: string;
@@ -17,6 +17,8 @@ interface UserState {
   dateOfBirth: string;
   lastPeriodDate: string;
   averageCycle: number;
+  weight: number;
+  height: number;
   reminder: ReminderData;
 
   setField: <T extends keyof UserState>(field: T, value: UserState[T]) => void;
@@ -35,6 +37,8 @@ export const useUserDataStore = create<UserState>((set, get) => ({
   dateOfBirth: '',
   lastPeriodDate: '',
   averageCycle: 0,
+  height: 0,
+  weight: 0,
   reminder: {
     time: '',
     schedule: '',
@@ -95,6 +99,8 @@ export const useUserDataStore = create<UserState>((set, get) => ({
       dateOfBirth: state.dateOfBirth,
       lastPeriodDate: state.lastPeriodDate,
       averageCycle: state.averageCycle,
+      height: state.height,
+      weight: state.weight,
       reminder: state.reminder,
     };
   },
@@ -109,6 +115,8 @@ export const useUserDataStore = create<UserState>((set, get) => ({
         dateOfBirth: '',
         lastPeriodDate: '',
         averageCycle: 0,
+        height: 0,
+        weight: 0,
         reminder: {
           time: '',
           schedule: '',

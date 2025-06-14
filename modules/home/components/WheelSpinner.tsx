@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Animated,
   FlatList,
@@ -13,6 +13,7 @@ interface WheelSpinnerProps {
   visibleCount?: number;
   onValueChange?: (value: string, index: number) => void;
   textClassName?: string;
+  initialIndex?: number;
 }
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
@@ -23,9 +24,22 @@ const WheelSpinner: React.FC<WheelSpinnerProps> = ({
   visibleCount = 5,
   onValueChange,
   textClassName = 'text-white text-xl font-medium',
+  initialIndex = 0,
 }) => {
   const scrollY = useRef(new Animated.Value(0)).current;
   const wheelHeight = itemHeight * visibleCount;
+  const flatListRef = useRef<FlatList>(null);
+
+  useEffect(() => {
+    if (initialIndex != null && flatListRef.current) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToOffset({
+          offset: initialIndex * itemHeight,
+          animated: false,
+        });
+      }, 0);
+    }
+  }, [initialIndex]);
 
   const handleMomentumScrollEnd = (event: any) => {
     const offsetY = event.nativeEvent.contentOffset.y;
@@ -37,6 +51,7 @@ const WheelSpinner: React.FC<WheelSpinnerProps> = ({
     <View className="flex-1 items-center justify-center bg-gray-900">
       <View className="w-full overflow-hidden relative" style={{ height: wheelHeight }}>
         <AnimatedFlatList
+          ref={flatListRef}
           data={data}
           keyExtractor={(item) => item}
           bounces={false}

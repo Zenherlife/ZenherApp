@@ -1,5 +1,7 @@
 import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import SettingSection from '@/modules/home/components/SettingSection';
+import SocialFooter from '@/modules/home/components/SocialFooter';
+import { calculateProfileCompletion } from '@/modules/home/utils/profileUtils';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
@@ -17,21 +19,21 @@ import LinearGradient from 'react-native-linear-gradient';
 
 export default function ConnectScreen() {
   const router = useRouter();
-  const user = useUserDataStore.getState().getUser()
+  const user = useUserDataStore((state) => (state))
   const { colorScheme } = useColorScheme();
 
-  const profileCompletion = 0.7;
+  const profileCompletion = calculateProfileCompletion(user);
 
   return (
     <View className={`flex-1 ${colorScheme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <ScrollView 
-        className="flex-1" 
+        className="flex-1 pt-6" 
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
         <View className="mx-4 mb-8">
-          <View className="bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-lg shadow-indigo-100 dark:shadow-none">
-            <View className="flex-row items-center mb-6 gap-4">
+          <View className="bg-white dark:bg-gray-800 rounded-3xl px-4 pt-4 shadow-lg shadow-indigo-100 dark:shadow-none">
+            <View className="flex-row items-center mb-4 gap-4">
               <View className="w-16 h-16 rounded-full bg-indigo-500 items-center justify-center shadow-lg shadow-indigo-300 overflow-hidden">
                 {user?.photoURL ? (
                   <Image
@@ -64,8 +66,8 @@ export default function ConnectScreen() {
                 </View>
               </Pressable>
             </View>
-
-            <View className="bg-gray-100 dark:bg-gray-700 rounded-2xl p-4">
+            {profileCompletion < 1 && (
+            <View className="bg-gray-100 dark:bg-gray-700 rounded-2xl p-4 mb-4">
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-gray-900 dark:text-white font-bold tracking-tight">
                   Profile Completion
@@ -92,7 +94,8 @@ export default function ConnectScreen() {
                   }}
                 />
               </View>
-            </View>
+              </View>
+            )}
           </View>
         </View>
 
@@ -100,8 +103,8 @@ export default function ConnectScreen() {
           <SettingSection 
             title="Health & Wellness" 
             items={[
-              { title: 'BMI & Health Metrics', icon: 'body-outline', subtitle: 'Track your vitals', onPress: () => router.push('/health/bmi') },
-              { title: 'Cycle Management', icon: 'time-outline', subtitle: 'Customize your tracking', onPress: () => router.push('/settings/cycle') },
+              { title: 'BMI & Health Metrics', icon: 'body-outline', subtitle: 'Track your vitals', onPress: () => router.push('/setting/BMI') },
+              { title: 'Cycle Management', icon: 'time-outline', subtitle: 'Customize your tracking', onPress: () => router.push({ pathname: '/auth/onboard/AverageCycle', params: { mode: 'edit' } }) },
               { title: 'Smart Reminders', icon: 'notifications-outline', subtitle: 'Never miss important dates', onPress: () => router.push('/settings/reminders') },
             ]} 
           />
@@ -134,6 +137,8 @@ export default function ConnectScreen() {
             </Text>
           </View>
         </View>
+
+        <SocialFooter />
       </ScrollView>
     </View>
   );
