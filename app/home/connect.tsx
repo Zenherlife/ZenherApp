@@ -105,7 +105,7 @@ export default function ConnectScreen() {
             items={[
               { title: 'BMI & Health Metrics', icon: 'body-outline', subtitle: 'Track your vitals', onPress: () => router.push('/setting/BMI') },
               { title: 'Cycle Management', icon: 'time-outline', subtitle: 'Customize your tracking', onPress: () => router.push({ pathname: '/auth/onboard/AverageCycle', params: { mode: 'edit' } }) },
-              { title: 'Smart Reminders', icon: 'notifications-outline', subtitle: 'Never miss important dates', onPress: () => router.push('/settings/reminders') },
+              { title: 'Smart Reminders', icon: 'notifications-outline', subtitle: 'Never miss important dates', onPress: () => router.push({ pathname:'/auth/onboard/reminder', params: {mode: 'edit'}}) },
             ]} 
           />
 
