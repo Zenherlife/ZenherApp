@@ -2,9 +2,10 @@ import { useSignUp } from '@/modules/auth/hooks/useSignUp';
 import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import { Ionicons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useRouter } from 'expo-router';
+import firestore from '@react-native-firebase/firestore';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Pencil } from 'lucide-react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -26,9 +27,29 @@ export default function PeriodReminderScreen() {
   const [modalType, setModalType] = useState<'schedule' | 'message' | null>(null);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const { signup, loading, error } = useSignUp();
-  const router = useRouter()
+  const router = useRouter();
+  const {mode} = useLocalSearchParams<{mode?: 'add' | 'edit'}>();
+  const uid = useUserDataStore((state) => state.uid);
+  console.log('Entered With mode:', mode)
+  useEffect(() => {
+    if( mode === 'edit'){
+      const reminder = useUserDataStore.getState().reminder;
 
-    const handleTurnOn = async () => {
+      setSchedule(reminder.schedule || '1 day before');
+      if (reminder.time){
+        const [hour, minute] = reminder.time.split(':');
+        const date = new Date();
+        date.setHours(parseInt(hour, 10));
+        date.setMinutes(parseInt(minute,10));
+        setTime(date);
+      }
+
+      setMessageHeading(reminder.title || 'Zenher');
+      setMessageBody(reminder.body || 'Your new cycle will start soon');
+    }
+  }, [mode]);
+  
+  const handleTurnOn = async () => {
     setField('reminder', {
       time: formattedTime,
       schedule,
@@ -42,6 +63,30 @@ export default function PeriodReminderScreen() {
       console.log('Signup error:', e);
     }
   };
+  
+  const handleUpdateReminder = async () => {
+    const updatedReminder ={
+      time: formattedTime,
+      schedule,
+      title: messageHeading,
+      body: messageBody,
+    };
+
+     try{
+      await firestore()
+      .collection('users')
+      .doc(uid)
+      .update({
+        reminder: updatedReminder,
+      });
+      console.log('Reminder updated successfully');
+      router.back();
+     } catch(e){
+      console.log('Failed to update reminder:', e);
+     }
+  };
+
+  console.log("Saving this to Firebase:", useUserDataStore.getState());
 
   const handleScheduleSelect = (val: string) => {
     setSchedule(val);
@@ -62,10 +107,10 @@ export default function PeriodReminderScreen() {
       </TouchableOpacity>
 
       <Text className="text-white text-3xl font-bold text-center mt-10">
-        Would you like to get{'\n'}a period reminder?
+        {mode ===  'add' ? 'Would you like to get\na period reminder?' : 'Keep your reminder\nup to date' }
       </Text>
       <Text className="text-gray-400 text-base text-center mt-4">
-        Use this reminder to feel prepared{'\n'}before your next period starts.
+        {mode ===  'add' ? 'Use this reminder to feel prepared\nbefore your next period starts.' : 'Make changes to your reminder to stay\nprepared for your next period.' }
       </Text>
 
       {/* Main Box */}
@@ -120,18 +165,31 @@ export default function PeriodReminderScreen() {
       <View className="flex-1 mt-10 ">
         <TouchableOpacity
              disabled={loading}
-             onPress={handleTurnOn}
+             onPress={() => {
+              if (mode=== 'add') {
+                handleTurnOn();
+              }
+              else if(mode === 'edit'){
+                router.back();
+              }
+             }}
         >
-          <Text className="text-white font-semibold text-base text-center mb-8">Maybe later</Text>
+          <Text className="text-white font-semibold text-base text-center mb-8">{mode ===  'add' ? 'Maybe later' : 'Discard Changes' }</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
             disabled={loading}
             className="bg-white w-auto rounded-full py-3 mx-2"
-            onPress={handleTurnOn}
+            onPress={() => {
+              if (mode === 'add'){
+                handleTurnOn();
+              }else if(mode === 'edit'){
+                handleUpdateReminder();
+              }
+            }}
         > 
           {loading ? (<ActivityIndicator size={24} color='black' />) : (
-            <Text className="text-center text-black font-semibold text-lg">Yes, turn on</Text>
+            <Text className="text-center text-black font-semibold text-lg">{mode ===  'add' ? 'Yes, turn on' : 'Update Reminder' }</Text>
           )}
         </TouchableOpacity>
         {error && (
