@@ -32,6 +32,7 @@ export default function PeriodReminderScreen() {
   const router = useRouter();
   const {mode} = useLocalSearchParams<{mode?: 'add' | 'edit'}>();
   const uid = useUserDataStore((state) => state.uid);
+<<<<<<< feature/update-reminder
   console.log('Entered With mode:', mode)
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -40,6 +41,9 @@ export default function PeriodReminderScreen() {
     StatusBar.setBarStyle( isDark ? 'light-content' : 'dark-content');
   }, [isDark]);
   
+=======
+
+>>>>>>> main
   useEffect(() => {
     if( mode === 'edit'){
       const reminder = useUserDataStore.getState().reminder;
@@ -88,14 +92,11 @@ export default function PeriodReminderScreen() {
       .update({
         reminder: updatedReminder,
       });
-      console.log('Reminder updated successfully');
       router.back();
      } catch(e){
       console.log('Failed to update reminder:', e);
      }
   };
-
-  console.log("Saving this to Firebase:", useUserDataStore.getState());
 
   const handleScheduleSelect = (val: string) => {
     setSchedule(val);

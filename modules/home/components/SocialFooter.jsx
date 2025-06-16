@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6, Ionicons } from '@expo/vector-icons';
 import { Linking, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 
 const SocialFooter = () => {
@@ -6,6 +6,8 @@ const SocialFooter = () => {
   const iconColor = colorScheme === 'dark' ? '#d1d5db' : '#374151';
 
   const socialLinks = [
+    { icon: <Ionicons name="logo-whatsapp" size={22} color={iconColor} />, url: 'https://wa.me/7310212507' },
+     { icon: <FontAwesome6 name="x-twitter" size={20} color={iconColor} />, url: 'https://x.com/zenherofficial?t=dvq11Gf3ToZiHiMIrwsRnw&s=09' },
     { icon: <Ionicons name="logo-instagram" size={22} color={iconColor} />, url: 'https://www.instagram.com/zenher.in/' },
     { icon: <Ionicons name="logo-linkedin" size={22} color={iconColor} />, url: 'https://www.linkedin.com/company/zenher/' },
   ];
