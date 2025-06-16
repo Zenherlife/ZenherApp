@@ -5,9 +5,10 @@ import firestore from '@react-native-firebase/firestore';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-	Text,
-	TouchableOpacity,
-	View,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -17,6 +18,8 @@ const CycleLengthSelector = () => {
   const isEdit = mode === 'edit';
   const {averageCycle, setField, uid} = useUserDataStore((state) => state);
   const [selectedCycle, setSelectedCycle] = useState(averageCycle || 28);
+
+  const colorScheme = useColorScheme();
 
   useEffect(() => {
     if (averageCycle) {
@@ -41,23 +44,23 @@ const CycleLengthSelector = () => {
 
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900 px-6">
+    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900 px-6">
       <TouchableOpacity className="mt-4" onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="white" />
+        <Ionicons name="arrow-back" size={24} color={colorScheme === 'dark' ? 'white': 'black'} />
       </TouchableOpacity>
 
       <View className="items-center pt-12">
         <View className="items-center justify-center mb-6">
-          <View className="bg-blue-500 rounded-full w-20 h-20 items-center justify-center">
+          <View className="bg-indigo-800 rounded-full w-20 h-20 items-center justify-center">
             <Ionicons name="calendar" size={30} color="white" />
           </View>
         </View>
 
-        <Text className="text-white text-2xl font-bold text-center mb-3">
+        <Text className="text-black dark:text-white text-2xl font-bold text-center mb-3">
           {isEdit ? 'Update Your Average Cycle' : 'How long is your average cycle?'}
         </Text>
 
-        <Text className="text-gray-400 text-base text-center px-8">
+        <Text className="text-gray-600 dark:text-gray-400 text-base text-center px-8">
           {isEdit
             ? 'Change your cycle length anytime. Cycles usually last 24–38 days.'
             : 'A little hint – cycles usually last 24–38 days'}
@@ -69,39 +72,40 @@ const CycleLengthSelector = () => {
         visibleCount={5}
         initialIndex={selectedCycle - 24}
         onValueChange={(value, index) => setSelectedCycle(index + 24)}
+        
       />
 
       <View className="flex-row justify-between px-2 gap-4 mb-20 mt-8">
         {isEdit ? (
           <>
             <TouchableOpacity
-              className="flex-1 h-14 bg-white/20 rounded-full items-center justify-center"
+              className="flex-1 h-14 bg-gray-200 dark:bg-white/20 rounded-full items-center justify-center"
               onPress={() => router.back()}
             >
-              <Text className="text-white font-semibold text-lg">Cancel</Text>
+              <Text className="text-black dark:text-white font-semibold text-lg">Cancel</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="flex-1 h-14 bg-white rounded-full items-center justify-center"
+              className="flex-1 h-14 bg-indigo-800 dark:bg-white rounded-full items-center justify-center"
               onPress={handleSubmit}
             >
-              <Text className="text-black font-semibold text-lg">Save</Text>
+              <Text className="text-white dark:text-black font-semibold text-lg">Save</Text>
             </TouchableOpacity>
           </>
         ) : (
           <>
             <TouchableOpacity
-              className="flex-1 h-14 bg-white/30 rounded-full items-center justify-center"
+              className="flex-1 h-14 bg-gray-200 dark:bg-white/30 rounded-full items-center justify-center"
               onPress={() => router.push('./Reminder')}
             >
-              <Text className="text-white font-semibold text-lg">Not sure</Text>
+              <Text className="text-black dark:text-white font-semibold text-lg">Not sure</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              className="flex-1 h-14 bg-white rounded-full items-center justify-center"
+              className="flex-1 h-14 bg-indigo-800 dark:bg-white rounded-full items-center justify-center"
               onPress={handleSubmit}
             >
-              <Text className="text-black font-semibold text-lg">Next</Text>
+              <Text className="text-white dark:text-black font-semibold text-lg">Next</Text>
             </TouchableOpacity>
           </>
         )}

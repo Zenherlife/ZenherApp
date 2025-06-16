@@ -4,6 +4,7 @@ import {
   FlatList,
   Text,
   View,
+  useColorScheme
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -23,13 +24,14 @@ const WheelSpinner: React.FC<WheelSpinnerProps> = ({
   itemHeight = 42,
   visibleCount = 5,
   onValueChange,
-  textClassName = 'text-white text-xl font-medium',
+  textClassName = 'text-black dark:text-white text-xl font-medium',
   initialIndex = 0,
 }) => {
   const scrollY = useRef(new Animated.Value(0)).current;
   const wheelHeight = itemHeight * visibleCount;
   const flatListRef = useRef<FlatList>(null);
-
+  const colorScheme = useColorScheme();
+  
   useEffect(() => {
     if (initialIndex != null && flatListRef.current) {
       setTimeout(() => {
@@ -48,8 +50,11 @@ const WheelSpinner: React.FC<WheelSpinnerProps> = ({
   };
 
   return (
-    <View className="flex-1 items-center justify-center bg-gray-900">
-      <View className="w-full overflow-hidden relative" style={{ height: wheelHeight }}>
+    <View className="flex-1 items-center justify-center bg-white dark:bg-gray-900">
+      <View
+        className="w-full overflow-hidden relative"
+        style={{ height: wheelHeight }}
+      >
         <AnimatedFlatList
           ref={flatListRef}
           data={data}
@@ -79,21 +84,21 @@ const WheelSpinner: React.FC<WheelSpinnerProps> = ({
             const scale = scrollY.interpolate({
               inputRange,
               outputRange: [0.7, 0.9, 1, 0.9, 0.7],
-              extrapolate: 'clamp',
+              extrapolate: "clamp",
             });
 
             const opacity = scrollY.interpolate({
               inputRange,
               outputRange: [0.2, 0.5, 1, 0.5, 0.2],
-              extrapolate: 'clamp',
+              extrapolate: "clamp",
             });
 
             return (
               <Animated.View
                 style={{
                   height: itemHeight,
-                  justifyContent: 'center',
-                  alignItems: 'center',
+                  justifyContent: "center",
+                  alignItems: "center",
                   transform: [{ scale }],
                   opacity,
                 }}
@@ -103,20 +108,31 @@ const WheelSpinner: React.FC<WheelSpinnerProps> = ({
             );
           }}
         />
-        <View className="absolute top-1/2 left-0 right-0 -translate-y-1/2 z-20" pointerEvents='none'>
-          <View className="w-full h-[1.4px] bg-white/55" />
+        <View
+          className="absolute top-1/2 left-0 right-0 -translate-y-1/2 z-20"
+          pointerEvents="none"
+        >
+          <View className="w-full h-[1.4px] bg-neutral-800 dark:bg-white/55" />
           <View style={{ height: itemHeight }} />
-          <View className="w-full h-[1.4px] bg-white/55" />
+          <View className="w-full h-[1.4px] bg-neutral-800 dark:bg-white/55" />
         </View>
         <LinearGradient
-          colors={['rgba(17, 24, 39, 0.9)', 'transparent']}
+          colors={
+            colorScheme === "dark"
+              ? ['rgba(17, 24, 39, 0.9)', 'transparent']
+              : ['rgba(255,255,255,0.9)', 'transparent']
+          }
           className="absolute top-0 left-0 right-0 z-10"
           style={{ height: 25 }}
           pointerEvents="none"
         />
 
         <LinearGradient
-          colors={['transparent', 'rgba(17, 24, 39, 0.9)']}
+          colors={
+            colorScheme === "dark"
+              ? ['transparent', 'rgba(17, 24, 39, 0.9)']
+              : ['transparent', 'rgba(255,255,255,0.9)']
+          }
           className="absolute bottom-0 left-0 right-0 z-10"
           style={{ height: 25 }}
           pointerEvents="none"
