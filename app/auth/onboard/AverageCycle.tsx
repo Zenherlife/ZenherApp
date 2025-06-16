@@ -7,10 +7,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Text,
   TouchableOpacity,
-<<<<<<< feature/update-reminder
   useColorScheme,
-=======
->>>>>>> main
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';

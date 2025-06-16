@@ -1,5 +1,8 @@
-import firestore from '@react-native-firebase/firestore';
+import { getApp } from '@react-native-firebase/app';
+import { doc, getFirestore, onSnapshot, setDoc } from '@react-native-firebase/firestore';
 import { create } from 'zustand';
+
+const db = getFirestore(getApp());
 
 interface ReminderData {
   time: string;
@@ -51,41 +54,36 @@ export const useUserDataStore = create<UserState>((set, get) => ({
   setUser: async (user) => {
     if (!user?.uid) return;
     try {
-      await firestore()
-        .collection('users')
-        .doc(user.uid)
-        .set(user, { merge: true });
+      await setDoc(doc(db, 'users', user.uid), user, { merge: true });
     } catch (error) {
       console.error('Error writing user to Firestore:', error);
     }
   },
-
+  
   listenToUser: (uid: string) => {
-    const unsubscribe = firestore()
-      .collection('users')
-      .doc(uid)
-      .onSnapshot(
-        (doc) => {
-          if (doc.exists()) {
-            const data = doc.data();
-            if (data) {
-              set((state) => ({
-                ...state,
-                ...data,
-                reminder: {
-                  ...state.reminder,
-                  ...(data.reminder || {}),
-                },
-              }));
-            }
+    const unsub = onSnapshot(
+      doc(db, 'users', uid),
+      (docSnap) => {
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          if (data) {
+            set((state) => ({
+              ...state,
+              ...data,
+              reminder: {
+                ...state.reminder,
+                ...(data.reminder || {}),
+              },
+            }));
           }
-        },
-        (error) => {
-          console.error('Realtime Firestore error:', error);
         }
-      );
+      },
+      (error) => {
+        console.error('Realtime Firestore error:', error);
+      }
+    );
 
-    return unsubscribe;
+    return unsub;
   },
 
   getUser: () => {

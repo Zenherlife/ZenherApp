@@ -32,8 +32,6 @@ export default function PeriodReminderScreen() {
   const router = useRouter();
   const {mode} = useLocalSearchParams<{mode?: 'add' | 'edit'}>();
   const uid = useUserDataStore((state) => state.uid);
-<<<<<<< feature/update-reminder
-  console.log('Entered With mode:', mode)
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
@@ -41,9 +39,6 @@ export default function PeriodReminderScreen() {
     StatusBar.setBarStyle( isDark ? 'light-content' : 'dark-content');
   }, [isDark]);
   
-=======
-
->>>>>>> main
   useEffect(() => {
     if( mode === 'edit'){
       const reminder = useUserDataStore.getState().reminder;
