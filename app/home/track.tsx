@@ -1,33 +1,67 @@
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import WellnessModal from '@/modules/home/components/WellnessModal';
+import { SelectedDate, WellnessCategory, WellnessData, WellnessOption, WellnessOptions } from '@/modules/home/utils/types';
+import { ChevronLeft, ChevronRight, Circle } from 'lucide-react-native';
 import React, { useRef, useState } from 'react';
 import {
   Animated,
-  Dimensions,
   Text,
   TouchableOpacity,
   useColorScheme,
   View,
 } from 'react-native';
 
-const { width } = Dimensions.get('window');
-
-const CalendarScreen = () => {
+const CalendarScreen: React.FC = () => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [selectedDate, setSelectedDate] = useState<SelectedDate | null>(null);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [wellnessData, setWellnessData] = useState<WellnessData>({});
+  
   const slideAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
-  const months = [
+  const months: string[] = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const weekDays: string[] = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  const getDaysInMonth = (date) => {
+  const wellnessOptions: WellnessOptions = {
+    flow: [
+      { label: 'Light', color: '#fef3c7', textColor: '#d97706' },
+      { label: 'Medium', color: '#fed7aa', textColor: '#ea580c' },
+      { label: 'Heavy', color: '#fca5a5', textColor: '#dc2626' },
+      { label: 'Super Heavy', color: '#f87171', textColor: '#b91c1c' }
+    ],
+    feelings: [
+      { label: 'Mood Swings', color: '#e0e7ff', textColor: '#6366f1' },
+      { label: 'Not in Control', color: '#fee2e2', textColor: '#ef4444' },
+      { label: 'Fine', color: '#f0fdf4', textColor: '#22c55e' },
+      { label: 'Happy', color: '#fef3c7', textColor: '#f59e0b' },
+      { label: 'Sad', color: '#dbeafe', textColor: '#3b82f6' },
+      { label: 'Confident', color: '#ecfdf5', textColor: '#10b981' },
+      { label: 'Excited', color: '#fdf2f8', textColor: '#ec4899' },
+      { label: 'Irritable', color: '#fef2f2', textColor: '#f87171' },
+      { label: 'Anxious', color: '#f3e8ff', textColor: '#a855f7' },
+      { label: 'Insecure', color: '#f1f5f9', textColor: '#64748b' },
+      { label: 'Grateful', color: '#f0f9ff', textColor: '#0ea5e9' },
+      { label: 'Indifferent', color: '#f8fafc', textColor: '#6b7280' }
+    ],
+    sleep: [
+      { label: 'Trouble Falling Asleep', color: '#fef2f2', textColor: '#dc2626' },
+      { label: 'Woke Up Refreshed', color: '#f0fdf4', textColor: '#16a34a' },
+      { label: 'Woke Up Tired', color: '#fefce8', textColor: '#ca8a04' },
+      { label: 'Restless Sleep', color: '#fdf4ff', textColor: '#c026d3' },
+      { label: 'Vivid Dreams', color: '#eff6ff', textColor: '#2563eb' },
+      { label: 'Night Sweats', color: '#fff7ed', textColor: '#ea580c' }
+    ]
+  };
+
+  const getDaysInMonth = (date: Date): (number | null)[] => {
     const year = date.getFullYear();
     const month = date.getMonth();
     const firstDay = new Date(year, month, 1);
@@ -35,14 +69,12 @@ const CalendarScreen = () => {
     const daysInMonth = lastDay.getDate();
     const startingDayOfWeek = firstDay.getDay();
 
-    const days = [];
+    const days: (number | null)[] = [];
     
-    // Add empty cells for days before the first day of the month
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
     
-    // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
@@ -50,8 +82,7 @@ const CalendarScreen = () => {
     return days;
   };
 
-  const animateTransition = (direction) => {
-    // Start animations
+  const animateTransition = (direction: 'next' | 'prev'): void => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 0,
@@ -64,7 +95,6 @@ const CalendarScreen = () => {
         useNativeDriver: true,
       }),
     ]).start(() => {
-      // Reset and fade back in
       slideAnim.setValue(direction === 'next' ? 20 : -20);
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -81,7 +111,7 @@ const CalendarScreen = () => {
     });
   };
 
-  const changeMonth = (direction) => {
+  const changeMonth = (direction: 'next' | 'prev'): void => {
     animateTransition(direction);
     
     const newDate = new Date(currentDate);
@@ -93,22 +123,33 @@ const CalendarScreen = () => {
     setCurrentDate(newDate);
   };
 
-  const handleDayPress = () => {
-    Animated.sequence([
-      Animated.timing(scaleAnim, {
-        toValue: 0.95,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 100,
-        useNativeDriver: true,
-      }),
-    ]).start();
+  const handleDayPress = (day: number | null): void => {
+    if (!day) return;
+
+    const dateKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`;
+    setSelectedDate({ day, month: currentDate.getMonth(), year: currentDate.getFullYear(), key: dateKey });
+    setModalVisible(true);
   };
 
-  const isToday = (day) => {
+  const closeModal = (): void => {
+    setModalVisible(false);
+    setSelectedDate(null);
+  };
+
+  const updateWellnessData = (category: WellnessCategory, option: WellnessOption): void => {
+    if (!selectedDate) return;
+    
+    setWellnessData(prev => ({
+      ...prev,
+      [selectedDate.key]: {
+        ...prev[selectedDate.key],
+        [category]: option
+      }
+    }));
+  };
+
+  const isToday = (day: number | null): boolean => {
+    if (!day) return false;
     const today = new Date();
     return (
       day === today.getDate() &&
@@ -117,11 +158,16 @@ const CalendarScreen = () => {
     );
   };
 
+  const hasWellnessData = (day: number | null): boolean => {
+    if (!day) return false;
+    const dateKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`;
+    return wellnessData[dateKey] && Object.keys(wellnessData[dateKey]).length > 0;
+  };
+
   const days = getDaysInMonth(currentDate);
 
   return (
     <View className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      {/* Header */}
       <View className="pt-12 pb-6 px-6">
         <View className="flex-row items-center justify-between">
           <TouchableOpacity
@@ -163,9 +209,7 @@ const CalendarScreen = () => {
         </View>
       </View>
 
-      {/* Calendar */}
       <View className={`mx-4 rounded-3xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-lg`}>
-        {/* Week Days Header */}
         <View className="flex-row border-b border-gray-200 dark:border-gray-700">
           {weekDays.map((day) => (
             <View key={day} className="flex-1 py-4">
@@ -178,7 +222,6 @@ const CalendarScreen = () => {
           ))}
         </View>
 
-        {/* Calendar Days */}
         <Animated.View
           style={{
             opacity: fadeAnim,
@@ -194,8 +237,8 @@ const CalendarScreen = () => {
               <View key={index} className="w-1/7" style={{ width: `${100/7}%` }}>
                 {day ? (
                   <TouchableOpacity
-                    onPress={handleDayPress}
-                    className={`m-1 h-12 rounded-2xl items-center justify-center ${
+                    onPress={() => handleDayPress(day)}
+                    className={`m-1 h-12 rounded-2xl items-center justify-center relative ${
                       isToday(day)
                         ? 'bg-blue-500 shadow-lg'
                         : 'hover:bg-gray-100 dark:hover:bg-gray-700'
@@ -211,6 +254,11 @@ const CalendarScreen = () => {
                     }`}>
                       {day}
                     </Text>
+                    {hasWellnessData(day) && (
+                      <View className="absolute -top-1 -right-1">
+                        <Circle size={8} color="#10b981" fill="#10b981" />
+                      </View>
+                    )}
                   </TouchableOpacity>
                 ) : (
                   <View className="m-1 h-12" />
@@ -221,7 +269,6 @@ const CalendarScreen = () => {
         </Animated.View>
       </View>
 
-      {/* Today's Date Indicator */}
       <View className="px-6 pt-8">
         <View className={`p-4 rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
           <Text className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
@@ -236,6 +283,15 @@ const CalendarScreen = () => {
           </Text>
         </View>
       </View>
+
+      <WellnessModal
+        visible={modalVisible}
+        selectedDate={selectedDate}
+        wellnessData={wellnessData}
+        wellnessOptions={wellnessOptions}
+        onClose={closeModal}
+        onUpdateWellnessData={updateWellnessData}
+      />
     </View>
   );
 };

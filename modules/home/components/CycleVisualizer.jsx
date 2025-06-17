@@ -136,7 +136,7 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
           <Svg width={SIZE} height={SIZE}>
             <Path
               d={arcPath}
-              stroke={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)"}
+              stroke={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.2)"}
               strokeWidth={STROKE_WIDTH}
               fill="none"
               strokeLinecap="round"
@@ -193,7 +193,7 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
           {/* Knob */}
           <Animated.View
             className={`rounded-full bg-gray-300 dark:bg-gray-700 border-[3px] absolute items-center justify-center ${
-              isToday ? "border-blue-500" : "border-white dark:border-gray-900"
+              isToday ? "border-blue-500" : "border-gray-50 dark:border-gray-900"
             }`}
             style={[
               knobStyle,
