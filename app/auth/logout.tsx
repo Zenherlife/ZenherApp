@@ -139,7 +139,7 @@ export default function AccountScreen() {
     const userData = useUserDataStore.getState().getUser();
     const  {uid, displayName, email, dateOfBirth} = userData;
 
-    const updatedData = { displayName, email, dateOfBirth};
+    const updatedData = { displayName, dateOfBirth};
 
     try {
       await firestore().collection("users").doc(uid).update(updatedData);
@@ -232,11 +232,10 @@ export default function AccountScreen() {
       <Text className="text-black dark:text-white font-semibold mb-1">
         Email Address
       </Text>
-      <TextInput
-        placeholder="Enter Email (e.g., zenher@gmail.com)"
-        defaultValue={email}
-        className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 mb-4 text-black dark:text-white"
-      />
+      <Text className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 mb-4 text-black dark:text-white">
+        {email}
+      </Text>
+      
       <TouchableOpacity
         className="rounded-full py-3 mb-3"
         onPress={() => navigation.goBack()}

@@ -2,7 +2,7 @@ import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -10,12 +10,14 @@ export default function PeriodScreen() {
   const [selectedDate, setSelectedDate] = useState('');
   const setField = useUserDataStore((state) => state.setField);
   const router = useRouter()
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   return (
-  <SafeAreaView className="flex-1 bg-gray-900 px-6">
+  <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 px-6">
     {/* Back Button */}
     <TouchableOpacity className="mt-4" onPress={() => router.back()}>
-      <Ionicons name="arrow-back" size={24} color="white" />
+      <Ionicons name="arrow-back" size={24} color={isDark ? 'white' : 'black'} />
     </TouchableOpacity>
 
     {/* Red Drop Icon */}
@@ -26,10 +28,10 @@ export default function PeriodScreen() {
     </View>
 
     {/* Title */}
-    <Text className="text-white text-2xl font-bold text-center mb-2">When did your last period start?</Text>
+    <Text className="text-black dark:text-white text-2xl font-bold text-center mb-2">When did your last period start?</Text>
 
     {/* Subtitle */}
-    <Text className="text-white text-center opacity-80 mb-4">We can then predict your next period.</Text>
+    <Text className="text-black dark:text-white text-center opacity-80 mb-4">We can then predict your next period.</Text>
 
     {/* Calendar */}
     <Calendar
@@ -38,39 +40,39 @@ export default function PeriodScreen() {
       markedDates={{
         [selectedDate]: {
           selected: true,
-          selectedColor: 'white', 
+          selectedColor: isDark? 'white': '#283593', 
         },
       }}
       theme={{
         todayTextColor: '#ff5656',
         backgroundColor: 'transparent',
         calendarBackground: 'transparent',
-        textSectionTitleColor: '#ffffff',
-        dayTextColor: '#ffffff',
-        monthTextColor: '#ffffff',
-        arrowColor: '#ffffff',
+        textSectionTitleColor: isDark?'#ffffff' : 'black',
+        dayTextColor: isDark ? '#ffffff' : 'black',
+        monthTextColor: isDark ? '#ffffff' : 'black',
+        arrowColor: isDark? '#ffffff' : 'black',
         textDisabledColor: 'gray',
-        selectedDayTextColor: '#000000',
+        selectedDayTextColor: isDark? '#000000' : 'white',
       }}
     />
 
     {/* Buttons */}
     <View className="flex-row justify-between mt-6 px-2 gap-4">
-      <TouchableOpacity className="flex-1 h-14 bg-white/30 rounded-full  items-center justify-center px-8" 
+      <TouchableOpacity className="flex-1 h-14 bg-gray-300 dark:bg-white/30 rounded-full  items-center justify-center px-8" 
         onPress={() => {
           router.push('./AverageCycle')
         }}
         >
-        <Text className="text-white font-semibold text-lg">Not sure</Text>
+        <Text className="text-black dark:text-white font-semibold text-lg">Not sure</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity className="flex-1 h-14 bg-white rounded-full items-center justify-center px-8" 
+      <TouchableOpacity className="flex-1 h-14 bg-indigo-800 dark:bg-white rounded-full items-center justify-center px-8" 
         onPress={() => {
         setField('lastPeriodDate', selectedDate)
           router.push('./AverageCycle')
       }}
       >
-        <Text className="text-black font-semibold text-lg">Next</Text>
+        <Text className="text-white dark:text-black font-semibold text-lg">Next</Text>
       </TouchableOpacity>
     </View>
   </SafeAreaView>
