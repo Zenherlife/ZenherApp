@@ -61,8 +61,9 @@ export default function ConnectScreen() {
                 onPress={() => router.push('/auth/logout')}
                 className="rounded-full border-2 border-white/20 active:opacity-80"
               >
-                <View className="bg-gray-100 dark:bg-gray-700 rounded-full p-2">
-                  <Ionicons name="chevron-forward" size={20} color="#6366f1" />
+                <View className="flex-row items-center bg-gray-100 dark:bg-gray-700 rounded-full px-3 py-2">
+                  <Ionicons name="create-outline" size={20} color="#6366f1" />
+                  <Text className="text-sm text-black dark:text-white ml-2">Edit</Text>
                 </View>
               </Pressable>
             </View>
@@ -113,7 +114,7 @@ export default function ConnectScreen() {
             title="Personalization" 
             items={[
               { title: 'Tracking Preferences', icon: 'options-outline', subtitle: 'Customize your experience', onPress: () => {} },
-              { title: 'Edit Profile', icon: 'create-outline', subtitle: 'Update your information', onPress: () => router.push('/settings/edit-profile') },
+              // { title: 'Edit Profile', icon: 'create-outline', subtitle: 'Update your information', onPress: () => router.push('/settings/edit-profile') },
               { title: 'Privacy & Security', icon: 'lock-closed-outline', subtitle: 'Manage data protection', onPress: () => {} },
             ]} 
           />
