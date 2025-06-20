@@ -9,6 +9,7 @@ import {
   Platform,
   ScrollView, Text, TextInput, TouchableOpacity,
   TouchableWithoutFeedback,
+  useColorScheme,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -22,6 +23,8 @@ export default function CreateAccountScreen() {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   const isFormValid = name.trim() && email.trim() && password.trim().length >= 10;
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   const handleCreateAccount = () => {
     if (isFormValid) {
@@ -33,9 +36,9 @@ export default function CreateAccountScreen() {
   };
 
   return (
-  <SafeAreaView className="flex-1 bg-gray-900 px-6">
+  <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 px-6">
   <TouchableOpacity className="mt-4 mb-12" onPress={() => router.back()}>
-    <Ionicons name="arrow-back" size={24} color="white" />
+    <Ionicons name="arrow-back" size={24} color={isDark? "white": "black"} />
   </TouchableOpacity>
   <KeyboardAvoidingView
     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -52,8 +55,8 @@ export default function CreateAccountScreen() {
               resizeMode="contain"
             />
 
-          <Text className="text-white text-3xl font-bold mb-4">Create your account</Text>
-          <Text className="text-gray-400 text-center text-base px-4">
+          <Text className="text-black dark:text-white text-3xl font-bold mb-4">Create your account</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-center text-base px-4">
             Enter your details and pick a password that's at least 10 characters.
           </Text>
         </View>
@@ -62,19 +65,19 @@ export default function CreateAccountScreen() {
 
           {/* Name Input */}
           <View>
-            <Text className="text-gray-300 text-base mb-2">Full Name</Text>
+            <Text className="text-gray-600 dark:text-gray-300 text-base mb-2">Full Name</Text>
             <TextInput
               value={name}
               onChangeText={setName}
               placeholder="Emily Taylor"
               placeholderTextColor="#6b7280"
-              className="text-white text-base bg-gray-800 rounded-xl px-4 py-3 border border-gray-700"
+              className="text-black dark:text-white text-base bg-gray-200 dark:bg-gray-800 rounded-xl px-4 py-3 border border-gray-300 dark:border-gray-700"
             />
           </View>
 
           {/* Email Input */}
           <View>
-            <Text className="text-gray-300 text-base mb-2">Email</Text>
+            <Text className="text-gray-600 dark:text-gray-300 text-base mb-2">Email</Text>
             <TextInput
               value={email}
               onChangeText={setEmail}
@@ -82,33 +85,33 @@ export default function CreateAccountScreen() {
               placeholderTextColor="#6b7280"
               keyboardType="email-address"
               autoCapitalize="none"
-              className="text-white text-base bg-gray-800 rounded-xl px-4 py-3 border border-gray-700"
+              className="text-black dark:text-white text-base bg-gray-200 dark:bg-gray-800 rounded-xl px-4 py-3 border border-gray-300 dark:border-gray-700"
             />
           </View>
 
           {/* Password Input */}
           <View>
-            <Text className="text-gray-300 text-base mb-2">Password</Text>
-            <View className="flex-row items-center bg-gray-800 rounded-xl px-4 border border-gray-700">
+            <Text className="text-gray-600 dark:text-gray-300 text-base mb-2">Password</Text>
+            <View className="flex-row items-center bg-gray-200 dark:bg-gray-800 rounded-xl px-4 border border-gray-300 dark:border-gray-700">
               <TextInput
                 value={password}
                 onChangeText={setPassword}
                 placeholder="At least 10 characters"
                 placeholderTextColor="#6b7280"
                 secureTextEntry={!isPasswordVisible}
-                className="flex-1 text-white text-base py-3"
+                className="flex-1 text-black dark:text-white text-base py-3"
               />
               <TouchableOpacity onPress={() => setIsPasswordVisible(!isPasswordVisible)}>
                 <Ionicons
                   name={isPasswordVisible ? 'eye' : 'eye-off'}
                   size={22}
-                  color="#9ca3af"
+                  color={isDark? "#9ca3af" : "#6d727a"}
                 />
               </TouchableOpacity>
             </View>
 
             {password.length > 0 && password.length < 10 && (
-              <Text className="text-red-400 mt-2 text-sm">
+              <Text className="text-red-600 dark:text-red-400 mt-2 text-sm">
                 Password must be at least 10 characters
               </Text>
             )}
@@ -120,9 +123,9 @@ export default function CreateAccountScreen() {
           <TouchableOpacity
             disabled={!isFormValid}
             onPress={handleCreateAccount}
-            className={`py-3 rounded-full ${isFormValid ? 'bg-white' : 'bg-gray-700'}`}
+            className={`py-3 rounded-full ${isFormValid ? 'bg-indigo-800 dark:bg-white' : 'bg-gray-300 dark:bg-gray-700'}`}
           >
-            <Text className={`text-center text-lg font-semibold ${isFormValid ? 'text-black' : 'text-gray-400'}`}>
+            <Text className={`text-center text-lg font-semibold ${isFormValid ? 'text-white dark:text-black' : 'text-gray-800 dark:text-gray-400'}`}>
               Create account
             </Text>
           </TouchableOpacity>

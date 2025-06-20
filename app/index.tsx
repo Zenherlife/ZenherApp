@@ -8,6 +8,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  useColorScheme,
 } from 'react-native';
 import Animated, {
   runOnJS,
@@ -32,6 +33,11 @@ export default function WelcomeScreen() {
   const optionsOpacity = useSharedValue(0);
   const optionsTranslate = useSharedValue(15);
 
+  // Status Bar color scheme
+  const  colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
+
+  
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authUser) => {
       if (authUser) {
@@ -83,8 +89,8 @@ export default function WelcomeScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
-      <StatusBar barStyle="light-content" backgroundColor="transparent" />
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <StatusBar barStyle={isDark ? 'light-content' : 'dark-content'} backgroundColor="transparent" />
 
       <Animated.View className="flex-1" style={screenAnimatedStyle}>
         {/* Logo */}
@@ -94,13 +100,13 @@ export default function WelcomeScreen() {
             className="w-12 h-12"
             resizeMode="contain"
           />
-          <Text className="text-white text-2xl font-semibold mt-2">Zenher</Text>
+          <Text className="text-black dark:text-white text-2xl font-semibold mt-2">Zenher</Text>
         </View>
 
         {/* Heading */}
         <View className="px-8 mt-6">
-          <Text className="text-white text-3xl font-bold text-center">Discover Zenher</Text>
-          <Text className="text-gray-300 text-base text-center mt-4 leading-6">
+          <Text className="text-black dark:text-white text-3xl font-bold text-center">Discover Zenher</Text>
+          <Text className="text-gray-600 dark:text-gray-300 text-base text-center mt-4 leading-6">
             Effortlessly track your cycle, connect with wellness experts, and unlock personalized
             health insights—all in one beautifully designed space.
           </Text>
@@ -121,10 +127,10 @@ export default function WelcomeScreen() {
           {!showOptions && (
             <Animated.View style={getStartedStyle}>
               <TouchableOpacity
-                className="bg-white py-3 rounded-full"
+                className="bg-indigo-800 dark:bg-white py-3 rounded-full"
                 onPress={handleGetStarted}
               >
-                <Text className="text-center text-gray-900 font-bold text-lg">Get Started</Text>
+                <Text className="text-center text-white dark:text-gray-900 font-bold text-lg">Get Started</Text>
               </TouchableOpacity>
             </Animated.View>
           )}
@@ -133,17 +139,17 @@ export default function WelcomeScreen() {
           {showOptions && (
             <Animated.View style={optionsStyle}>
               <TouchableOpacity
-                className="py-3 rounded-full border border-white mb-4"
+                className="py-3 rounded-full border border-black dark:border-white mb-4"
                 onPress={() => router.push('/auth/login')}
               >
-                <Text className="text-center text-white font-semibold text-lg">I have an account</Text>
+                <Text className="text-center text-black dark:text-white font-semibold text-lg">I have an account</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="bg-white py-3 rounded-full"
+                className="bg-indigo-800 dark:bg-white py-3 rounded-full"
                 onPress={() => router.push('/auth/onboard')}
               >
-                <Text className="text-center text-gray-900 font-bold text-lg">Create account</Text>
+                <Text className="text-center text-white dark:text-gray-900 font-bold text-lg">Create account</Text>
               </TouchableOpacity>
             </Animated.View>
           )}

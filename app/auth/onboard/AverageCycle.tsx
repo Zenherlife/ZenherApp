@@ -38,7 +38,7 @@ const CycleLengthSelector = () => {
 			router.back();
 		} else {
 			setField('averageCycle', selectedCycle);
-			router.push('./Reminder');
+			router.push({ pathname:'/auth/onboard/reminder', params: {mode: 'add'}})
 		}
 	};
 
@@ -96,7 +96,7 @@ const CycleLengthSelector = () => {
           <>
             <TouchableOpacity
               className="flex-1 h-14 bg-gray-200 dark:bg-white/30 rounded-full items-center justify-center"
-              onPress={() => router.push('./Reminder')}
+              onPress={() => router.push({ pathname:'/auth/onboard/reminder', params: {mode: 'add'}})}
             >
               <Text className="text-black dark:text-white font-semibold text-lg">Not sure</Text>
             </TouchableOpacity>
