@@ -5,12 +5,13 @@ import { calculateProfileCompletion } from '@/modules/home/utils/profileUtils';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   Image,
   Linking,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   View
@@ -21,9 +22,12 @@ export default function ConnectScreen() {
   const router = useRouter();
   const user = useUserDataStore((state) => (state))
   const { colorScheme } = useColorScheme();
-
+  const isDark = colorScheme === 'dark';
   const profileCompletion = calculateProfileCompletion(user);
 
+  useEffect(() => {
+      StatusBar.setBarStyle(isDark ? "light-content" : "dark-content");
+    }, [isDark]);
   return (
     <View className={`flex-1 ${colorScheme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <ScrollView 
@@ -115,7 +119,7 @@ export default function ConnectScreen() {
             items={[
               { title: 'Tracking Preferences', icon: 'options-outline', subtitle: 'Customize your experience', onPress: () => {} },
               // { title: 'Edit Profile', icon: 'create-outline', subtitle: 'Update your information', onPress: () => router.push('/settings/edit-profile') },
-              { title: 'Privacy & Security', icon: 'lock-closed-outline', subtitle: 'Manage data protection', onPress: () => {} },
+              { title: 'Privacy Policy', icon: 'lock-closed-outline', subtitle: 'Manage data protection', onPress: () => router.push('/setting/Privacy') },
             ]} 
           />
 
