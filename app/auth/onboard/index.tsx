@@ -2,7 +2,7 @@ import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Modal, ScrollView, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BirthdateScreen() {
@@ -13,6 +13,9 @@ export default function BirthdateScreen() {
   const [showParentalConsent, setShowParentalConsent] = useState(false);
   const setField = useUserDataStore((state) => state.setField);
   const router = useRouter();
+
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark'; 
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -128,18 +131,18 @@ export default function BirthdateScreen() {
   const calendarDays = generateCalendarDays();
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-900">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="px-6">
       <TouchableOpacity className="mt-4" onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="white" />
+        <Ionicons name="arrow-back" size={24} color={isDark ? 'white' : 'dark'} />
       </TouchableOpacity>
 
         <View className="items-center mb-8">
           <View className="bg-[#ed6372] rounded-full w-20 h-20 justify-center items-center mb-6">
             <Feather name="gift" size={32} color="white" />
           </View>
-          <Text className="text-white text-2xl font-bold mb-2">When were you born?</Text>
-          <Text className="text-gray-400 text-center text-base px-4">
+          <Text className="text-black dark:text-white text-2xl font-bold mb-2">When were you born?</Text>
+          <Text className="text-gray-600 dark:text-gray-400 text-center text-base px-4">
             Since cycles can change over time, this helps us customize the app for you.
           </Text>
         </View>
@@ -147,21 +150,21 @@ export default function BirthdateScreen() {
         {/* Month/Year Header */}
         <View className="flex-row items-center justify-between mb-6 px-4">
           <TouchableOpacity onPress={handlePrevMonth}>
-            <Feather name="chevron-left" size={24} color="white" />
+            <Feather name="chevron-left" size={24} color={isDark ? 'white' : 'black'} />
           </TouchableOpacity>
           
           <TouchableOpacity 
             onPress={() => setShowYearPicker(true)}
             className="flex-row items-center"
           >
-            <Text className="text-white text-lg font-medium">
+            <Text className="text-black dark:text-white text-lg font-medium">
               {months[currentMonth]} {currentYear}
             </Text>
-            <Feather name="chevron-down" size={20} color="white" className="ml-2" />
+            <Feather name="chevron-down" size={20} color={isDark ? 'white' : 'black'} className="ml-2" />
           </TouchableOpacity>
           
           <TouchableOpacity onPress={handleNextMonth}>
-            <Feather name="chevron-right" size={24} color="white" />
+            <Feather name="chevron-right" size={24} color={isDark ? 'white' : 'black'} />
           </TouchableOpacity>
         </View>
 
@@ -169,7 +172,7 @@ export default function BirthdateScreen() {
         <View className="flex-row mb-4">
           {weekDays.map((day, index) => (
             <View key={index} className="flex-1 items-center">
-              <Text className="text-gray-400 text-sm font-medium">{day}</Text>
+              <Text className="text-gray-600 dark:text-gray-400 text-sm font-medium">{day}</Text>
             </View>
           ))}
         </View>
@@ -191,12 +194,12 @@ export default function BirthdateScreen() {
                       <TouchableOpacity
                         onPress={() => handleDayPress(day)}
                         className={`w-10 h-10 rounded-full items-center justify-center ${
-                          isSelected(day) ? 'bg-white' : ''
+                          isSelected(day) ? 'bg-indigo-800 dark:bg-white' : ''
                         }`}
                       >
                         <Text
                           className={`text-base ${
-                            isSelected(day) ? 'text-black font-semibold' : 'text-white'
+                            isSelected(day) ? 'text-white dark:text-black font-semibold' : 'text-black dark:text-white'
                           }`}
                         >
                           {day}
@@ -216,12 +219,12 @@ export default function BirthdateScreen() {
         <TouchableOpacity
           disabled={!selectedDate}
           className={`mx-4 py-4 rounded-full mb-20 ${
-            selectedDate ? 'bg-white' : 'bg-gray-700'
+            selectedDate ? 'bg-indigo-800 dark:bg-white' : 'bg-gray-300 dark:bg-gray-700'
           }`}
           onPress={handleNext}
         >
           <Text className={`text-center text-base font-semibold ${
-            selectedDate ? 'text-black' : 'text-gray-400'
+            selectedDate ? 'text-white dark:text-black' : 'text-gray-700 dark:text-gray-400'
           }`}>
             Next
           </Text>
@@ -241,7 +244,7 @@ export default function BirthdateScreen() {
           justifyContent: 'flex-end'
         }}>
           <View style={{ 
-            backgroundColor: '#1f2937',
+            backgroundColor: isDark ? '#1f2937' : '#f9fafb',
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
             height: 400
@@ -252,14 +255,14 @@ export default function BirthdateScreen() {
               alignItems: 'center', 
               padding: 16,
               borderBottomWidth: 1,
-              borderBottomColor: '#374151'
+              borderBottomColor: isDark ? '#374151' : '#878d96',
             }}>
               <TouchableOpacity onPress={() => setShowYearPicker(false)}>
-                <Text style={{ color: '#9ca3af', fontSize: 18 }}>Cancel</Text>
+                <Text style={{ color: isDark ? '#9ca3af' : '#4e5157', fontSize: 18 }}>Cancel</Text>
               </TouchableOpacity>
-              <Text style={{ color: 'white', fontSize: 18, fontWeight: '600' }}>Select Year</Text>
+              <Text style={{ color: isDark ? 'white' : 'black', fontSize: 18, fontWeight: '600' }}>Select Year</Text>
               <TouchableOpacity onPress={() => setShowYearPicker(false)}>
-                <Text style={{ color: '#22d3ee', fontSize: 18 }}>Done</Text>
+                <Text style={{ color: isDark? '#22d3ee' : '#283593', fontSize: 18, fontWeight: 'bold' }}>Done</Text>
               </TouchableOpacity>
             </View>
             
@@ -273,15 +276,15 @@ export default function BirthdateScreen() {
                   onPress={() => handleYearSelect(year)}
                   style={{
                     padding: 16,
-                    backgroundColor: year === currentYear ? 'rgba(34, 211, 238, 0.2)' : 'transparent',
+                    backgroundColor: year === currentYear ? isDark ? 'rgba(34, 211, 238, 0.2)' :'#bec2de' : 'transparent',
                     borderBottomWidth: 0.5,
-                    borderBottomColor: '#374151'
+                    borderBottomColor: isDark ? '#374151' : '#c3c6ca',
                   }}
                 >
                   <Text style={{
                     textAlign: 'center',
                     fontSize: 18,
-                    color: year === currentYear ? '#22d3ee' : 'white',
+                    color: year === currentYear ? isDark? '#22d3ee' : '#283593' : isDark ? 'white' : 'black' ,
                     fontWeight: year === currentYear ? '600' : 'normal'
                   }}>
                     {year}
@@ -306,43 +309,43 @@ export default function BirthdateScreen() {
         animationType="fade"
         onRequestClose={handleParentalConsentClose}
       >
-        <View className="flex-1 px-6 bg-gray-900">
+        <View className="flex-1 px-6 bg-gray-50 dark:bg-gray-900">
           <TouchableOpacity className="mt-4" onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="white" />
+            <Ionicons name="arrow-back" size={24} color={isDark ? "white" : "black"} />
           </TouchableOpacity>
 
           <View className="flex-1 justify-center items-center px-4">
             {/* Icon */}
             <View className="bg-blue-400 rounded-full w-20 h-20 justify-center items-center mb-8">
-              <Ionicons name='happy' color='#d7e0fd' size={44} />
+              <Ionicons name='happy' color= '#d7e0fd' size={44} />
             </View>
 
             {/* Title */}
-            <Text className="text-white text-3xl font-bold text-center mb-8">
+            <Text className="text-black dark:text-white text-3xl font-bold text-center mb-8">
               Before we get started
             </Text>
 
             {/* Description */}
             <View className="mb-12">
-              <Text className="text-white text-lg text-center mb-6">
+              <Text className="text-black dark:text-white text-lg text-center mb-6">
                 Please ask your parent or guardian to help you set up your Zenher account.
               </Text>
               
-              <Text className="text-white text-base text-center mb-6">
+              <Text className="text-black dark:text-white text-base text-center mb-6">
                 As you're younger than 16 years old, we're legally required to ask a parent or guardian for:
               </Text>
               
               <View className="space-y-3">
                 <View className="flex-row items-start">
-                  <Text className="text-white text-base mr-2">•</Text>
-                  <Text className="text-white text-base flex-1">
+                  <Text className="text-black dark:text-white text-base mr-2">•</Text>
+                  <Text className="text-black dark:text-white text-base flex-1">
                     Their permission for you to use the Zenher app
                   </Text>
                 </View>
                 
                 <View className="flex-row items-start">
-                  <Text className="text-white text-base mr-2">•</Text>
-                  <Text className="text-white text-base flex-1">
+                  <Text className="text-black dark:text-white text-base mr-2">•</Text>
+                  <Text className="text-black dark:text-white text-base flex-1">
                     Their help to set up your privacy settings
                   </Text>
                 </View>
@@ -355,9 +358,9 @@ export default function BirthdateScreen() {
             <TouchableOpacity
             disabled={!selectedDate}
               onPress={handleGotIt}
-              className="bg-white py-4 rounded-full"
+              className="bg-indigo-800 dark:bg-white py-4 rounded-full"
             >
-              <Text className="text-black text-center text-base font-semibold">
+              <Text className="text-white dark:text-black text-center text-base font-semibold">
                 Got it
               </Text>
             </TouchableOpacity>

@@ -10,6 +10,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  useColorScheme
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -20,6 +21,8 @@ export default function EmailLoginScreen() {
   const [password, setPassword] = useState('');
   const [secure, setSecure] = useState(true);
   const { signIn, loading, error } = useEmailSignIn();
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -38,10 +41,10 @@ export default function EmailLoginScreen() {
     }
   };
   return (
-    <SafeAreaView className="flex-1 bg-gray-900 px-6">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 px-6">
       {/* Back Button */}
       <TouchableOpacity className="mt-4" onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="white" />
+        <Ionicons name="arrow-back" size={24} color={isDark ? 'white' : 'black'} />
       </TouchableOpacity>
 
       {/* Logo */}
@@ -54,8 +57,8 @@ export default function EmailLoginScreen() {
       </View>
 
       {/* Headings */}
-      <Text className="text-white text-2xl font-bold text-center mb-2">Sign in with email</Text>
-      <Text className="text-gray-400 text-base text-center mb-12">
+      <Text className="text-black dark:text-white text-2xl font-bold text-center mb-2">Sign in with email</Text>
+      <Text className="text-gray-600 dark:text-gray-400 text-base text-center mb-12">
         Enter your details to continue. If you've forgotten, we'll help you out.
       </Text>
 
@@ -68,11 +71,11 @@ export default function EmailLoginScreen() {
       <TextInput
       onChangeText={(value) => setEmail(value)}
         placeholder="Email"
-        placeholderTextColor="#888"
+        placeholderTextColor={isDark ? "#888" : "#555"}
         keyboardType="email-address"
         autoCapitalize="none"
         autoComplete='email'
-        className="bg-[#080e20] text-white border border-white/10 rounded-xl px-4 py-4 mb-4 text-base"
+        className="bg-[#cdced2] dark:bg-[#080e20] text-black dark:text-white border border-gray-400 dark:border-white/10 rounded-xl px-4 py-4 mb-4 text-base"
       />
 
       {/* Password Input */}
@@ -80,9 +83,9 @@ export default function EmailLoginScreen() {
         <TextInput
         onChangeText={(value) => setPassword(value)}
           placeholder="Password"
-          placeholderTextColor="#888"
+          placeholderTextColor={isDark ? "#888" : "#555"}
           secureTextEntry={secure}
-          className="bg-[#080e20] text-white border border-white/10 rounded-xl px-4 py-4 pr-12 text-base"
+          className="bg-[#cdced2] dark:bg-[#080e20] text-black dark:text-white border border-gray-400 dark:border-white/10 rounded-xl px-4 py-4 pr-12 text-base"
         />
         <TouchableOpacity
           className="absolute right-4 top-3.5"
@@ -91,7 +94,7 @@ export default function EmailLoginScreen() {
           <Ionicons
             name={secure ? 'eye-off' : 'eye'}
             size={20}
-            color="#aaa"
+            color={isDark ? '#aaa' : '#888' }
           />
         </TouchableOpacity>
       </View>
@@ -99,19 +102,19 @@ export default function EmailLoginScreen() {
 
       {/* Forgot Password Placeholder */}
       <TouchableOpacity className="mt-2 mb-12">
-        <Text className="text-white text-center font-semibold">I forgot my password</Text>
+        <Text className="tex-black dark:text-white text-center font-semibold">I forgot my password</Text>
       </TouchableOpacity>
 
       {/* Continue Button */}
       <TouchableOpacity
-        className={`bg-white py-3 mx-2 rounded-full ${loading ? 'opacity-60' : ''}`}
+        className={`bg-indigo-800 dark:bg-white py-3 mx-2 rounded-full ${loading ? 'opacity-60' : ''}`}
         disabled={loading}
         onPress={handleLogin}
       >
         {loading ? (
           <ActivityIndicator color="#000" />
         ) : (
-          <Text className="text-center text-lg font-semibold text-black">Continue</Text>
+          <Text className="text-center text-lg font-semibold text-white dark:text-black">Continue</Text>
         )}
       </TouchableOpacity>
     </SafeAreaView>

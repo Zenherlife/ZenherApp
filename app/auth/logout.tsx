@@ -27,16 +27,15 @@ export default function AccountScreen() {
   const user = useUserDataStore.getState().getUser();
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const [name, setName] = useState(user?.displayName || "");
-  const [email, setEmail] = useState(user?.email || "")
   const [selectedDate, setSelectedDate] = useState(user?.dateOfBirth || null);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [showYearPicker, setShowYearPicker] = useState(false);
   const [showCalendar, setShowCalendar] = useState(false);
   const setField = useUserDataStore((state) => state.setField);
-  const { setUser } = useUserDataStore();
-  
+  const {uid,displayName, dateOfBirth, email} = useUserDataStore((state) => state);
+  const [name, setName] = useState(displayName || "");
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const months = [
     "January","February","March","April","May","June","July","August","September","October","November", "December",
@@ -136,13 +135,15 @@ export default function AccountScreen() {
   };
 
   const handleSave = async () => {
-    const userData = useUserDataStore.getState().getUser();
-    const  {uid, displayName, email, dateOfBirth} = userData;
-
-    const updatedData = { displayName, email, dateOfBirth};
 
     try {
-      await firestore().collection("users").doc(uid).update(updatedData);
+      await firestore()
+      .collection("users")
+      .doc(uid)
+      .update({
+        displayName: name,
+        dateOfBirth: selectedDate,
+      });
 
       ToastAndroid.show("Profile updated successfully", ToastAndroid.SHORT);
       router.back();
@@ -170,7 +171,7 @@ export default function AccountScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={signOut}
+          onPress={() => setShowLogoutConfirm(true)}
           className="flex-row items-center gap-1 mt-4"
         >
           <Ionicons
@@ -183,7 +184,7 @@ export default function AccountScreen() {
           </Text>
         </TouchableOpacity>
       </View>
-      
+
       {/* Profile Image */}
       <View className="items-center mt-10">
         <View className="relative">
@@ -206,7 +207,7 @@ export default function AccountScreen() {
       <TextInput
         placeholder="Enter name (e.g., Zenher)"
         defaultValue={name}
-        onChangeText={(val)=> setField("displayName", val)}
+        onChangeText={setName}
         className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white rounded-lg px-4 py-3 mb-4 "
       />
       <Text className="text-black dark:text-white font-semibold mb-1">
@@ -229,14 +230,13 @@ export default function AccountScreen() {
         </View>
       </View>
       {/* Email */}
-      <Text className="text-black dark:text-white font-semibold mb-1">
+      <Text className="text-black dark:text-white font-semibold mb-                                              1">
         Email Address
       </Text>
-      <TextInput
-        placeholder="Enter Email (e.g., zenher@gmail.com)"
-        defaultValue={email}
-        className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 mb-4 text-black dark:text-white"
-      />
+      <Text className="bg-gray-100 dark:bg-gray-800 rounded-lg px-4 py-3 mb-4 text-black dark:text-white">
+        {email}
+      </Text>
+
       <TouchableOpacity
         className="rounded-full py-3 mb-3"
         onPress={() => navigation.goBack()}
@@ -245,7 +245,10 @@ export default function AccountScreen() {
           Cancel
         </Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={handleSave} className="bg-indigo-800 dark:bg-white rounded-full py-4 mt-4 mb-3" >
+      <TouchableOpacity
+        onPress={handleSave}
+        className="bg-indigo-800 dark:bg-white rounded-full py-4 mt-4 mb-3"
+      >
         <Text className="text-center text-white dark:text-black font-semibold text-lg">
           Save
         </Text>
@@ -388,6 +391,38 @@ export default function AccountScreen() {
                 Cancel
               </Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+      <Modal visible={showLogoutConfirm} transparent animationType="fade">
+        <View className="flex-1 justify-center items-center bg-black/50 px-6">
+          <View className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl w-full max-w-md">
+            <Text className="text-black dark:text-white text-lg font-semibold mb-4 text-center">
+              Are you sure you want to sign out?
+            </Text>
+
+            <View className="flex-row justify-between mt-4">
+              <TouchableOpacity
+                className="flex-1 bg-gray-300 dark:bg-gray-700 rounded-lg py-3 mr-2"
+                onPress={() => setShowLogoutConfirm(false)}
+              >
+                <Text className="text-center text-black dark:text-white font-medium">
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="flex-1 bg-indigo-800 dark:bg-white rounded-lg py-3 ml-2"
+                onPress={async () => {
+                  setShowLogoutConfirm(false);
+                  await signOut();
+                }}
+              >
+                <Text className="text-center text-white dark:text-black font-medium">
+                  Yes, Sign out
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>

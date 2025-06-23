@@ -38,13 +38,13 @@ const CycleLengthSelector = () => {
 			router.back();
 		} else {
 			setField('averageCycle', selectedCycle);
-			router.push('./Reminder');
+			router.push({ pathname:'/auth/onboard/reminder', params: {mode: 'add'}})
 		}
 	};
 
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900 px-6">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 px-6">
       <TouchableOpacity className="mt-4" onPress={() => router.back()}>
         <Ionicons name="arrow-back" size={24} color={colorScheme === 'dark' ? 'white': 'black'} />
       </TouchableOpacity>
@@ -96,7 +96,7 @@ const CycleLengthSelector = () => {
           <>
             <TouchableOpacity
               className="flex-1 h-14 bg-gray-200 dark:bg-white/30 rounded-full items-center justify-center"
-              onPress={() => router.push('./Reminder')}
+              onPress={() => router.push({ pathname:'/auth/onboard/reminder', params: {mode: 'add'}})}
             >
               <Text className="text-black dark:text-white font-semibold text-lg">Not sure</Text>
             </TouchableOpacity>

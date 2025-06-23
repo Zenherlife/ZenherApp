@@ -1,13 +1,14 @@
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ConsentScreen() {
   const [checks, setChecks] = useState([false, false, false, false]);
   const router = useRouter();
-
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === 'dark';
   const toggleCheck = (index: number) => {
     const updated = [...checks];
     updated[index] = !updated[index];
@@ -15,10 +16,10 @@ export default function ConsentScreen() {
   };
 
   return (
-  <SafeAreaView className="flex-1 bg-gray-900 px-6">
+  <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 px-6">
       {/* Back Button */}
       <TouchableOpacity className="mt-4" onPress={() => router.back()}>
-        <Ionicons name="arrow-back" size={24} color="white" />
+        <Ionicons name="arrow-back" size={24} color={isDark ? "white" : "black"} />
       </TouchableOpacity>
 
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -32,10 +33,10 @@ export default function ConsentScreen() {
         </View>
 
         {/* Title */}
-        <Text className="text-white text-2xl font-bold text-center mb-3">You and Zenher</Text>
+        <Text className="text-black dark:text-white text-2xl font-bold text-center mb-3">You and Zenher</Text>
 
         {/* Description */}
-        <Text className="text-gray-300 text-center mb-8">
+        <Text className="text-gray-600 dark:text-gray-300 text-center mb-8">
           We promise to keep your data safe, secure and private. Please take a moment to get to know our policies.
         </Text>
 
@@ -53,22 +54,22 @@ export default function ConsentScreen() {
           >
             <View
               className={`w-6 h-6 rounded-md border-2 ${
-                checks[index] ? 'bg-white border-white' : 'border-white/60'
+                checks[index] ? 'bg-indigo-800 dark:bg-white border-indigo-800 dark:border-white' : 'border-gray-500 dark:border-white/60'
               } items-center justify-center`}
             >
-              {checks[index] && <MaterialCommunityIcons name="check" color="black" size={18} />}
+              {checks[index] && <MaterialCommunityIcons name="check" color={isDark ? "black" : "white"} size={18} />}
             </View>
-            <Text className="text-white flex-1">{text}</Text>
+            <Text className="text-black dark:text-white flex-1">{text}</Text>
           </TouchableOpacity>
         ))}
 
         {/* Next Button */}
         <TouchableOpacity
           disabled={checks.some(item => item === false)}
-          className="bg-white rounded-full py-4 mt-6 mb-10"
+          className="bg-indigo-800 dark:bg-white rounded-full py-4 mt-6 mb-10"
           onPress={() => router.push('./signup')}
         >
-          <Text className="text-center text-black font-semibold text-base">Next</Text>
+          <Text className="text-center text-white dark:text-black font-semibold text-base">Next</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
