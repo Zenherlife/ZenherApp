@@ -44,7 +44,7 @@ const CycleLengthSelector = () => {
 
 
   return (
-    <SafeAreaView className="flex-1 bg-white dark:bg-gray-900 px-6">
+    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900 px-6">
       <TouchableOpacity className="mt-4" onPress={() => router.back()}>
         <Ionicons name="arrow-back" size={24} color={colorScheme === 'dark' ? 'white': 'black'} />
       </TouchableOpacity>
