@@ -1,14 +1,17 @@
-import { X } from 'lucide-react-native';
+import { Droplet, Heart, Moon, X } from 'lucide-react-native';
 import React from 'react';
 import {
-    Modal,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    useColorScheme,
-    View,
+  Dimensions,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  useColorScheme,
+  View,
 } from 'react-native';
 import { SelectedDate, WellnessCategory, WellnessData, WellnessOption, WellnessOptions } from '../utils/types';
+
+const { height: screenHeight } = Dimensions.get('window');
 
 interface WellnessModalProps {
   visible: boolean;
@@ -28,6 +31,22 @@ interface WellnessSectionProps {
   onUpdateWellnessData: (category: WellnessCategory, option: WellnessOption) => void;
   isDark: boolean;
 }
+
+const getCategoryIcon = (category: WellnessCategory, isDark: boolean) => {
+  const iconSize = 20;
+  const iconColor = isDark ? '#60a5fa' : '#3b82f6';
+  
+  switch (category) {
+    case 'flow':
+      return <Droplet size={iconSize} color={iconColor} fill={iconColor} />;
+    case 'feelings':
+      return <Heart size={iconSize} color={iconColor} fill={iconColor} />;
+    case 'sleep':
+      return <Moon size={iconSize} color={iconColor} fill={iconColor} />;
+    default:
+      return null;
+  }
+};
 
 const months = [
   'January', 'February', 'March', 'April', 'May', 'June',
@@ -49,10 +68,19 @@ const WellnessSection: React.FC<WellnessSectionProps> = ({
   };
 
   return (
-    <View className="mb-6">
-      <Text className={`text-lg font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-        {title}
-      </Text>
+    <View className="mb-8">
+      <View className="flex-row items-center mb-4">
+        <View className={`w-10 h-10 rounded-2xl items-center justify-center mr-3 ${
+          isDark ? 'bg-blue-500/20' : 'bg-blue-50'
+        }`}>
+          {getCategoryIcon(category, isDark)}
+        </View>
+        <Text className={`text-lg font-bold tracking-wide ${
+          isDark ? 'text-white' : 'text-gray-900'
+        }`}>
+          {title}
+        </Text>
+      </View>
       <View className="flex-row flex-wrap">
         {options.map((option, index) => {
           const isSelected = getCurrentData(category)?.label === option.label;
@@ -60,32 +88,47 @@ const WellnessSection: React.FC<WellnessSectionProps> = ({
             <TouchableOpacity
               key={index}
               onPress={() => onUpdateWellnessData(category, option)}
-              className={`mr-2 mb-2 px-4 py-2 rounded-full border-2 ${
-                isSelected 
-                  ? 'border-blue-500' 
-                  : isDark 
-                    ? 'border-gray-600' 
-                    : 'border-gray-200'
-              }`}
+              className="mr-3 mb-3 rounded-2xl overflow-hidden"
               style={{
-                backgroundColor: isSelected ? option.color : (isDark ? '#374151' : '#f9fafb')
+                shadowColor: isSelected ? option.color : 'transparent',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: isSelected ? 8 : 0,
               }}
-              activeOpacity={0.7}
+              activeOpacity={0.8}
             >
-              <Text 
-                className={`text-sm font-medium ${
-                  isSelected 
-                    ? '' 
-                    : isDark 
-                      ? 'text-gray-300' 
-                      : 'text-gray-700'
-                }`}
-                style={{
-                  color: isSelected ? option.textColor : undefined
-                }}
-              >
-                {option.label}
-              </Text>
+              {isSelected ? (
+                <View
+                  className="px-5 py-3 border-2 border-transparent rounded-2xl"
+                  style={{
+                    backgroundColor: option.color,
+                  }}
+                >
+                  <Text 
+                    className="text-sm font-semibold tracking-wide"
+                    style={{ color: option.textColor }}
+                  >
+                    {option.label}
+                  </Text>
+                </View>
+              ) : (
+                <View
+                  className={`px-5 py-3 border-2 rounded-2xl ${
+                    isDark 
+                      ? 'border-gray-700 bg-gray-800/50' 
+                      : 'border-gray-200 bg-gray-50/80'
+                  }`}
+                >
+                  <Text 
+                    className={`text-sm font-medium tracking-wide ${
+                      isDark ? 'text-gray-300' : 'text-gray-700'
+                    }`}
+                  >
+                    {option.label}
+                  </Text>
+                </View>
+              )}
             </TouchableOpacity>
           );
         })}
@@ -112,37 +155,73 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
       visible={visible}
       onRequestClose={onClose}
     >
-      <View className="flex-1 bg-black/50 justify-end">
+      <View className="flex-1 justify-end">
+        {/* Backdrop with blur effect */}
+        <View 
+          className="absolute inset-0 bg-black/30"
+        />
+        
         <View
-          className={`${isDark ? 'bg-gray-900' : 'bg-white'} rounded-t-3xl shadow-2xl`}
+          className={`${
+            isDark ? 'bg-gray-900' : 'bg-white'
+          } rounded-t-3xl shadow-2xl overflow-hidden`}
+          style={{
+            height: screenHeight * 0.8,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: -10 },
+            shadowOpacity: 0.25,
+            shadowRadius: 20,
+            elevation: 25,
+          }}
         >
           {/* Modal Header */}
-          <View className="flex-row items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <View>
-              <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                How are you feeling?
-              </Text>
-              {selectedDate && (
-                <Text className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {months[selectedDate.month]} {selectedDate.day}, {selectedDate.year}
-                </Text>
-              )}
-            </View>
-            <TouchableOpacity
-              onPress={onClose}
-              className={`w-10 h-10 rounded-full items-center justify-center ${
-                isDark ? 'bg-gray-800' : 'bg-gray-100'
+          <View className="relative overflow-hidden">
+            <View
+              className={`absolute inset-0 ${
+                isDark ? 'bg-blue-900/10' : 'bg-blue-50/50'
               }`}
-              activeOpacity={0.7}
-            >
-              <X size={20} color={isDark ? '#f3f4f6' : '#374151'} />
-            </TouchableOpacity>
+            />
+            <View className={`flex-row items-center justify-between p-6 border-b ${
+              isDark ? 'border-gray-800' : 'border-gray-100'
+            }`}>
+              <View className="flex-1">
+                <Text className={`text-2xl font-bold tracking-tight ${
+                  isDark ? 'text-white' : 'text-gray-900'
+                }`}>
+                  How are you feeling?
+                </Text>
+                {selectedDate && (
+                  <Text className={`text-base font-medium mt-1 ${
+                    isDark ? 'text-blue-400' : 'text-blue-600'
+                  }`}>
+                    {months[selectedDate.month]} {selectedDate.day}, {selectedDate.year}
+                  </Text>
+                )}
+              </View>
+              <TouchableOpacity
+                onPress={onClose}
+                className={`w-12 h-12 rounded-2xl items-center justify-center ${
+                  isDark ? 'bg-gray-800/80' : 'bg-gray-100/80'
+                }`}
+                style={{
+                  shadowColor: '#000',
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 4,
+                  elevation: 3,
+                }}
+                activeOpacity={0.7}
+              >
+                <X size={22} color={isDark ? '#f3f4f6' : '#374151'} />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Modal Content */}
           <ScrollView 
-            className="max-h-96 px-6 py-4"
+            className="flex-1 px-6 py-6"
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
           >
             <WellnessSection 
               title="Flow" 
@@ -174,14 +253,23 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
           </ScrollView>
 
           {/* Modal Footer */}
-          <View className="p-6 border-t border-gray-200 dark:border-gray-700">
+          <View className={`p-6 border-t ${
+            isDark ? 'border-gray-800' : 'border-gray-100'
+          }`}>
             <TouchableOpacity
               onPress={onClose}
               className="bg-blue-500 py-4 rounded-2xl items-center"
-              activeOpacity={0.8}
+              style={{
+                shadowColor: '#3b82f6',
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.3,
+                shadowRadius: 8,
+                elevation: 8,
+              }}
+              activeOpacity={0.9}
             >
-              <Text className="text-white font-semibold text-lg">
-                Save
+              <Text className="text-white font-bold text-lg tracking-wide">
+                Save Changes
               </Text>
             </TouchableOpacity>
           </View>

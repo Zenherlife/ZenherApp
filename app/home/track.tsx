@@ -238,10 +238,10 @@ const CalendarScreen: React.FC = () => {
                 {day ? (
                   <TouchableOpacity
                     onPress={() => handleDayPress(day)}
-                    className={`m-1 h-12 rounded-2xl items-center justify-center relative ${
+                    className={`m-1 h-12 rounded-xl items-center justify-center relative ${
                       isToday(day)
-                        ? 'bg-blue-500 shadow-lg'
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-blue-500/70 shadow-lg'
+                        : 'bg-gray-100 dark:bg-gray-700'
                     }`}
                     activeOpacity={0.8}
                   >

@@ -25,10 +25,10 @@ export default function ConnectScreen() {
   const profileCompletion = calculateProfileCompletion(user);
 
   return (
-    <View className={`flex-1 ${colorScheme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <View className='flex-1 dark:bg-gray-900 bg-gray-50'>
       <ScrollView 
         className="flex-1 pt-6" 
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
       >
         <View className="mx-4 mb-8">
