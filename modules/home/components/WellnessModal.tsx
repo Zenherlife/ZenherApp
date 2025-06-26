@@ -157,17 +157,15 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
     >
       <View className="flex-1 justify-end">
         {/* Backdrop with blur effect */}
-        <View 
-          className="absolute inset-0 bg-black/30"
-        />
-        
+        <View className="absolute inset-0 bg-black/30" />
+
         <View
           className={`${
-            isDark ? 'bg-gray-900' : 'bg-white'
+            isDark ? "bg-gray-900" : "bg-white"
           } rounded-t-3xl shadow-2xl overflow-hidden`}
           style={{
             height: screenHeight * 0.8,
-            shadowColor: '#000',
+            shadowColor: "#000",
             shadowOffset: { width: 0, height: -10 },
             shadowOpacity: 0.25,
             shadowRadius: 20,
@@ -178,33 +176,45 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
           <View className="relative overflow-hidden">
             <View
               className={`absolute inset-0 ${
-                isDark ? 'bg-blue-900/10' : 'bg-blue-50/50'
+                isDark ? "bg-blue-900/10" : "bg-blue-50/50"
               }`}
             />
-            <View className={`flex-row items-center justify-between p-6 border-b ${
-              isDark ? 'border-gray-800' : 'border-gray-100'
-            }`}>
+            <View
+              className={`flex-row items-center justify-between p-6 border-b ${
+                isDark ? "border-gray-800" : "border-gray-100"
+              }`}
+            >
               <View className="flex-1">
-                <Text className={`text-2xl font-bold tracking-tight ${
-                  isDark ? 'text-white' : 'text-gray-900'
-                }`}>
-                  How are you feeling?
+                <Text
+                  className={`text-2xl font-bold tracking-tight ${
+                    isDark ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  {selectedDate &&
+                  selectedDate.day === new Date().getDate() &&
+                  selectedDate.month === new Date().getMonth() &&
+                  selectedDate.year === new Date().getFullYear()
+                    ? "How are you feeling today?"
+                    : "How are you feeling?"}
                 </Text>
                 {selectedDate && (
-                  <Text className={`text-base font-medium mt-1 ${
-                    isDark ? 'text-blue-400' : 'text-blue-600'
-                  }`}>
-                    {months[selectedDate.month]} {selectedDate.day}, {selectedDate.year}
+                  <Text
+                    className={`text-base font-medium mt-1 ${
+                      isDark ? "text-blue-400" : "text-blue-600"
+                    }`}
+                  >
+                    {months[selectedDate.month]} {selectedDate.day},{" "}
+                    {selectedDate.year}
                   </Text>
                 )}
               </View>
               <TouchableOpacity
                 onPress={onClose}
                 className={`w-12 h-12 rounded-2xl items-center justify-center ${
-                  isDark ? 'bg-gray-800/80' : 'bg-gray-100/80'
+                  isDark ? "bg-gray-800/80" : "bg-gray-100/80"
                 }`}
                 style={{
-                  shadowColor: '#000',
+                  shadowColor: "#000",
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.1,
                   shadowRadius: 4,
@@ -212,38 +222,38 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
                 }}
                 activeOpacity={0.7}
               >
-                <X size={22} color={isDark ? '#f3f4f6' : '#374151'} />
+                <X size={22} color={isDark ? "#f3f4f6" : "#374151"} />
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Modal Content */}
-          <ScrollView 
+          <ScrollView
             className="flex-1 px-6 py-6"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
           >
-            <WellnessSection 
-              title="Flow" 
-              category="flow" 
+            <WellnessSection
+              title="Flow"
+              category="flow"
               options={wellnessOptions.flow}
               selectedDate={selectedDate}
               wellnessData={wellnessData}
               onUpdateWellnessData={onUpdateWellnessData}
               isDark={isDark}
             />
-            <WellnessSection 
-              title="Feelings" 
-              category="feelings" 
+            <WellnessSection
+              title="Feelings"
+              category="feelings"
               options={wellnessOptions.feelings}
               selectedDate={selectedDate}
               wellnessData={wellnessData}
               onUpdateWellnessData={onUpdateWellnessData}
               isDark={isDark}
             />
-            <WellnessSection 
-              title="Sleep" 
-              category="sleep" 
+            <WellnessSection
+              title="Sleep"
+              category="sleep"
               options={wellnessOptions.sleep}
               selectedDate={selectedDate}
               wellnessData={wellnessData}
@@ -253,14 +263,16 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
           </ScrollView>
 
           {/* Modal Footer */}
-          <View className={`p-6 border-t ${
-            isDark ? 'border-gray-800' : 'border-gray-100'
-          }`}>
+          <View
+            className={`p-6 border-t ${
+              isDark ? "border-gray-800" : "border-gray-100"
+            }`}
+          >
             <TouchableOpacity
               onPress={onClose}
               className="bg-blue-500 py-4 rounded-2xl items-center"
               style={{
-                shadowColor: '#3b82f6',
+                shadowColor: "#3b82f6",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
                 shadowRadius: 8,

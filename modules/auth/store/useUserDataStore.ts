@@ -1,5 +1,5 @@
 import { getApp } from '@react-native-firebase/app';
-import { doc, getFirestore, onSnapshot, setDoc } from '@react-native-firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, getFirestore, onSnapshot, setDoc } from '@react-native-firebase/firestore';
 import { create } from 'zustand';
 
 const db = getFirestore(getApp());
@@ -9,6 +9,13 @@ interface ReminderData {
   schedule: string;
   title: string;
   body: string;
+}
+interface WaterData {
+  goal: number;
+  cupSize: number;
+  customAmount: number;
+  intake: number;
+  history: Record<string, number>;
 }
 
 export interface UserState {
@@ -23,13 +30,37 @@ export interface UserState {
   weight: number;
   height: number;
   reminder: ReminderData;
+  water: WaterData;
 
   setField: <T extends keyof UserState>(field: T, value: UserState[T]) => void;
+  setWaterField: <K extends keyof WaterData>(field: K, value: WaterData[K]) => void;
   setUser: (user: Partial<UserState> & { uid?: string }) => void;
   listenToUser: (uid: string) => () => void;
-  getUser: () => Omit<UserState, 'setField' | 'setUser' | 'listenToUser' | 'reset' | 'getUser'>;
+  getUser: () => Omit<UserState, 'setField' | 'setUser' | 'listenToUser' | 'reset' | 'getUser' | 'setWaterField'>;
   reset: () => void;
 }
+
+const cleanOldWaterLogs = async (uid: string) => {
+  try {
+    const waterRef = collection(db, "users", uid, "water");
+    const snapshot = await getDocs(waterRef);
+    const now = new Date();
+    const fourteenDaysAgo = new Date(now.setDate(now.getDate() - 14));
+
+    const deletions = snapshot.docs.map(async (docSnap) => {
+      const data = docSnap.data();
+      const timestamp = new Date(data.timestamp);
+      if (timestamp < fourteenDaysAgo) {
+        await deleteDoc(doc(db, "users", uid, "water", docSnap.id));
+      }
+    });
+
+    await Promise.all(deletions);
+    console.log("Old water logs cleaned.");
+  } catch (err) {
+    console.error("Error cleaning old water logs:", err);
+  }
+};
 
 export const useUserDataStore = create<UserState>((set, get) => ({
   uid: '',
@@ -48,8 +79,23 @@ export const useUserDataStore = create<UserState>((set, get) => ({
     title: '',
     body: '',
   },
-
+  water: {
+    goal:3000,
+    cupSize: 250,
+    customAmount: 0, 
+    intake: 0,
+    history: {},
+  },
+  
   setField: (field, value) => set({ [field]: value }),
+  
+  setWaterField: <K extends keyof WaterData>(field: K, value: WaterData[K]) =>
+  set((state) => ({
+    water: {
+      ...state.water,
+      [field]: value,
+    },
+  })),
 
   setUser: async (user) => {
     if (!user?.uid) return;
@@ -74,7 +120,13 @@ export const useUserDataStore = create<UserState>((set, get) => ({
                 ...state.reminder,
                 ...(data.reminder || {}),
               },
+              water: {
+                ...state.water,
+                ...(data.water || {}),
+              }
             }));
+
+            cleanOldWaterLogs(uid);
           }
         }
       },
@@ -100,6 +152,7 @@ export const useUserDataStore = create<UserState>((set, get) => ({
       height: state.height,
       weight: state.weight,
       reminder: state.reminder,
+      water: state.water,
     };
   },
 
@@ -120,6 +173,13 @@ export const useUserDataStore = create<UserState>((set, get) => ({
           schedule: '',
           title: '',
           body: '',
+        },
+        water: {
+          goal:3000,
+          cupSize: 250,
+          customAmount: 0, 
+          intake: 0,
+          history: {},
         },
     }),
 }));
