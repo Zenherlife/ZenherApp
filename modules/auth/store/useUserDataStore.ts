@@ -56,7 +56,6 @@ const cleanOldWaterLogs = async (uid: string) => {
     });
 
     await Promise.all(deletions);
-    console.log("Old water logs cleaned.");
   } catch (err) {
     console.error("Error cleaning old water logs:", err);
   }
