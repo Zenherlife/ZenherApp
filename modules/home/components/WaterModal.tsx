@@ -15,15 +15,19 @@ import {
 const screenWidth = Dimensions.get('window').width;
 const screenHeight = Dimensions.get('window').height;
 
-interface Props {
-  visible: boolean;
-  onClose: () => void;
-  goal: number;
-  setGoal: (goal: number) => void;
-  intake: number;
-}
+const formatDateKey = (date: Date) => date.toISOString().split('T')[0];
 
-const WaterModal: React.FC<Props> = ({ visible, onClose }) => {
+const getPastNDays = (n: number): string[] => {
+  const result: string[] = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    result.push(formatDateKey(d));
+  }
+  return result;
+};
+
+const WaterModal: React.FC<{ visible: boolean; onClose: () => void; goal: number; setGoal: (goal: number) => void; intake: number; }> = ({ visible, onClose }) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
 
@@ -32,23 +36,9 @@ const WaterModal: React.FC<Props> = ({ visible, onClose }) => {
   const { uid, water, setWaterField, setUser } = useUserDataStore();
 
   const progress = Math.min(water.intake / water.goal, 1);
-  const history = Object.values(water.history || {});
-  const totalBars = history.length;
-  const visibleBars = 6;
+  const barLabels = getPastNDays(14);
+  const history = barLabels.map((key) => water.history?.[key] || 0);
   const barMaxHeight = 80;
-
-  const getPastNDays = (n: number) => {
-    const result: string[] = [];
-    for (let i = n - 1; i >= 0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      const isToday = i === 0;
-      result.push(isToday ? 'Today' : `${d.getDate()}/${d.getMonth() + 1}`);
-    }
-    return result;
-  };
-
-  const barLabels = getPastNDays(totalBars);
 
   useEffect(() => {
     setTimeout(() => {
@@ -57,13 +47,21 @@ const WaterModal: React.FC<Props> = ({ visible, onClose }) => {
   }, [visible]);
 
   const handleSave = async () => {
-    const today = new Date().toDateString();
-    setWaterField('history', {
+    const todayKey = formatDateKey(new Date());
+    const updatedHistory = {
       ...water.history,
-      [today]: water.intake,
+      [todayKey]: water.intake,
+    };
+    setWaterField('history', updatedHistory);
+
+    await setUser({
+      uid,
+      water: {
+        ...water,
+        history: updatedHistory,
+      },
     });
 
-    await setUser({ uid, water });
     onClose();
   };
 
@@ -75,7 +73,6 @@ const WaterModal: React.FC<Props> = ({ visible, onClose }) => {
           className={`rounded-t-3xl px-6 pt-8 pb-4 ${isDark ? 'bg-gray-900' : 'bg-white'}`}
           style={{ maxHeight: screenHeight * 0.9 }}
         >
-          {/* Header */}
           <View className="flex-row justify-between items-center mb-6">
             <Text className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Water Details</Text>
             <TouchableOpacity onPress={onClose}>
@@ -84,21 +81,27 @@ const WaterModal: React.FC<Props> = ({ visible, onClose }) => {
           </View>
 
           <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Goal Input */}
+            {/* Goal */}
             <Text className={`mb-2 font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Daily Goal (ml)</Text>
             <TextInput
               keyboardType="numeric"
               value={String(water.goal)}
-              onChangeText={(text) => setWaterField('goal', Number(text))}
+              onChangeText={(text) => {
+                const num = Number(text);
+                if (!isNaN(num)) setWaterField('goal', num);
+              }}
               className="mb-4 px-4 py-2 rounded-xl text-lg font-bold bg-gray-100 dark:bg-gray-800 text-black dark:text-white"
             />
 
-            {/* Cup Size Input */}
+            {/* Cup Size */}
             <Text className={`mb-2 font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Cup Size (ml)</Text>
             <TextInput
               keyboardType="numeric"
               value={String(water.cupSize)}
-              onChangeText={(value) => setWaterField('cupSize', Number(value))}
+              onChangeText={(text) => {
+                const num = Number(text);
+                if (!isNaN(num)) setWaterField('cupSize', num);
+              }}
               placeholder="250"
               className="mb-4 px-4 py-2 rounded-xl text-lg font-bold bg-gray-100 dark:bg-gray-800 text-black dark:text-white"
             />
@@ -106,10 +109,12 @@ const WaterModal: React.FC<Props> = ({ visible, onClose }) => {
             {/* Custom Amount */}
             <Text className={`mb-2 font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Custom Amount (ml)</Text>
             <TextInput
-              placeholder="Enter amount"
               keyboardType="numeric"
               value={String(water.customAmount)}
-              onChangeText={(value) => setWaterField('customAmount', Number(value))}
+              onChangeText={(text) => {
+                const num = Number(text);
+                if (!isNaN(num)) setWaterField('customAmount', num);
+              }}
               className="mb-6 px-4 py-2 rounded-xl text-lg font-bold bg-gray-100 dark:bg-gray-800 text-black dark:text-white"
             />
 
@@ -122,32 +127,34 @@ const WaterModal: React.FC<Props> = ({ visible, onClose }) => {
                 {Math.floor(progress * 100)}% of goal reached
               </Text>
               {progress === 1 && (
-                <Text className="mt-2 text-center text-green-400 font-medium italic">Goal reached! 💧 Stay refreshed!</Text>
+                <Text className="mt-2 text-center text-green-400 font-medium italic">
+                  Goal reached! 💧 Stay refreshed!
+                </Text>
               )}
             </View>
 
-            {/* Last 14 Days */}
+            {/* Bar Chart */}
             <View className="mb-6" style={{ height: 190 }}>
               <Text className={`mb-2 font-medium ${isDark ? 'text-gray-200' : 'text-gray-700'}`}>Last 14 Days</Text>
               <ScrollView
                 horizontal
                 ref={scrollRef}
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ width: screenWidth * (totalBars / visibleBars) }}
+                contentContainerStyle={{ width: screenWidth * (14 / 6) }}
                 className="px-2 py-3 rounded-xl"
               >
                 <View className="flex-row justify-between items-end pb-2 w-full h-full">
                   {history.map((val, idx) => {
-                    const percentOfGoal = Math.min(val / water.goal, 1);
-                    const heightPx = percentOfGoal * barMaxHeight;
+                    const heightPx = Math.min(val / water.goal, 1) * barMaxHeight;
+                    const labelDate = new Date(barLabels[idx]);
                     return (
-                      <View key={idx} style={{ width: screenWidth / visibleBars }} className="items-center">
+                      <View key={idx} style={{ width: screenWidth / 6 }} className="items-center">
                         <View
                           className="w-6 bg-blue-400 rounded-md"
                           style={{ height: heightPx, maxHeight: barMaxHeight, minHeight: 1 }}
                         />
                         <Text className={`mt-1 text-sm font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                          {barLabels[idx]}
+                          {labelDate.getDate()}/{labelDate.getMonth() + 1}
                         </Text>
                         <Text className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                           {(val / 1000).toFixed(1)}L
@@ -160,7 +167,6 @@ const WaterModal: React.FC<Props> = ({ visible, onClose }) => {
             </View>
           </ScrollView>
 
-          {/* Save */}
           <TouchableOpacity
             onPress={handleSave}
             className="bg-blue-500 py-4 rounded-2xl items-center active:scale-95"

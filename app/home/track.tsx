@@ -164,6 +164,8 @@ const CalendarScreen: React.FC = () => {
     setCurrentDate(newDate);
   };
 
+  const formatDateKey = (date: Date) =>
+    `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
   const handleDayPress = (day: number | null): void => {
     if (!day) return;
 
@@ -438,7 +440,8 @@ const CalendarScreen: React.FC = () => {
                   intake: newIntake,
                   history: {
                     ...water.history,
-                    [new Date().toDateString()]: newIntake,
+                    [formatDateKey(new Date())]: newIntake
+
                   },
                 },
               });
@@ -466,7 +469,8 @@ const CalendarScreen: React.FC = () => {
                   intake: newIntake,
                   history: {
                     ...water.history,
-                    [new Date().toDateString()]: newIntake,
+                    [formatDateKey(new Date())]: newIntake
+
                   },
                 },
               });
