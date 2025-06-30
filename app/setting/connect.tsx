@@ -14,6 +14,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -29,9 +30,24 @@ export default function ConnectScreen() {
       StatusBar.setBarStyle(isDark ? "light-content" : "dark-content");
     }, [isDark]);
   return (
-    <View className='flex-1 dark:bg-gray-900 bg-gray-50'>
+    <View className='flex-1 dark:bg-gray-900 bg-gray-50 '>
+      <View className="flex-row justify-between items-center pt-6 px-6">
+        <TouchableOpacity
+                  className="flex-row items-center  mt-4"
+                  onPress={() => router.back()}
+                >
+                  <Ionicons
+                    name="arrow-back"
+                    size={24}
+                    color={colorScheme === "dark" ? "white" : "black"}
+                  />
+                  <Text className="text-black dark:text-white text-2xl font-semibold ml-4">
+                    Profile
+                  </Text>
+                </TouchableOpacity>
+      </View>
       <ScrollView 
-        className="flex-1 pt-6" 
+        className="flex-1 pt-2" 
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
       >

@@ -41,25 +41,6 @@ export default function PrivacyPolicyScreen() {
           </View>
         ))}
 
-        {/* Contact Us */}
-        {/* <View
-          className="mt-6 p-4 rounded-xl bg-white dark:bg-gray-800 shadow-sm"
-          style={{
-            shadowColor: isDark ? '#000' : '#ccc',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.15,
-            shadowRadius: 4,
-            elevation: 3,
-          }}
-        >
-          <Text className="text-[18px] font-bold text-black dark:white mb-2">
-            Contact Us
-          </Text>
-          <Text className="text-[15px] text-gray-700 dark:text-gray-200 leading-7">
-            📧 support@zenher.in{'\n'}
-            🌐 https://www.zenher.in
-          </Text>
-        </View> */}
 
         {/* Effective Date */}
         <Text className="text-sm text-gray-500 dark:text-gray-400 mt-6 text-center">
