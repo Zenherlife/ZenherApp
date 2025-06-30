@@ -4,16 +4,15 @@ import WellnessModal from "@/modules/home/components/WellnessModal";
 import {
   SelectedDate,
   WellnessCategory,
-  WellnessData,
   WellnessOption,
   WellnessOptions,
 } from "@/modules/home/utils/types";
+import { useWellnessStore } from "@/modules/track/store/useWellnessStore";
 import {
   ChevronLeft,
-  ChevronRight,
-  Circle
+  ChevronRight
 } from "lucide-react-native";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   Text,
@@ -27,10 +26,20 @@ const CalendarScreen: React.FC = () => {
   const isDark = colorScheme === "dark";
   const { uid, water, setWaterField, setUser } = useUserDataStore();
 
+  const {
+    entries,
+    loading: wellnessLoading,
+    error: wellnessError,
+    addOrUpdateEntry,
+    subscribeToMonth,
+    setCurrentMonth,
+    currentMonth,
+    currentYear,
+  } = useWellnessStore();
+
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<SelectedDate | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-  const [wellnessData, setWellnessData] = useState<WellnessData>({});
 
   const slideAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -102,6 +111,19 @@ const CalendarScreen: React.FC = () => {
     ],
   };
 
+  useEffect(() => {
+    if (!uid) return;
+
+    const month = currentDate.getMonth();
+    const year = currentDate.getFullYear();
+    
+    setCurrentMonth(month, year);
+    
+    const unsubscribe = subscribeToMonth(uid, month, year);
+    
+    return unsubscribe;
+  }, [uid, currentDate, subscribeToMonth, setCurrentMonth]);
+
   const getDaysInMonth = (date: Date): (number | null)[] => {
     const year = date.getFullYear();
     const month = date.getMonth();
@@ -167,11 +189,14 @@ const CalendarScreen: React.FC = () => {
   const handleDayPress = (day: number | null): void => {
     if (!day) return;
 
-    const dateKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`;
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    
     setSelectedDate({
       day,
-      month: currentDate.getMonth(),
-      year: currentDate.getFullYear(),
+      month,
+      year,
       key: dateKey,
     });
     setModalVisible(true);
@@ -182,19 +207,17 @@ const CalendarScreen: React.FC = () => {
     setSelectedDate(null);
   };
 
-  const updateWellnessData = (
+  const updateWellnessData = async (
     category: WellnessCategory,
     option: WellnessOption
-  ): void => {
-    if (!selectedDate) return;
+  ): Promise<void> => {
+    if (!selectedDate || !uid) return;
 
-    setWellnessData((prev) => ({
-      ...prev,
-      [selectedDate.key]: {
-        ...prev[selectedDate.key],
-        [category]: option,
-      },
-    }));
+    try {
+      await addOrUpdateEntry(uid, selectedDate.key, category, option);
+    } catch (error) {
+      console.error('Error updating wellness data:', error);
+    }
   };
 
   const isToday = (day: number | null): boolean => {
@@ -206,20 +229,49 @@ const CalendarScreen: React.FC = () => {
       currentDate.getFullYear() === today.getFullYear()
     );
   };
+  
+  const isAfterToday = (day: number | null): boolean => {
+    if (!day) return false;
+    const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+
+  const inputDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+  inputDate.setHours(0, 0, 0, 0);
+
+  return inputDate > today;
+  };
 
   const hasWellnessData = (day: number | null): boolean => {
     if (!day) return false;
-    const dateKey = `${currentDate.getFullYear()}-${currentDate.getMonth()}-${day}`;
-    return (
-      wellnessData[dateKey] && Object.keys(wellnessData[dateKey]).length > 0
-    );
+    
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    
+    const entry = entries[dateKey];
+    return entry && (entry.flow || entry.feelings || entry.sleep);
+  };
+
+  const getWellnessData = () => {
+    const wellnessData: Record<string, any> = {};
+    
+    Object.values(entries).forEach(entry => {
+      wellnessData[entry.date] = {
+        flow: entry.flow,
+        feelings: entry.feelings,
+        sleep: entry.sleep,
+      };
+    });
+    
+    return wellnessData;
   };
 
   const days = getDaysInMonth(currentDate);
 
   return (
-    <View className={`flex-1 ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
-      <View className="px-6 pt-8">
+    <View className='flex-1 dark:bg-gray-900 bg-gray-50' >
+      <View className="px-6 pt-6">
         <View
           className={`p-4 rounded-2xl ${
             isDark ? "bg-gray-800" : "bg-white"
@@ -245,7 +297,8 @@ const CalendarScreen: React.FC = () => {
           </Text>
         </View>
       </View>
-      <View className="pt-12 pb-6 px-6">
+      
+      <View className="px-6 py-3">
         <View className="flex-row items-center justify-between">
           <TouchableOpacity
             onPress={() => changeMonth("prev")}
@@ -315,16 +368,14 @@ const CalendarScreen: React.FC = () => {
               <View
                 key={index}
                 className="w-1/7"
-                style={{ width: `${100 / 7}%` }}
+                style={{ width: `14.28%` }}
               >
                 {day ? (
                   <TouchableOpacity
+                    disabled={isAfterToday(day)}
                     onPress={() => handleDayPress(day)}
-                    className={`m-1 h-12 rounded-xl items-center justify-center relative ${
-                      isToday(day)
-                        ? "bg-blue-500/70 shadow-lg"
-                        : "bg-gray-100 dark:bg-gray-700"
-                    }`}
+                    className={`m-1 h-12 rounded-xl items-center justify-center relative ${isAfterToday(day) && "opacity-50"} ${
+                      isToday(day) && "bg-blue-500/70 shadow-lg" } ${hasWellnessData(day) ? `${(!isToday(day)) && "bg-gray-100 dark:bg-gray-700"}` : "border-[1.3px] dark:border-gray-700 border-gray-300 border-dashed"} `}
                     activeOpacity={0.8}
                   >
                     <Text
@@ -338,11 +389,6 @@ const CalendarScreen: React.FC = () => {
                     >
                       {day}
                     </Text>
-                    {hasWellnessData(day) && (
-                      <View className="absolute -top-1 -right-1">
-                        <Circle size={8} color="#10b981" fill="#10b981" />
-                      </View>
-                    )}
                   </TouchableOpacity>
                 ) : (
                   <View className="m-1 h-12" />
@@ -353,36 +399,23 @@ const CalendarScreen: React.FC = () => {
         </Animated.View>
       </View>
 
-      
+      {wellnessError && (
+        <View className="mx-4 mt-4 p-3 bg-red-100 dark:bg-red-900/20 rounded-lg">
+          <Text className="text-red-600 dark:text-red-400 text-sm">
+            {wellnessError}
+          </Text>
+        </View>
+      )}
 
       <WellnessModal
         visible={modalVisible}
         selectedDate={selectedDate}
-        wellnessData={wellnessData}
+        wellnessData={getWellnessData()}
         wellnessOptions={wellnessOptions}
         onClose={closeModal}
         onUpdateWellnessData={updateWellnessData}
+        loading={wellnessLoading}
       />
-      {/* <View className="px-6 pt-6 pb-8">
-        <TouchableOpacity
-          onPress={() => {
-            const today = new Date();
-            const day = today.getDate();
-            const month = today.getMonth();
-            const year = today.getFullYear();
-            const key = `${year}-${month}-${day}`;
-            setSelectedDate({ day, month, year, key });
-            setModalVisible(true);
-          }}
-          className="bg-blue-500 py-4 rounded-2xl  flex-row items-center justify-center space-x-2 active:scale-95 gap-4"
-          activeOpacity={0.9}
-        >
-          <Edit3 size={20} color="white" />
-          <Text className="text-white text-xl font-bold tracking-wide">
-            Check In for Today
-          </Text>
-        </TouchableOpacity>
-      </View> */}
 
       {/* Water Box */}
       <View className=" px-6 pb-8 pt-4 bg-white dark:bg-gray-800 rounded-2xl shadow-xl z-40 mt-4 ml-4 mr-4 ">

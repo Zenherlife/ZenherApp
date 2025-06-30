@@ -119,8 +119,10 @@ const WomensHealthcareBanner = () => {
     outputRange: [-width, width],
   });
 
+  const isDark = colorScheme === 'dark';
+
   return (
-    <View className="px-4 py-3 bg-gray-50 dark:bg-gray-900">
+    <View className="p-4 bg-gray-50 dark:bg-gray-900">
       <TouchableOpacity
         activeOpacity={0.9}
         onPressIn={handlePressIn}
@@ -137,9 +139,9 @@ const WomensHealthcareBanner = () => {
           className="relative rounded-3xl overflow-hidden shadow-lg"
         >
           <LinearGradient
-            colors={colorScheme === 'dark'
+            colors={isDark
               ? ['#1f2937', '#374151']
-              : ['#f9fafb', '#e5e7eb']}
+              : ['#f9a8d4', '#d8b4fe', '#a5f3fc']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{
@@ -187,7 +189,7 @@ const WomensHealthcareBanner = () => {
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
                   <View
                     style={{
-                      backgroundColor: 'rgba(255,255,255,0.3)',
+                      backgroundColor: `${isDark ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.7)"}`,
                       padding: 6,
                       borderRadius: 999,
                       marginRight: 6,
@@ -196,10 +198,8 @@ const WomensHealthcareBanner = () => {
                     <Text style={{ fontSize: 16 }}>🌸</Text>
                   </View>
                   <Text
+                   className='dark:text-white/90 text-black/80 text-lg font-bold'
                     style={{
-                      fontSize: 17,
-                      fontWeight: '700',
-                      color: '#fff',
                       includeFontPadding: false,
                     }}
                   >
@@ -208,11 +208,7 @@ const WomensHealthcareBanner = () => {
                 </View>
 
                 <Text
-                  style={{
-                    color: 'rgba(255, 255, 255, 0.95)',
-                    fontSize: 13,
-                    lineHeight: 18,
-                  }}
+                  className='dark:text-white/90 text-black/60 font-medium text-base leading-5'
                 >
                   Personalized healthcare insights at your fingertips.
                 </Text>
@@ -223,7 +219,7 @@ const WomensHealthcareBanner = () => {
                 <Animated.View
                   style={{
                     opacity: pulseAnim,
-                    backgroundColor: 'rgba(255,255,255,0.25)',
+                    backgroundColor: `${isDark ? "rgba(255,255,255,0.3)" : "rgba(255,255,255,0.7)"}`,
                     borderRadius: 999,
                     padding: 10,
                     marginBottom: 4,
@@ -232,11 +228,7 @@ const WomensHealthcareBanner = () => {
                   <Text style={{ fontSize: 16 }}>✨</Text>
                 </Animated.View>
                 <Text
-                  style={{
-                    color: '#fff',
-                    fontSize: 12,
-                    fontWeight: 'bold',
-                  }}
+                  className='dark:text-white/90 text-black/60 font-bold text-sm'
                 >
                   Discover →
                 </Text>
@@ -254,7 +246,7 @@ const WomensHealthcareBanner = () => {
                 bottom: 0,
                 borderRadius: 20,
                 borderWidth: 2,
-                borderColor: colorScheme === 'dark' ? '#374151' : '#e5e7eb',
+                borderColor: isDark ? '#374151' : 'rgba(255,255,255,0.3)',
               }}
             />
           </LinearGradient>

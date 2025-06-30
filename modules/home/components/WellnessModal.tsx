@@ -9,17 +9,18 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
-import { SelectedDate, WellnessCategory, WellnessData, WellnessOption, WellnessOptions } from '../utils/types';
+import { SelectedDate, WellnessCategory, WellnessOption, WellnessOptions } from '../utils/types';
 
 const { height: screenHeight } = Dimensions.get('window');
 
 interface WellnessModalProps {
   visible: boolean;
   selectedDate: SelectedDate | null;
-  wellnessData: WellnessData;
+  wellnessData: Record<string, any>;
   wellnessOptions: WellnessOptions;
   onClose: () => void;
-  onUpdateWellnessData: (category: WellnessCategory, option: WellnessOption) => void;
+  onUpdateWellnessData: (category: WellnessCategory, option: WellnessOption) => Promise<void>;
+  loading: boolean;
 }
 
 interface WellnessSectionProps {
@@ -27,8 +28,8 @@ interface WellnessSectionProps {
   category: WellnessCategory;
   options: WellnessOption[];
   selectedDate: SelectedDate | null;
-  wellnessData: WellnessData;
-  onUpdateWellnessData: (category: WellnessCategory, option: WellnessOption) => void;
+  wellnessData: Record<string, any>;
+  onUpdateWellnessData: (category: WellnessCategory, option: WellnessOption) => Promise<void>; // Added Promise<void>
   isDark: boolean;
 }
 
@@ -144,6 +145,7 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
   wellnessOptions,
   onClose,
   onUpdateWellnessData,
+  loading,
 }) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
@@ -195,7 +197,7 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
                   selectedDate.month === new Date().getMonth() &&
                   selectedDate.year === new Date().getFullYear()
                     ? "How are you feeling today?"
-                    : "How are you feeling?"}
+                    : "How were you feeling?"}
                 </Text>
                 {selectedDate && (
                   <Text
@@ -270,18 +272,21 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
           >
             <TouchableOpacity
               onPress={onClose}
-              className="bg-blue-500 py-4 rounded-2xl items-center"
+              className={`py-4 rounded-2xl items-center ${
+                loading ? 'bg-gray-400' : 'bg-blue-500'
+              }`}
               style={{
-                shadowColor: "#3b82f6",
+                shadowColor: loading ? "#6b7280" : "#3b82f6",
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
                 shadowRadius: 8,
                 elevation: 8,
               }}
-              activeOpacity={0.9}
+              activeOpacity={loading ? 1 : 0.9}
+              disabled={loading}
             >
               <Text className="text-white font-bold text-lg tracking-wide">
-                Save Changes
+                {loading ? 'Saving...' : 'Save Changes'}
               </Text>
             </TouchableOpacity>
           </View>
