@@ -215,7 +215,7 @@ const ArticlesScreen = () => {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
-      <View className="px-5 pt-6 pb-4">
+      <View className="px-5 pt-0 pb-4">
         <Text className="text-3xl font-black text-gray-900 dark:text-white mb-2">
           Articles
         </Text>

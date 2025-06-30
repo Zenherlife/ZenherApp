@@ -118,7 +118,7 @@ export default function HomeScreen() {
             className="h-8 w-8 mr-2"
             contentFit="contain"
           />
-          <Text className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Zenher</Text>
+          <Text className="text-3xl font-extrabold text-gray-900 dark:text-pink tracking-tight">Zenher</Text>
         </View>
         {/* Title */}
         <Text className="text-4xl font-extrabold text-center text-gray-900 dark:text-white mb-4">Discover Zenher</Text>

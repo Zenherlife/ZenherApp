@@ -19,7 +19,7 @@ const TABS = [
   { key: 'track', label: 'Track', iconOutline: 'calendar-outline', iconFilled: 'calendar' },
   { key: 'shop', label: 'Shop', iconOutline: 'cart-outline', iconFilled: 'cart' },
   { key: 'consult', label: 'Consult', iconOutline: 'call-outline', iconFilled: 'call' },
-  { key: 'connect', label: 'Profile', iconOutline: 'person-outline', iconFilled: 'person' },
+  { key: 'articles', label: 'Explore', iconOutline: 'newspaper-outline', iconFilled: 'newspaper' },
 ];
 
 const CustomTabBar = ({ state, descriptors, navigation }: any) => {
