@@ -1,5 +1,4 @@
 import { useUserDataStore } from "@/modules/auth/store/useUserDataStore";
-import WaterModal from "@/modules/home/components/WaterModal";
 import WellnessModal from "@/modules/home/components/WellnessModal";
 import {
   SelectedDate,
@@ -8,23 +7,21 @@ import {
   WellnessOptions,
 } from "@/modules/home/utils/types";
 import { useWellnessStore } from "@/modules/track/store/useWellnessStore";
-import {
-  ChevronLeft,
-  ChevronRight
-} from "lucide-react-native";
+import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  ScrollView,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View,
+  View
 } from "react-native";
 
 const CalendarScreen: React.FC = () => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-  const { uid, water, setWaterField, setUser } = useUserDataStore();
+  const { uid } = useUserDataStore();
 
   const {
     entries,
@@ -41,21 +38,15 @@ const CalendarScreen: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<SelectedDate | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
 
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  const todayEntry = entries[todayKey];
+
   const slideAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const waterIntake = water.intake;
-  const waterGoal = water.goal;
-  const [waterModalVisible, setWaterModalVisible] = useState(false);
-
-  const motivationalQuotes = [
-    "Stay hydrated, stay glowing 💧",
-    "Water you doing? Keep drinking! 🥤",
-    "Your body thanks you! 💙",
-    "Hydration = motivation 🚀",
-    "One glass closer to greatness! ✨",
-  ];
 
   const [quote, setQuote] = useState("");
 
@@ -116,11 +107,11 @@ const CalendarScreen: React.FC = () => {
 
     const month = currentDate.getMonth();
     const year = currentDate.getFullYear();
-    
+
     setCurrentMonth(month, year);
-    
+
     const unsubscribe = subscribeToMonth(uid, month, year);
-    
+
     return unsubscribe;
   }, [uid, currentDate, subscribeToMonth, setCurrentMonth]);
 
@@ -193,8 +184,10 @@ const CalendarScreen: React.FC = () => {
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    
+    const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+      day
+    ).padStart(2, "0")}`;
+
     setSelectedDate({
       day,
       month,
@@ -218,7 +211,7 @@ const CalendarScreen: React.FC = () => {
     try {
       await addOrUpdateEntry(uid, selectedDate.key, category, option);
     } catch (error) {
-      console.error('Error updating wellness data:', error);
+      console.error("Error updating wellness data:", error);
     }
   };
 
@@ -231,49 +224,80 @@ const CalendarScreen: React.FC = () => {
       currentDate.getFullYear() === today.getFullYear()
     );
   };
-  
+
   const isAfterToday = (day: number | null): boolean => {
     if (!day) return false;
     const today = new Date();
 
-  today.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
 
-  const inputDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-  inputDate.setHours(0, 0, 0, 0);
+    const inputDate = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      day
+    );
+    inputDate.setHours(0, 0, 0, 0);
 
-  return inputDate > today;
+    return inputDate > today;
   };
 
   const hasWellnessData = (day: number | null): boolean => {
     if (!day) return false;
-    
+
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
-    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    
+    const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(
+      day
+    ).padStart(2, "0")}`;
+
     const entry = entries[dateKey];
     return entry && (entry.flow || entry.feelings || entry.sleep);
   };
 
   const getWellnessData = () => {
     const wellnessData: Record<string, any> = {};
-    
-    Object.values(entries).forEach(entry => {
+
+    Object.values(entries).forEach((entry) => {
       wellnessData[entry.date] = {
         flow: entry.flow,
         feelings: entry.feelings,
         sleep: entry.sleep,
       };
     });
-    
+
     return wellnessData;
   };
 
   const days = getDaysInMonth(currentDate);
 
+  const WellnessChip = ({ option }: { option: WellnessOption }) => (
+    <View
+      className="px-5 py-2 mr-2 mb-2 rounded-2xl"
+      style={{
+        backgroundColor: option.color,
+        shadowColor: option.color,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 4,
+      }}
+    >
+      <Text
+        className="text-sm font-semibold tracking-wide"
+        style={{ color: option.textColor }}
+      >
+        {option.label}
+      </Text>
+    </View>
+  );
+
   return (
-    <View className='flex-1 dark:bg-gray-900 bg-gray-50' >
-      <View className="px-6 pt-6">
+    <View className="flex-1 dark:bg-gray-900 bg-gray-50">
+       <ScrollView
+    contentContainerStyle={{ paddingBottom: 100 }}
+    showsVerticalScrollIndicator={false}
+  >
+      <View className="px-6 pt-6 pb-3">
         <View
           className={`p-4 rounded-2xl ${
             isDark ? "bg-gray-800" : "bg-white"
@@ -299,7 +323,7 @@ const CalendarScreen: React.FC = () => {
           </Text>
         </View>
       </View>
-      
+
       <View className="px-6 py-3">
         <View className="flex-row items-center justify-between">
           <TouchableOpacity
@@ -367,17 +391,18 @@ const CalendarScreen: React.FC = () => {
         >
           <View className="flex-row flex-wrap">
             {days.map((day, index) => (
-              <View
-                key={index}
-                className="w-1/7"
-                style={{ width: `14.28%` }}
-              >
+              <View key={index} className="w-1/7" style={{ width: `14.28%` }}>
                 {day ? (
                   <TouchableOpacity
                     disabled={isAfterToday(day)}
                     onPress={() => handleDayPress(day)}
-                    className={`m-1 h-12 rounded-xl items-center justify-center relative ${isAfterToday(day) && "opacity-50"} ${
-                      isToday(day) && "bg-blue-500/70 shadow-lg" } ${hasWellnessData(day) ? `${(!isToday(day)) && "bg-gray-100 dark:bg-gray-700"}` : "border-[1.3px] dark:border-gray-700 border-gray-300 border-dashed"} `}
+                    className={`m-1 h-12 rounded-xl items-center justify-center relative ${
+                      isAfterToday(day) && "opacity-50"
+                    } ${isToday(day) && "bg-blue-500/70 shadow-lg"} ${
+                      hasWellnessData(day)
+                        ? `${!isToday(day) && "bg-gray-100 dark:bg-gray-700"}`
+                        : "border-[1.3px] dark:border-gray-700 border-gray-300 border-dashed"
+                    } `}
                     activeOpacity={0.8}
                   >
                     <Text
@@ -418,139 +443,118 @@ const CalendarScreen: React.FC = () => {
         onUpdateWellnessData={updateWellnessData}
         loading={wellnessLoading}
       />
-
-      {/* Water Box */}
-      <View className=" px-6 pb-8 pt-4 bg-white dark:bg-gray-800 rounded-2xl shadow-xl z-40 mt-4 ml-4 mr-4 ">
-        {/* Top-left Modal Open Button */}
-        <View className="flex-row items-center justify-between mb-2">
-          <Text
-            className={`text-lg font-bold ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            Water Intake
-          </Text>
-
-          <TouchableOpacity
-            onPress={() => setWaterModalVisible(true)}
-            className="bg-blue-500 rounded-full p-1"
-            activeOpacity={0.8}
-          >
-            <ChevronRight size={16} color="white" />
-          </TouchableOpacity>
-        </View>
-
-        <View
-          className={`w-full h-4 rounded-full overflow-hidden ${
-            isDark ? "bg-gray-700" : "bg-gray-200"
-          }`}
-        >
-          <View
-            style={{ width: `${(waterIntake / waterGoal) * 100}%` }}
-            className="h-full bg-blue-400"
-          />
-        </View>
-
+      {(todayEntry?.flow || todayEntry?.feelings || todayEntry?.sleep) ? (
+  // ✅ When user has selected today's moods
+  <View className="mt-6 px-6">
+    <View
+      className={`rounded-2xl px-5 py-5 shadow-sm ${
+        isDark ? 'bg-gray-800' : 'bg-white'
+      }`}
+    >
+      {/* Header with arrow button */}
+      <View className="flex-row items-center justify-between mb-3">
         <Text
-          className={`text-sm mt-1 mb-4 ${
-            isDark ? "text-gray-400" : "text-gray-600"
+          className={`text-lg font-semibold ${
+            isDark ? 'text-white' : 'text-gray-900'
           }`}
         >
-          {waterIntake}ml of {waterGoal}ml
+          Your selections for today
         </Text>
 
-        {/* Add/Reduce Buttons */}
-        <View className="flex-row justify-between space-x-4">
-          {/* Subtract Water */}
-          <TouchableOpacity
-            onPress={() => {
-              const newIntake = Math.max(waterIntake - water.cupSize, 0);
-              setWaterField("intake", newIntake);
-              setUser({
-                uid,
-                water: {
-                  ...water,
-                  intake: newIntake,
-                  history: {
-                    ...water.history,
-                    [formatDateKey(new Date())]: newIntake
-
-                  },
-                },
-              });
-            }}
-            className="flex-1 bg-gray-200 dark:bg-white py-3 rounded-xl items-center mr-1 active:scale-95"
-            activeOpacity={0.9}
-          >
-            <Text className="font-semibold text-base text-black">
-              - {water.cupSize}ml
-            </Text>
-          </TouchableOpacity>
-
-          {/* Add Water */}
-          <TouchableOpacity
-            onPress={() => {
-              const newIntake = Math.min(
-                waterIntake + water.cupSize,
-                waterGoal
-              );
-              setWaterField("intake", newIntake);
-              setUser({
-                uid,
-                water: {
-                  ...water,
-                  intake: newIntake,
-                  history: {
-                    ...water.history,
-                    [formatDateKey(new Date())]: newIntake
-
-                  },
-                },
-              });
-
-              const random =
-                motivationalQuotes[
-                  Math.floor(Math.random() * motivationalQuotes.length)
-                ];
-              setQuote(random);
-            }}
-            className="flex-1 bg-blue-600 py-3 rounded-xl items-center ml-1 active:scale-95"
-            activeOpacity={0.9}
-          >
-            <Text className="text-white font-semibold text-base">
-              + {water.cupSize}ml
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Motivational Quote */}
-        {quote !== "" && (
-          <Text
-            className={`text-sm italic text-center mt-3 ${
-              isDark ? "text-blue-300" : "text-blue-600"
-            }`}
-          >
-            {quote}
-          </Text>
-        )}
+        {/* Edit arrow button */}
+        <TouchableOpacity
+          onPress={() => {
+            setSelectedDate({
+              day: today.getDate(),
+              month: today.getMonth(),
+              year: today.getFullYear(),
+              key: todayKey,
+            });
+            setModalVisible(true);
+          }}
+          className={`w-9 h-9 items-center justify-center rounded-xl ${
+            isDark ? 'bg-gray-700' : 'bg-gray-100'
+          }`}
+          activeOpacity={0.7}
+        >
+          <ArrowUpRight size={20} color={isDark ? "#93c5fd" : "#3b82f6"} />
+        </TouchableOpacity>
       </View>
 
-      <WaterModal
-        visible={waterModalVisible}
-        onClose={() => setWaterModalVisible(false)}
-        goal={water.goal}
-        setGoal={(newGoal) => {
-          setWaterField("goal", newGoal);
-          setUser({
-            uid,
-            water: {
-              ...water,
-              goal: newGoal,
-            },
-          });
-        }}
-        intake={water.intake}
-      />
+      {/* Mood Data Display */}
+      {todayEntry.flow && (
+        <View className="mb-3">
+          <Text className={`text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            Flow
+          </Text>
+          <View className="flex-row flex-wrap">
+            <WellnessChip option={todayEntry.flow} />
+          </View>
+        </View>
+      )}
+
+      {todayEntry.feelings && (
+        <View className="mb-3">
+          <Text className={`text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            Feelings
+          </Text>
+          <View className="flex-row flex-wrap">
+            <WellnessChip option={todayEntry.feelings} />
+          </View>
+        </View>
+      )}
+
+      {todayEntry.sleep && (
+        <View>
+          <Text className={`text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+            Sleep
+          </Text>
+          <View className="flex-row flex-wrap">
+            <WellnessChip option={todayEntry.sleep} />
+          </View>
+        </View>
+      )}
+    </View>
+  </View>
+) : (
+  // 🆕 When user has not selected today's moods
+  <TouchableOpacity
+    onPress={() => {
+      setSelectedDate({
+        day: today.getDate(),
+        month: today.getMonth(),
+        year: today.getFullYear(),
+        key: todayKey,
+      });
+      setModalVisible(true);
+    }}
+    activeOpacity={0.9}
+    className="mt-6 px-6"
+  >
+    <View
+      className={`rounded-2xl px-5 py-6 shadow-sm items-start ${
+        isDark ? 'bg-gray-800' : 'bg-white'
+      }`}
+    >
+      <Text
+        className={`text-lg font-semibold mb-2 ${
+          isDark ? 'text-white' : 'text-gray-900'
+        }`}
+      >
+        How are you feeling today?
+      </Text>
+      <Text
+        className={`text-sm ${
+          isDark ? 'text-gray-300' : 'text-gray-600'
+        }`}
+      >
+        Tap to record your current mood, flow, and sleep.
+      </Text>
+    </View>
+  </TouchableOpacity>
+)}
+
+        </ScrollView>
     </View>
   );
 };
