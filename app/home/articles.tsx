@@ -9,7 +9,6 @@ import {
   View
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 
 
@@ -214,8 +213,8 @@ const ArticlesScreen = () => {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
-      <View className="px-5 pt-0 pb-4">
+    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <View className="px-5 pt-4 pb-4">
         <Text className="text-3xl font-black text-gray-900 dark:text-white mb-2">
           Articles
         </Text>
@@ -259,7 +258,10 @@ const ArticlesScreen = () => {
         data={filtered}
         keyExtractor={(item) => item.id}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: 100 }}
+        contentContainerStyle={{ paddingHorizontal: 24}}
+        ListFooterComponent={() =>
+          <View className="h-24" ></View>
+        }
         ListHeaderComponent={() =>
           filtered.length > 0
             ? renderFeaturedArticle({ item: filtered[0], index: 0 })
@@ -268,7 +270,7 @@ const ArticlesScreen = () => {
         renderItem={renderRegularArticle}
         ItemSeparatorComponent={() => <View className="h-0" />}
       />
-    </SafeAreaView>
+    </View>
   );
 };
 

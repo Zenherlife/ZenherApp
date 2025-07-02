@@ -38,7 +38,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const indicatorAnimation = React.useRef(new Animated.Value(0)).current;
 
   const activeColor = isDark ? '#A5B4FC' : '#7C3AED';
-  const inactiveColor = isDark ? '#9CA3AF' : '#6B7280';
+  const inactiveColor = isDark ? '#b3b6bd' : '#64748b';
   const backgroundColor = isDark ? 'rgba(31, 41, 55, 1)' : 'rgba(255, 255, 255, 1)';
   const highlightColor = isDark ? 'rgba(165, 180, 252, 0.2)' : 'rgba(124, 58, 237, 0.15)';
   const shadowColor = 'rgba(17, 24, 39, 1)';
@@ -126,10 +126,10 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
         className="mx-4 rounded-[30px]"
         style={{
           backgroundColor: Platform.OS === 'android' ? backgroundColor : 'transparent',
-          shadowColor: '#111827',
+          shadowColor: `${isDark ? '#111827' : '#888888'}`,
           shadowOffset: { width: 0, height: 12 },
           shadowOpacity: 1,
-          shadowRadius: 50,
+          shadowRadius: 20,
           elevation: 15,
           borderWidth: isDark ? 1 : 0,
           borderColor: isDark ? 'rgba(75, 85, 99, 0.3)' : 'transparent',

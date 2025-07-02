@@ -14,8 +14,9 @@ export default function LayoutHeader({ right }: { right?: React.ReactNode }) {
 
   return (
     <SafeAreaView
-      className="left-0 right-0 z-10 bg-white dark:bg-gray-900 flex-row items-center justify-between px-6 shadow-md pt-2"
-      style={{ elevation: 4 }}
+      edges={["top"]}
+      className="left-0 right-0 z-10 bg-white dark:bg-gray-900 flex-row items-center justify-between px-6 shadow-md pt-2 pb-4"
+      style={{ elevation: 2 }}
     >
       <View className="flex-row items-center">
         <Image source={logo} className="h-8 w-8" resizeMode="contain" />
@@ -27,8 +28,8 @@ export default function LayoutHeader({ right }: { right?: React.ReactNode }) {
       {right ? (
         right
       ) : (
-        <View className="flex-row items-center space-x-4 ">
-          <Pressable className="p-2 rounded-full  mr-2">
+        <View className="flex-row items-center">
+          <Pressable className="rounded-full mr-4">
             <NotificationIcon width={24} height={24} color={isDark? "#b3b6bd" : "#64748b"} />
           </Pressable>
 
@@ -43,7 +44,7 @@ export default function LayoutHeader({ right }: { right?: React.ReactNode }) {
                 resizeMode="cover"
               />
             ) : (
-              <Text className="text-white text-2xl font-black">
+              <Text className="text-white text-2xl font-semibold">
                 {(user?.displayName || " ")[0].toUpperCase()}
               </Text>
             )}
