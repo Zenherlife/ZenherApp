@@ -17,7 +17,6 @@ const { width: screenWidth } = Dimensions.get('window');
 const TABS = [
   { key: 'index', label: 'Home', iconOutline: 'home-outline', iconFilled: 'home' },
   { key: 'track', label: 'Track', iconOutline: 'calendar-outline', iconFilled: 'calendar' },
-  { key: 'shop', label: 'Shop', iconOutline: 'cart-outline', iconFilled: 'cart' },
   { key: 'consult', label: 'Consult', iconOutline: 'call-outline', iconFilled: 'call' },
   { key: 'articles', label: 'Explore', iconOutline: 'newspaper-outline', iconFilled: 'newspaper' },
 ];
@@ -35,40 +34,63 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
     }))
   ).current;
 
+
   const indicatorAnimation = React.useRef(new Animated.Value(0)).current;
 
   const activeColor = isDark ? '#A5B4FC' : '#7C3AED';
   const inactiveColor = isDark ? '#b3b6bd' : '#64748b';
   const backgroundColor = isDark ? 'rgba(31, 41, 55, 1)' : 'rgba(255, 255, 255, 1)';
   const highlightColor = isDark ? 'rgba(165, 180, 252, 0.2)' : 'rgba(124, 58, 237, 0.15)';
-  const shadowColor = 'rgba(17, 24, 39, 1)';
+  const floatingButtonColor = isDark ? '#8B5CF6' : '#7C3AED';
+  const floatingButtonGradient = isDark
+    ? ['#6366F1', '#8B5CF6']
+    : ['#93C5FD', '#C084FC'];
 
   const containerPadding = 16;
   const tabBarWidth = screenWidth - containerPadding;
   const availableWidth = tabBarWidth - containerPadding * 2;
-  const tabWidth = availableWidth / TABS.length;
-
+  const floatingButtonSpace = 55;
+  const tabWidth = (availableWidth - floatingButtonSpace) / TABS.length;
   const prevTabIndexRef = React.useRef(0);
 
   useEffect(() => {
     const currentRouteKey = state.routes[state.index].name.toLowerCase();
     const toIndex = TABS.findIndex(tab => tab.key === currentRouteKey);
 
-    indicatorAnimation.setValue(prevTabIndexRef.current);
+    if (toIndex !== -1) {
+      indicatorAnimation.setValue(prevTabIndexRef.current);
 
-    Animated.spring(indicatorAnimation, {
-      toValue: toIndex,
-      useNativeDriver: true,
-      damping: 14,
-      stiffness: 140,
-      mass: 0.9,
-      overshootClamping: false,
-      restSpeedThreshold: 0.01,
-      restDisplacementThreshold: 0.01,
-    }).start();
+      Animated.spring(indicatorAnimation, {
+        toValue: toIndex,
+        useNativeDriver: true,
+        damping: 14,
+        stiffness: 140,
+        mass: 0.9,
+        overshootClamping: false,
+        restSpeedThreshold: 0.01,
+        restDisplacementThreshold: 0.01,
+      }).start();
 
-    prevTabIndexRef.current = toIndex;
+      prevTabIndexRef.current = toIndex;
+    }
   }, [state.index]);
+
+  const getTabPosition = (index: number) => {
+    if (index < 2) {
+      return index * tabWidth;
+    } else {
+      return (index * tabWidth) + floatingButtonSpace;
+    }
+  };
+
+  const handleFloatingButtonPress = () => {
+    if (Platform.OS === 'ios') {
+      try {
+        const { HapticFeedback } = require('expo-haptics');
+        HapticFeedback?.impactAsync(HapticFeedback?.ImpactFeedbackStyle?.Medium);
+      } catch {}
+    }
+  };
 
   const renderTab = (tab: any, index: number) => {
     const route = state.routes.find((r: any) => r.name.toLowerCase() === tab.key.toLowerCase());
@@ -93,11 +115,19 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
     };
 
     return (
-      <Animated.View key={tab.key} className="items-center justify-center" style={{ width: tabWidth, transform: [{ scale: tabAnimations[index].scale }] }}>
+      <Animated.View 
+        key={tab.key} 
+        className="items-center justify-center absolute" 
+        style={{ 
+          width: tabWidth, 
+          left: getTabPosition(index) + 10,
+          transform: [{ scale: tabAnimations[index].scale }] 
+        }}
+      >
         <Pressable
           onPress={onPress}
           android_ripple={{ color: activeColor + '30', borderless: true, radius: 30 }}
-          className="items-center justify-center rounded-2xl py-2"
+          className="items-center justify-center rounded-2xl"
         >
           <Animated.View
             className="mb-1 rounded-xl"
@@ -107,10 +137,64 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
           </Animated.View>
           <Animated.Text
             className="text-[10px] text-center"
-            style={{ fontWeight: isFocused ? '700' : '600', color, opacity: tabAnimations[index].labelOpacity }}
+            style={{ 
+              fontWeight: isFocused ? '700' : '600', 
+              color, 
+              opacity: tabAnimations[index].labelOpacity 
+            }}
           >
             {tab.label}
           </Animated.Text>
+        </Pressable>
+      </Animated.View>
+    );
+  };
+
+  const renderFloatingButton = () => {
+
+    return (
+      <Animated.View 
+        className="absolute -top-6 items-center justify-center"
+        style={{
+          left: '50%',
+          marginLeft: -28,
+        }}
+      >
+        <Pressable
+          onPress={handleFloatingButtonPress}
+          android_ripple={{ color: 'rgba(255,255,255,0.3)', borderless: true, radius: 28 }}
+          className="items-center justify-center"
+        >
+          <LinearGradient
+            colors={floatingButtonGradient}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              width: 56,
+              height: 56,
+              borderRadius: 28,
+              justifyContent: 'center',
+              alignItems: 'center',
+              shadowColor: floatingButtonColor,
+              shadowOffset: { width: 0, height: 8 },
+              shadowOpacity: 0.4,
+              shadowRadius: 12,
+              elevation: 8,
+            }}
+          >
+            <View 
+              style={{
+                width: 54,
+                height: 54,
+                borderRadius: 27,
+                backgroundColor: 'rgba(255,255,255,0.1)',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Ionicons name="add" size={28} color="white" />
+            </View>
+          </LinearGradient>
         </Pressable>
       </Animated.View>
     );
@@ -135,7 +219,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
           borderColor: isDark ? 'rgba(75, 85, 99, 0.3)' : 'transparent',
         }}
       >
-        <View className="relative flex-row justify-center py-1.5 px-[8px]" style={{ height: 64 }}>
+        <View className="justify-center relative py-1.5 px-[8px]" style={{ height: 64 }}>
           <Animated.View
             className="absolute rounded-3xl"
             style={{
@@ -148,7 +232,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
                 {
                   translateX: indicatorAnimation.interpolate({
                     inputRange: TABS.map((_, i) => i),
-                    outputRange: TABS.map((_, i) => i * tabWidth),
+                    outputRange: TABS.map((_, i) => getTabPosition(i)),
                   }),
                 },
               ],
@@ -156,6 +240,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
           />
           {TABS.map(renderTab)}
         </View>
+        {renderFloatingButton()}
       </View>
     </View>
   );
@@ -183,8 +268,11 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
             intensity={isDark ? 90 : 100}
             style={{ borderRadius: 30 }}
           >
-            <View className="relative flex-row justify-center py-1.5 px-[8px]"
-              style={{ height: 64, backgroundColor: isDark ? 'rgba(31,41,55,0.4)' : 'rgba(255,255,255,0.4)' }}
+            <View className="relative py-1.5 px-[8px]"
+              style={{ 
+                height: 64, 
+                backgroundColor: isDark ? 'rgba(31,41,55,0.4)' : 'rgba(255,255,255,0.4)' 
+              }}
             >
               <Animated.View
                 className="absolute rounded-3xl"
@@ -198,7 +286,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
                     {
                       translateX: indicatorAnimation.interpolate({
                         inputRange: TABS.map((_, i) => i),
-                        outputRange: TABS.map((_, i) => i * tabWidth),
+                        outputRange: TABS.map((_, i) => getTabPosition(i)),
                       }),
                     },
                   ],
@@ -206,6 +294,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
               />
               {TABS.map(renderTab)}
             </View>
+            {renderFloatingButton()}
           </BlurView>
         </View>
       ) : (

@@ -3,8 +3,8 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
   getFirestore,
-  onSnapshot,
   orderBy,
   query,
   setDoc,
@@ -35,18 +35,15 @@ export type WellnessCategory = 'flow' | 'feelings' | 'sleep';
 
 export interface WellnessState {
   entries: Record<string, WellnessEntry>;
-  currentMonthEntries: WellnessEntry[];
   loading: boolean;
   error: string | null;
   
-  currentMonth: number;
-  currentYear: number;
-  
-  setCurrentMonth: (month: number, year: number) => void;
   addOrUpdateEntry: (uid: string, date: string, category: WellnessCategory, option: WellnessOption) => Promise<void>;
   getEntry: (date: string) => WellnessEntry | null;
-  subscribeToMonth: (uid: string, month: number, year: number) => () => void;
+  getMonthEntries: (uid: string, month: number, year: number) => Promise<void>;
   clearEntries: () => void;
+  setLoading: (loading: boolean) => void;
+  setError: (error: string | null) => void;
 }
 
 const getMonthYearKey = (month: number, year: number): string => {
@@ -66,14 +63,15 @@ const getEntryDocPath = (uid: string, month: number, year: number, date: string)
 export const useWellnessStore = create<WellnessState>()(
   subscribeWithSelector((set, get) => ({
     entries: {},
-    currentMonthEntries: [],
     loading: false,
     error: null,
-    currentMonth: new Date().getMonth(),
-    currentYear: new Date().getFullYear(),
 
-    setCurrentMonth: (month: number, year: number) => {
-      set({ currentMonth: month, currentYear: year });
+    setLoading: (loading: boolean) => {
+      set({ loading });
+    },
+
+    setError: (error: string | null) => {
+      set({ error });
     },
 
     addOrUpdateEntry: async (uid: string, date: string, category: WellnessCategory, option: WellnessOption) => {
@@ -136,54 +134,42 @@ export const useWellnessStore = create<WellnessState>()(
       return entries[date] || null;
     },
 
-    subscribeToMonth: (uid: string, month: number, year: number) => {
-      const collectionPath = getEntriesCollectionPath(uid, month, year);
-      const entriesRef = collection(db, collectionPath);
-      const q = query(entriesRef, orderBy('date', 'asc'));
+    getMonthEntries: async (uid: string, month: number, year: number) => {
+      try {
+        const collectionPath = getEntriesCollectionPath(uid, month, year);
+        const entriesRef = collection(db, collectionPath);
+        const q = query(entriesRef, orderBy('date', 'asc'));
 
-      set({ loading: true });
+        const snapshot = await getDocs(q);
+        const { entries } = get();
+        const newEntries = { ...entries };
 
-      const unsubscribe = onSnapshot(
-        q,
-        (snapshot) => {
-          const entries: Record<string, WellnessEntry> = {};
-          const currentMonthEntries: WellnessEntry[] = [];
+        snapshot.forEach((doc) => {
+          const data = doc.data() as WellnessEntry;
+          const entry = {
+            ...data,
+            id: doc.id,
+          };
+          
+          newEntries[entry.date] = entry;
+        });
 
-          snapshot.forEach((doc) => {
-            const data = doc.data() as WellnessEntry;
-            const entry = {
-              ...data,
-              id: doc.id,
-            };
-            
-            entries[entry.date] = entry;
-            currentMonthEntries.push(entry);
-          });
+        set({
+          entries: newEntries,
+          error: null,
+        });
 
-          set({
-            entries,
-            currentMonthEntries,
-            loading: false,
-            error: null,
-          });
-
-        },
-        (error) => {
-          console.error('Error subscribing to wellness entries:', error);
-          set({
-            error: error.message,
-            loading: false,
-          });
-        }
-      );
-
-      return unsubscribe;
+      } catch (error) {
+        console.error('Error fetching wellness entries:', error);
+        set({
+          error: error instanceof Error ? error.message : 'Failed to fetch entries',
+        });
+      }
     },
 
     clearEntries: () => {
       set({
         entries: {},
-        currentMonthEntries: [],
         loading: false,
         error: null,
       });
@@ -193,10 +179,6 @@ export const useWellnessStore = create<WellnessState>()(
 
 export const useWellnessEntry = (date: string) => {
   return useWellnessStore((state) => state.getEntry(date));
-};
-
-export const useCurrentMonthEntries = () => {
-  return useWellnessStore((state) => state.currentMonthEntries);
 };
 
 export const useWellnessLoading = () => {

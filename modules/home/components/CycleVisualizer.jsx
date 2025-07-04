@@ -130,7 +130,7 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
   });
 
   return (
-    <View className="flex-1 items-center pt-12 bg-gray-50 dark:bg-gray-900">
+    <View className="flex-1 items-center pt-4 bg-gray-50 dark:bg-gray-900">
       <GestureDetector gesture={panGesture}>
         <Animated.View className="relative" style={{ width: SIZE, height: SIZE }}>
           <Svg width={SIZE} height={SIZE}>

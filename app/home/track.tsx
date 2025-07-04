@@ -7,16 +7,23 @@ import {
   WellnessOptions,
 } from "@/modules/home/utils/types";
 import { useWellnessStore } from "@/modules/track/store/useWellnessStore";
-import { ArrowUpRight, ChevronLeft, ChevronRight } from "lucide-react-native";
+import { Activity, Calendar, ChevronDown, ChevronUp } from "lucide-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  ScrollView,
+  FlatList,
+  RefreshControl,
   Text,
   TouchableOpacity,
   useColorScheme,
-  View
+  View,
 } from "react-native";
+
+interface MonthData {
+  month: number;
+  year: number;
+  days: { day: number; dayName: string }[];
+}
 
 const CalendarScreen: React.FC = () => {
   const colorScheme = useColorScheme();
@@ -28,44 +35,23 @@ const CalendarScreen: React.FC = () => {
     loading: wellnessLoading,
     error: wellnessError,
     addOrUpdateEntry,
-    subscribeToMonth,
-    setCurrentMonth,
-    currentMonth,
-    currentYear,
+    getMonthEntries,
+    getEntry,
   } = useWellnessStore();
 
-  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [monthsData, setMonthsData] = useState<MonthData[]>([]);
   const [selectedDate, setSelectedDate] = useState<SelectedDate | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
-
-  const today = new Date();
-  const todayKey = `${today.getFullYear()}-${String(
-    today.getMonth() + 1
-  ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-  const todayEntry = entries[todayKey];
+  const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const slideAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(1)).current;
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-
-  const [quote, setQuote] = useState("");
 
   const months: string[] = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ];
-
-  const weekDays: string[] = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
   const wellnessOptions: WellnessOptions = {
     flow: [
@@ -89,11 +75,7 @@ const CalendarScreen: React.FC = () => {
       { label: "Indifferent", color: "#f8fafc", textColor: "#6b7280" },
     ],
     sleep: [
-      {
-        label: "Trouble Falling Asleep",
-        color: "#fef2f2",
-        textColor: "#dc2626",
-      },
+      { label: "Trouble Falling Asleep", color: "#fef2f2", textColor: "#dc2626" },
       { label: "Woke Up Refreshed", color: "#f0fdf4", textColor: "#16a34a" },
       { label: "Woke Up Tired", color: "#fefce8", textColor: "#ca8a04" },
       { label: "Restless Sleep", color: "#fdf4ff", textColor: "#c026d3" },
@@ -102,91 +84,118 @@ const CalendarScreen: React.FC = () => {
     ],
   };
 
+  // Initialize with current month and load data
   useEffect(() => {
     if (!uid) return;
+    
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    
+    initializeCalendar(currentMonth, currentYear);
+  }, [uid]);
 
-    const month = currentDate.getMonth();
-    const year = currentDate.getFullYear();
+  const initializeCalendar = async (month: number, year: number) => {
+    const initialMonths = [
+      { month: month - 1, year: month === 0 ? year - 1 : year },
+      { month, year },
+      { month: month + 1, year: month === 11 ? year + 1 : year },
+    ];
 
-    setCurrentMonth(month, year);
+    const monthsWithDays = initialMonths.map(({ month, year }) => ({
+      month,
+      year,
+      days: getDaysInMonth(new Date(year, month, 1)),
+    }));
 
-    const unsubscribe = subscribeToMonth(uid, month, year);
+    setMonthsData(monthsWithDays);
 
-    return unsubscribe;
-  }, [uid, currentDate, subscribeToMonth, setCurrentMonth]);
+    // Load data for all initial months
+    for (const { month, year } of initialMonths) {
+      if (uid) {
+        await getMonthEntries(uid, month, year);
+      }
+    }
+  };
 
-  const getDaysInMonth = (date: Date): (number | null)[] => {
+  const getDaysInMonth = (date: Date) => {
     const year = date.getFullYear();
     const month = date.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    const startingDayOfWeek = firstDay.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    const days: (number | null)[] = [];
-
-    for (let i = 0; i < startingDayOfWeek; i++) {
-      days.push(null);
-    }
-
+    const days = [];
     for (let day = 1; day <= daysInMonth; day++) {
-      days.push(day);
+      const currentDate = new Date(year, month, day);
+      const dayName = currentDate.toLocaleDateString("en-US", {
+        weekday: "short",
+      });
+      days.push({ day, dayName });
     }
 
     return days;
   };
 
-  const animateTransition = (direction: "next" | "prev"): void => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: direction === "next" ? -20 : 20,
-        duration: 150,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-      slideAnim.setValue(direction === "next" ? 20 : -20);
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    });
+  const loadPreviousMonth = async () => {
+    if (!uid || loadingMore) return;
+    
+    setLoadingMore(true);
+    const firstMonth = monthsData[0];
+    const prevMonth = firstMonth.month === 0 ? 11 : firstMonth.month - 1;
+    const prevYear = firstMonth.month === 0 ? firstMonth.year - 1 : firstMonth.year;
+
+    const newMonthData = {
+      month: prevMonth,
+      year: prevYear,
+      days: getDaysInMonth(new Date(prevYear, prevMonth, 1)),
+    };
+
+    // Load data for the new month
+    await getMonthEntries(uid, prevMonth, prevYear);
+    
+    setMonthsData(prev => [newMonthData, ...prev]);
+    setLoadingMore(false);
   };
 
-  const changeMonth = (direction: "next" | "prev"): void => {
-    animateTransition(direction);
+  const loadNextMonth = async () => {
+    if (!uid || loadingMore) return;
+    
+    setLoadingMore(true);
+    const lastMonth = monthsData[monthsData.length - 1];
+    const nextMonth = lastMonth.month === 11 ? 0 : lastMonth.month + 1;
+    const nextYear = lastMonth.month === 11 ? lastMonth.year + 1 : lastMonth.year;
 
-    const newDate = new Date(currentDate);
-    if (direction === "next") {
-      newDate.setMonth(newDate.getMonth() + 1);
-    } else {
-      newDate.setMonth(newDate.getMonth() - 1);
+    const newMonthData = {
+      month: nextMonth,
+      year: nextYear,
+      days: getDaysInMonth(new Date(nextYear, nextMonth, 1)),
+    };
+
+    // Load data for the new month
+    await getMonthEntries(uid, nextMonth, nextYear);
+    
+    setMonthsData(prev => [...prev, newMonthData]);
+    setLoadingMore(false);
+  };
+
+  const onRefresh = async () => {
+    if (!uid) return;
+    
+    setRefreshing(true);
+    // Reload data for all currently loaded months
+    for (const { month, year } of monthsData) {
+      await getMonthEntries(uid, month, year);
     }
-    setCurrentDate(newDate);
+    setRefreshing(false);
   };
 
-  const formatDateKey = (date: Date) =>
-    `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-  const handleDayPress = (day: number | null): void => {
-    if (!day) return;
+  const formatDate = (day: number, month: number, year: number) => {
+    const monthStr = String(month + 1).padStart(2, "0");
+    const dayStr = String(day).padStart(2, "0");
+    return `${year}-${monthStr}-${dayStr}`;
+  };
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-      day
-    ).padStart(2, "0")}`;
+  const handleDayPress = (day: number, month: number, year: number): void => {
+    const dateKey = formatDate(day, month, year);
 
     setSelectedDate({
       day,
@@ -215,48 +224,33 @@ const CalendarScreen: React.FC = () => {
     }
   };
 
-  const isToday = (day: number | null): boolean => {
-    if (!day) return false;
+  const isToday = (day: number, month: number, year: number): boolean => {
     const today = new Date();
     return (
       day === today.getDate() &&
-      currentDate.getMonth() === today.getMonth() &&
-      currentDate.getFullYear() === today.getFullYear()
+      month === today.getMonth() &&
+      year === today.getFullYear()
     );
   };
 
-  const isAfterToday = (day: number | null): boolean => {
-    if (!day) return false;
+  const isAfterToday = (day: number, month: number, year: number): boolean => {
     const today = new Date();
-
     today.setHours(0, 0, 0, 0);
 
-    const inputDate = new Date(
-      currentDate.getFullYear(),
-      currentDate.getMonth(),
-      day
-    );
+    const inputDate = new Date(year, month, day);
     inputDate.setHours(0, 0, 0, 0);
 
     return inputDate > today;
   };
 
-  const hasWellnessData = (day: number | null): boolean => {
-    if (!day) return false;
-
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const dateKey = `${year}-${String(month + 1).padStart(2, "0")}-${String(
-      day
-    ).padStart(2, "0")}`;
-
+  const hasWellnessData = (day: number, month: number, year: number): boolean => {
+    const dateKey = formatDate(day, month, year);
     const entry = entries[dateKey];
     return entry && (entry.flow || entry.feelings || entry.sleep);
   };
 
   const getWellnessData = () => {
     const wellnessData: Record<string, any> = {};
-
     Object.values(entries).forEach((entry) => {
       wellnessData[entry.date] = {
         flow: entry.flow,
@@ -264,171 +258,194 @@ const CalendarScreen: React.FC = () => {
         sleep: entry.sleep,
       };
     });
-
     return wellnessData;
   };
 
-  const days = getDaysInMonth(currentDate);
-
-  const WellnessChip = ({ option }: { option: WellnessOption }) => (
-    <View
-      className="px-5 py-2 mr-2 mb-2 rounded-2xl"
-      style={{
-        backgroundColor: option.color,
-        shadowColor: option.color,
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 8,
-        elevation: 4,
-      }}
-    >
-      <Text
-        className="text-sm font-semibold tracking-wide"
-        style={{ color: option.textColor }}
-      >
-        {option.label}
-      </Text>
+  const renderMonthHeader = (monthData: MonthData) => (
+    <View className="mx-4 mb-6 mt-4">
+      <View className={`p-4 rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+        <View className="flex-row items-center justify-center">
+          <Calendar size={20} color={isDark ? "#60a5fa" : "#3b82f6"} />
+          <Text className={`ml-2 text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            {months[monthData.month]} {monthData.year}
+          </Text>
+        </View>
+      </View>
     </View>
   );
 
-  return (
-    <View className="flex-1 dark:bg-gray-900 bg-gray-50">
-       <ScrollView
-    contentContainerStyle={{ paddingBottom: 100 }}
-    showsVerticalScrollIndicator={false}
-  >
-      <View className="px-6 pt-6 pb-3">
-        <View
-          className={`p-4 rounded-2xl ${
-            isDark ? "bg-gray-800" : "bg-white"
-          } shadow-sm`}
-        >
-          <Text
-            className={`text-sm font-medium ${
-              isDark ? "text-gray-400" : "text-gray-600"
-            }`}
-          >
-            Today
-          </Text>
-          <Text
-            className={`text-lg font-bold ${
-              isDark ? "text-white" : "text-gray-900"
-            }`}
-          >
-            {new Date().toLocaleDateString("en-US", {
-              weekday: "long",
-              month: "long",
-              day: "numeric",
-            })}
-          </Text>
-        </View>
-      </View>
+  const renderDayItem = ({ item: day, index, monthData }: { item: any; index: number; monthData: MonthData }) => {
+    const entry = getEntry(formatDate(day.day, monthData.month, monthData.year));
+    const isCurrentDay = isToday(day.day, monthData.month, monthData.year);
+    const isFutureDay = isAfterToday(day.day, monthData.month, monthData.year);
+    const hasData = hasWellnessData(day.day, monthData.month, monthData.year);
 
-      <View className="px-6 py-3">
-        <View className="flex-row items-center justify-between">
-          <TouchableOpacity
-            onPress={() => changeMonth("prev")}
-            className={`w-12 h-12 rounded-2xl items-center justify-center ${
-              isDark ? "bg-gray-800" : "bg-white"
-            } shadow-sm`}
-            activeOpacity={0.7}
-          >
-            <ChevronLeft size={24} color={isDark ? "#f3f4f6" : "#374151"} />
-          </TouchableOpacity>
-
-          <Animated.View
-            style={{
-              opacity: fadeAnim,
-              transform: [{ translateX: slideAnim }],
-            }}
-          >
-            <Text
-              className={`text-2xl font-bold ${
-                isDark ? "text-white" : "text-gray-900"
+    return (
+      <View className="mx-4 mb-3">
+        <View className="flex-row items-center">
+          {/* Day Info */}
+          <View className="w-16 mr-4">
+            <Text className={`text-xs text-center mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {day.dayName}
+            </Text>
+            <View
+              className={`h-10 w-10 rounded-full items-center justify-center self-center ${
+                isCurrentDay ? 'bg-blue-500' : 'bg-transparent'
               }`}
             >
-              {months[currentDate.getMonth()]} {currentDate.getFullYear()}
-            </Text>
-          </Animated.View>
+              <Text className={`text-lg font-medium ${
+                isCurrentDay ? 'text-white' : isDark ? 'text-gray-100' : 'text-gray-900'
+              }`}>
+                {day.day}
+              </Text>
+            </View>
+          </View>
 
+          {/* Wellness Data */}
           <TouchableOpacity
-            onPress={() => changeMonth("next")}
-            className={`w-12 h-12 rounded-2xl items-center justify-center ${
-              isDark ? "bg-gray-800" : "bg-white"
-            } shadow-sm`}
+            disabled={isFutureDay}
+            onPress={() => handleDayPress(day.day, monthData.month, monthData.year)}
+            className={`flex-1 rounded-xl p-3 ${
+              isFutureDay ? 'opacity-40' : 'opacity-100'
+            } ${
+              hasData
+                ? `${isDark ? 'bg-gray-700' : 'bg-gray-100'} border-l-4 border-blue-500`
+                : `border-2 border-dashed ${isDark ? 'border-gray-600' : 'border-gray-300'}`
+            }`}
             activeOpacity={0.7}
           >
-            <ChevronRight size={24} color={isDark ? "#f3f4f6" : "#374151"} />
+            {hasData ? (
+              <View className="flex-row flex-wrap">
+                {entry?.flow && (
+                  <View className="mr-2 mb-1 px-2 py-1 rounded-full" style={{ backgroundColor: entry.flow.color }}>
+                    <Text className="text-xs font-medium" style={{ color: entry.flow.textColor }}>
+                      {entry.flow.label}
+                    </Text>
+                  </View>
+                )}
+                {entry?.feelings && (
+                  <View className="mr-2 mb-1 px-2 py-1 rounded-full" style={{ backgroundColor: entry.feelings.color }}>
+                    <Text className="text-xs font-medium" style={{ color: entry.feelings.textColor }}>
+                      {entry.feelings.label}
+                    </Text>
+                  </View>
+                )}
+                {entry?.sleep && (
+                  <View className="mr-2 mb-1 px-2 py-1 rounded-full" style={{ backgroundColor: entry.sleep.color }}>
+                    <Text className="text-xs font-medium" style={{ color: entry.sleep.textColor }}>
+                      {entry.sleep.label}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            ) : (
+              <View className="flex-row items-center justify-center py-4">
+                <Activity size={16} color={isDark ? "#6b7280" : "#9ca3af"} />
+                <Text className={`ml-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                  Tap to add
+                </Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
       </View>
+    );
+  };
+  
+  const flatListRef = useRef<FlatList>(null);
+  const flatListData = monthsData.flatMap(monthData => [
+    { type: 'header', monthData },
+    ...monthData.days.map(day => ({ type: 'day', day, monthData }))
+  ]);
+  const hasScrolledToToday = useRef(false);
 
-      <View
-        className={`mx-4 rounded-3xl ${
-          isDark ? "bg-gray-800" : "bg-white"
-        } shadow-lg`}
-      >
-        <View className="flex-row border-b border-gray-200 dark:border-gray-700">
-          {weekDays.map((day) => (
-            <View key={day} className="flex-1 py-4">
-              <Text
-                className={`text-center text-sm font-semibold ${
-                  isDark ? "text-gray-400" : "text-gray-500"
-                }`}
-              >
-                {day}
-              </Text>
-            </View>
-          ))}
-        </View>
+  useEffect(() => {
+    if (flatListData.length === 0 || hasScrolledToToday.current) return;
 
-        <Animated.View
-          style={{
-            opacity: fadeAnim,
-            transform: [{ translateX: slideAnim }, { scale: scaleAnim }],
-          }}
-          className="p-2"
-        >
-          <View className="flex-row flex-wrap">
-            {days.map((day, index) => (
-              <View key={index} className="w-1/7" style={{ width: `14.28%` }}>
-                {day ? (
-                  <TouchableOpacity
-                    disabled={isAfterToday(day)}
-                    onPress={() => handleDayPress(day)}
-                    className={`m-1 h-12 rounded-xl items-center justify-center relative ${
-                      isAfterToday(day) && "opacity-50"
-                    } ${isToday(day) && "bg-blue-500/70 shadow-lg"} ${
-                      hasWellnessData(day)
-                        ? `${!isToday(day) && "bg-gray-100 dark:bg-gray-700"}`
-                        : "border-[1.3px] dark:border-gray-700 border-gray-300 border-dashed"
-                    } `}
-                    activeOpacity={0.8}
-                  >
-                    <Text
-                      className={`text-base font-medium ${
-                        isToday(day)
-                          ? "text-white font-bold"
-                          : isDark
-                          ? "text-gray-200"
-                          : "text-gray-900"
-                      }`}
-                    >
-                      {day}
-                    </Text>
-                  </TouchableOpacity>
-                ) : (
-                  <View className="m-1 h-12" />
-                )}
-              </View>
-            ))}
+    const todayIndex = flatListData.findIndex(item =>
+      item.type === 'day' &&
+      isToday(item.day.day, item.monthData.month, item.monthData.year)
+    );
+
+    if (todayIndex !== -1 && flatListRef.current) {
+      flatListRef.current.scrollToIndex({ index: todayIndex, animated: false });
+      hasScrolledToToday.current = true;
+    }
+  }, [flatListData]);
+
+  return (
+    <View className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <FlatList
+        ref={flatListRef}
+        data={flatListData}
+        showsVerticalScrollIndicator={false}
+        initialScrollIndex={flatListData.findIndex(item =>
+          item.type === 'day' &&
+          isToday(item.day.day, item.monthData.month, item.monthData.year)
+        )}
+        getItemLayout={(data, index) => ({
+    length: 92, // estimate height for item
+    offset: 92 * index,
+    index,
+  })}
+        maintainVisibleContentPosition={{
+          minIndexForVisible: 0,
+        }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={['#3b82f6']}
+            tintColor={isDark ? '#60a5fa' : '#3b82f6'}
+          />
+        }
+        ListHeaderComponent={
+          <View className="flex-row justify-center py-4">
+            <TouchableOpacity
+              onPress={loadPreviousMonth}
+              disabled={loadingMore}
+              className={`w-12 h-12 rounded-full items-center justify-center ${
+                isDark ? 'bg-gray-800' : 'bg-white'
+              } shadow-sm ${loadingMore ? 'opacity-50' : ''}`}
+              activeOpacity={0.7}
+            >
+              <ChevronUp size={24} color={isDark ? "#60a5fa" : "#3b82f6"} />
+            </TouchableOpacity>
           </View>
-        </Animated.View>
-      </View>
+        }
+        ListFooterComponent={
+          <View className="flex-row justify-center py-4 pb-36">
+            <TouchableOpacity
+              onPress={loadNextMonth}
+              disabled={loadingMore}
+              className={`w-12 h-12 rounded-full items-center justify-center ${
+                isDark ? 'bg-gray-800' : 'bg-white'
+              } shadow-sm ${loadingMore ? 'opacity-50' : ''}`}
+              activeOpacity={0.7}
+            >
+              <ChevronDown size={24} color={isDark ? "#60a5fa" : "#3b82f6"} />
+            </TouchableOpacity>
+          </View>
+        }
+        renderItem={({ item, index }) => {
+          if (item.type === 'header') {
+            return renderMonthHeader(item.monthData);
+          } else {
+            return renderDayItem({ item: item.day, index, monthData: item.monthData });
+          }
+        }}
+        keyExtractor={(item, index) => {
+          if (item.type === 'header') {
+            return `header-${item.monthData.month}-${item.monthData.year}`;
+          } else {
+            return `day-${item.monthData.month}-${item.monthData.year}-${item.day.day}`;
+          }
+        }}
+      />
 
       {wellnessError && (
-        <View className="mx-4 mt-4 p-3 bg-red-100 dark:bg-red-900/20 rounded-lg">
-          <Text className="text-red-600 dark:text-red-400 text-sm">
+        <View className="mx-4 mb-4 p-4 bg-red-100 dark:bg-red-900/20 rounded-xl">
+          <Text className="text-red-600 dark:text-red-400 text-sm font-medium">
             {wellnessError}
           </Text>
         </View>
@@ -443,118 +460,6 @@ const CalendarScreen: React.FC = () => {
         onUpdateWellnessData={updateWellnessData}
         loading={wellnessLoading}
       />
-      {(todayEntry?.flow || todayEntry?.feelings || todayEntry?.sleep) ? (
-  // ✅ When user has selected today's moods
-  <View className="mt-6 px-6">
-    <View
-      className={`rounded-2xl px-5 py-5 shadow-sm ${
-        isDark ? 'bg-gray-800' : 'bg-white'
-      }`}
-    >
-      {/* Header with arrow button */}
-      <View className="flex-row items-center justify-between mb-3">
-        <Text
-          className={`text-lg font-semibold ${
-            isDark ? 'text-white' : 'text-gray-900'
-          }`}
-        >
-          Your selections for today
-        </Text>
-
-        {/* Edit arrow button */}
-        <TouchableOpacity
-          onPress={() => {
-            setSelectedDate({
-              day: today.getDate(),
-              month: today.getMonth(),
-              year: today.getFullYear(),
-              key: todayKey,
-            });
-            setModalVisible(true);
-          }}
-          className={`w-9 h-9 items-center justify-center rounded-xl ${
-            isDark ? 'bg-gray-700' : 'bg-gray-100'
-          }`}
-          activeOpacity={0.7}
-        >
-          <ArrowUpRight size={20} color={isDark ? "#93c5fd" : "#3b82f6"} />
-        </TouchableOpacity>
-      </View>
-
-      {/* Mood Data Display */}
-      {todayEntry.flow && (
-        <View className="mb-3">
-          <Text className={`text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Flow
-          </Text>
-          <View className="flex-row flex-wrap">
-            <WellnessChip option={todayEntry.flow} />
-          </View>
-        </View>
-      )}
-
-      {todayEntry.feelings && (
-        <View className="mb-3">
-          <Text className={`text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Feelings
-          </Text>
-          <View className="flex-row flex-wrap">
-            <WellnessChip option={todayEntry.feelings} />
-          </View>
-        </View>
-      )}
-
-      {todayEntry.sleep && (
-        <View>
-          <Text className={`text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-            Sleep
-          </Text>
-          <View className="flex-row flex-wrap">
-            <WellnessChip option={todayEntry.sleep} />
-          </View>
-        </View>
-      )}
-    </View>
-  </View>
-) : (
-  // 🆕 When user has not selected today's moods
-  <TouchableOpacity
-    onPress={() => {
-      setSelectedDate({
-        day: today.getDate(),
-        month: today.getMonth(),
-        year: today.getFullYear(),
-        key: todayKey,
-      });
-      setModalVisible(true);
-    }}
-    activeOpacity={0.9}
-    className="mt-6 px-6"
-  >
-    <View
-      className={`rounded-2xl px-5 py-6 shadow-sm items-start ${
-        isDark ? 'bg-gray-800' : 'bg-white'
-      }`}
-    >
-      <Text
-        className={`text-lg font-semibold mb-2 ${
-          isDark ? 'text-white' : 'text-gray-900'
-        }`}
-      >
-        How are you feeling today?
-      </Text>
-      <Text
-        className={`text-sm ${
-          isDark ? 'text-gray-300' : 'text-gray-600'
-        }`}
-      >
-        Tap to record your current mood, flow, and sleep.
-      </Text>
-    </View>
-  </TouchableOpacity>
-)}
-
-        </ScrollView>
     </View>
   );
 };
