@@ -9,6 +9,7 @@ import {
   Image,
   Linking,
   Pressable,
+  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -29,8 +30,8 @@ export default function ConnectScreen() {
     StatusBar.setBarStyle(isDark ? "light-content" : "dark-content");
   }, [isDark]);
   return (
-    <View className="flex-1 dark:bg-gray-900 bg-gray-50 ">
-      <View className="flex-row justify-between items-center pt-6 px-6">
+    <SafeAreaView className="flex-1 dark:bg-gray-900 bg-gray-50 ">
+      <View className="flex-row justify-between items-center mt-4 px-6">
         <TouchableOpacity
           className="flex-row items-center  mt-4"
           onPress={() => router.back()}
@@ -125,7 +126,7 @@ export default function ConnectScreen() {
         </View>
 
         <View className="px-6">
-          <Text className="text-sm text-gray-600 dark:text-gray-200 mb-2 mt-6">
+          <Text className="text-sm text-gray-600 dark:text-gray-400 mb-2 mt-6">
             HEALTH & WELLNESS
           </Text>
           {[
@@ -160,7 +161,7 @@ export default function ConnectScreen() {
             >
               <View className="flex-row items-center space-x-4">
                 <Ionicons name={item.icon} size={22} color={isDark ? "white" : "black"} />
-                <Text className="text-black dark:text-white text-base ml-3">{item.title}</Text>
+                <Text className="text-black dark:text-white text-base ml-4">{item.title}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={ isDark ? "#aaa" : "#787878"} />
             </TouchableOpacity>
@@ -169,7 +170,7 @@ export default function ConnectScreen() {
           <View className="border-t border-gray-400 dark:border-gray-700 my-4" />
 
           
-          <Text className="text-sm text-gray-600 dark:text-gray-200 mb-2">PERSONALIZATION</Text>
+          <Text className="text-sm text-gray-600 dark:text-gray-400 mb-2">PERSONALIZATION</Text>
           {[
             {
               title: "Tracking Preferences",
@@ -189,7 +190,7 @@ export default function ConnectScreen() {
             >
               <View className="flex-row items-center space-x-4">
                 <Ionicons name={item.icon} size={22} color={isDark ? "white" : "black"} />
-                <Text className="text-black dark:text-white text-base ml-3">{item.title}</Text>
+                <Text className="text-black dark:text-white text-base ml-4">{item.title}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={ isDark ? "#aaa" : "#787878"} />
             </TouchableOpacity>
@@ -197,7 +198,7 @@ export default function ConnectScreen() {
 
           <View className="border-t border-gray-400 dark:border-gray-700 my-4" />
 
-          <Text className="text-sm text-gray-600 dark:text-gray-200 mb-2">
+          <Text className="text-sm text-gray-600 dark:text-gray-400 mb-2">
             SUPPORT & RESOURCES
           </Text>
           {[
@@ -220,7 +221,7 @@ export default function ConnectScreen() {
             >
               <View className="flex-row items-center space-x-4">
                 <Ionicons name={item.icon} size={22} color={isDark ? "white" : "black"} />
-                <Text className="text-black dark:text-white text-base ml-3">{item.title}</Text>
+                <Text className="text-black dark:text-white text-base ml-4">{item.title}</Text>
               </View>
               <Ionicons name="chevron-forward" size={18} color={ isDark ? "#aaa" : "#787878"} />
             </TouchableOpacity>
@@ -231,6 +232,6 @@ export default function ConnectScreen() {
 
         <SocialFooter />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }
