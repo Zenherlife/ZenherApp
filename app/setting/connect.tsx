@@ -9,7 +9,6 @@ import {
   Image,
   Linking,
   Pressable,
-  SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
@@ -18,6 +17,7 @@ import {
   View,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ConnectScreen() {
   const router = useRouter();
@@ -31,9 +31,9 @@ export default function ConnectScreen() {
   }, [isDark]);
   return (
     <SafeAreaView className="flex-1 dark:bg-gray-900 bg-gray-50 ">
-      <View className="flex-row justify-between items-center mt-4 px-6">
+      <View className="flex-row justify-between items-center mb-2 px-6">
         <TouchableOpacity
-          className="flex-row items-center  mt-4"
+          className="flex-row items-center mt-4"
           onPress={() => router.back()}
         >
           <Ionicons
@@ -51,7 +51,7 @@ export default function ConnectScreen() {
         contentContainerStyle={{ paddingBottom: 120 }}
         showsVerticalScrollIndicator={false}
       >
-        <View className="mx-4 mb-8">
+        <View className="mx-4 mb-4">
           <View className="bg-white dark:bg-gray-800 rounded-3xl px-4 pt-4 shadow-lg shadow-indigo-100 dark:shadow-none">
             <View className="flex-row items-center mb-4 gap-4">
               <View className="w-16 h-16 rounded-full bg-indigo-500 items-center justify-center shadow-lg shadow-indigo-300 overflow-hidden">
