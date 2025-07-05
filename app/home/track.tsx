@@ -53,34 +53,54 @@ const CalendarScreen: React.FC = () => {
     "July", "August", "September", "October", "November", "December",
   ];
 
-  const wellnessOptions: WellnessOptions = {
+   const wellnessOptions: WellnessOptions = {
     flow: [
-      { label: "Light", color: "#fef3c7", textColor: "#d97706" },
-      { label: "Medium", color: "#fed7aa", textColor: "#ea580c" },
-      { label: "Heavy", color: "#fca5a5", textColor: "#dc2626" },
-      { label: "Super Heavy", color: "#f87171", textColor: "#b91c1c" },
+      { label: "Light", color: "#fef7f0", textColor: "#d97706" },
+      { label: "Medium", color: "#fef3e2", textColor: "#ea580c" },
+      { label: "Heavy", color: "#fef2f2", textColor: "#dc2626" },
+      { label: "Super Heavy", color: "#fce7f3", textColor: "#be185d" },
     ],
     feelings: [
-      { label: "Mood Swings", color: "#e0e7ff", textColor: "#6366f1" },
-      { label: "Not in Control", color: "#fee2e2", textColor: "#ef4444" },
-      { label: "Fine", color: "#f0fdf4", textColor: "#22c55e" },
-      { label: "Happy", color: "#fef3c7", textColor: "#f59e0b" },
-      { label: "Sad", color: "#dbeafe", textColor: "#3b82f6" },
-      { label: "Confident", color: "#ecfdf5", textColor: "#10b981" },
+      { label: "Mood Swings", color: "#f0f4ff", textColor: "#6366f1" },
+      { label: "Not in Control", color: "#fef7f0", textColor: "#ea580c" },
+      { label: "Fine", color: "#f0fdf4", textColor: "#059669" },
+      { label: "Happy", color: "#fffbeb", textColor: "#d97706" },
+      { label: "Sad", color: "#eff6ff", textColor: "#3b82f6" },
+      { label: "Confident", color: "#ecfdf5", textColor: "#059669" },
       { label: "Excited", color: "#fdf2f8", textColor: "#ec4899" },
-      { label: "Irritable", color: "#fef2f2", textColor: "#f87171" },
-      { label: "Anxious", color: "#f3e8ff", textColor: "#a855f7" },
-      { label: "Insecure", color: "#f1f5f9", textColor: "#64748b" },
-      { label: "Grateful", color: "#f0f9ff", textColor: "#0ea5e9" },
-      { label: "Indifferent", color: "#f8fafc", textColor: "#6b7280" },
+      { label: "Irritable", color: "#fef2f2", textColor: "#dc2626" },
+      { label: "Anxious", color: "#f3e8ff", textColor: "#9333ea" },
+      { label: "Insecure", color: "#f8fafc", textColor: "#64748b" },
+      { label: "Grateful", color: "#f0f9ff", textColor: "#0284c7" },
+      { label: "Indifferent", color: "#f9fafb", textColor: "#6b7280" },
     ],
     sleep: [
-      { label: "Trouble Falling Asleep", color: "#fef2f2", textColor: "#dc2626" },
-      { label: "Woke Up Refreshed", color: "#f0fdf4", textColor: "#16a34a" },
-      { label: "Woke Up Tired", color: "#fefce8", textColor: "#ca8a04" },
+      { label: "Trouble Falling Asleep", color: "#fef7f0", textColor: "#dc2626" },
+      { label: "Woke Up Refreshed", color: "#f0fdf4", textColor: "#059669" },
+      { label: "Woke Up Tired", color: "#fffbeb", textColor: "#d97706" },
       { label: "Restless Sleep", color: "#fdf4ff", textColor: "#c026d3" },
       { label: "Vivid Dreams", color: "#eff6ff", textColor: "#2563eb" },
       { label: "Night Sweats", color: "#fff7ed", textColor: "#ea580c" },
+    ],
+    pain: [
+      { label: "Pain Free", color: "#f0fdf4", textColor: "#059669" },
+      { label: "Cramps", color: "#fef2f2", textColor: "#dc2626" },
+      { label: "Ovulation", color: "#fdf2f8", textColor: "#ec4899" },
+      { label: "Breast Tenderness", color: "#fce7f3", textColor: "#be185d" },
+      { label: "Headache", color: "#fef7f0", textColor: "#ea580c" },
+      { label: "Migraine", color: "#fef2f2", textColor: "#b91c1c" },
+      { label: "Migraine with Aura", color: "#f3e8ff", textColor: "#9333ea" },
+      { label: "Lower Back", color: "#fffbeb", textColor: "#d97706" },
+      { label: "Leg", color: "#eff6ff", textColor: "#3b82f6" },
+      { label: "Joint", color: "#f8fafc", textColor: "#64748b" },
+      { label: "Vulvar", color: "#fdf4ff", textColor: "#c026d3" },
+    ],
+    energy: [
+      { label: "Exhausted", color: "#fef2f2", textColor: "#dc2626" },
+      { label: "Tired", color: "#fef7f0", textColor: "#ea580c" },
+      { label: "OK", color: "#fffbeb", textColor: "#d97706" },
+      { label: "Energetic", color: "#ecfdf5", textColor: "#059669" },
+      { label: "Fully Energized", color: "#f0fdf4", textColor: "#047857" },
     ],
   };
 
@@ -246,7 +266,7 @@ const CalendarScreen: React.FC = () => {
   const hasWellnessData = (day: number, month: number, year: number): boolean => {
     const dateKey = formatDate(day, month, year);
     const entry = entries[dateKey];
-    return entry && (entry.flow || entry.feelings || entry.sleep);
+    return entry && (entry.flow || entry.feelings || entry.sleep || entry.pain || entry.energy);
   };
 
   const getWellnessData = () => {
@@ -256,6 +276,8 @@ const CalendarScreen: React.FC = () => {
         flow: entry.flow,
         feelings: entry.feelings,
         sleep: entry.sleep,
+        pain: entry.pain,
+        energy: entry.energy
       };
     });
     return wellnessData;
@@ -274,7 +296,7 @@ const CalendarScreen: React.FC = () => {
     </View>
   );
 
-  const renderDayItem = ({ item: day, index, monthData }: { item: any; index: number; monthData: MonthData }) => {
+  const DayItem = React.memo(({ item: day, index, monthData }: { item: any; index: number; monthData: MonthData }) => {
     const entry = getEntry(formatDate(day.day, monthData.month, monthData.year));
     const isCurrentDay = isToday(day.day, monthData.month, monthData.year);
     const isFutureDay = isAfterToday(day.day, monthData.month, monthData.year);
@@ -284,8 +306,8 @@ const CalendarScreen: React.FC = () => {
       <View className="mx-4 mb-3">
         <View className="flex-row items-center">
           {/* Day Info */}
-          <View className="w-16 mr-4">
-            <Text className={`text-xs text-center mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+          <View className="w-10 mr-4">
+            <Text className={`text-xs text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               {day.dayName}
             </Text>
             <View
@@ -305,41 +327,105 @@ const CalendarScreen: React.FC = () => {
           <TouchableOpacity
             disabled={isFutureDay}
             onPress={() => handleDayPress(day.day, monthData.month, monthData.year)}
-            className={`flex-1 rounded-xl p-3 ${
-              isFutureDay ? 'opacity-40' : 'opacity-100'
+            className={`flex-1 rounded-2xl px-3 pt-3 pb-1 ${
+              isFutureDay ? 'opacity-50' : 'opacity-100'
             } ${
               hasData
-                ? `${isDark ? 'bg-gray-700' : 'bg-gray-100'} border-l-4 border-blue-500`
-                : `border-2 border-dashed ${isDark ? 'border-gray-600' : 'border-gray-300'}`
+                ? `${isDark ? 'bg-gray-800' : 'bg-white border-2 border-gray-100'}`
+                : `border-[1.5px] border-dashed ${isDark ? 'border-gray-600/70' : 'border-gray-300'}`
             }`}
             activeOpacity={0.7}
           >
             {hasData ? (
               <View className="flex-row flex-wrap">
                 {entry?.flow && (
-                  <View className="mr-2 mb-1 px-2 py-1 rounded-full" style={{ backgroundColor: entry.flow.color }}>
-                    <Text className="text-xs font-medium" style={{ color: entry.flow.textColor }}>
-                      {entry.flow.label}
-                    </Text>
+                  <View className="flex-row items-center mr-2 mb-2">
+                    <View className="flex-row items-center px-3 py-1.5 rounded-lg" style={{ backgroundColor: entry.flow.color }}>
+                      <View className="mr-2">
+                        <Text className="text-xs font-medium opacity-70" style={{ color: entry.flow.textColor }}>
+                          Flow
+                        </Text>
+                      </View>
+                      <View className="w-px h-3 opacity-30" style={{ backgroundColor: entry.flow.textColor }} />
+                      <View className="ml-2">
+                        <Text className="text-xs font-semibold" style={{ color: entry.flow.textColor }}>
+                          {entry.flow.label}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 )}
                 {entry?.feelings && (
-                  <View className="mr-2 mb-1 px-2 py-1 rounded-full" style={{ backgroundColor: entry.feelings.color }}>
-                    <Text className="text-xs font-medium" style={{ color: entry.feelings.textColor }}>
-                      {entry.feelings.label}
-                    </Text>
+                  <View className="flex-row items-center mr-2 mb-2">
+                    <View className="flex-row items-center px-3 py-1.5 rounded-lg" style={{ backgroundColor: entry.feelings.color }}>
+                      <View className="mr-2">
+                        <Text className="text-xs font-medium opacity-70" style={{ color: entry.feelings.textColor }}>
+                          Mood
+                        </Text>
+                      </View>
+                      <View className="w-px h-3 opacity-30" style={{ backgroundColor: entry.feelings.textColor }} />
+                      <View className="ml-2">
+                        <Text className="text-xs font-semibold" style={{ color: entry.feelings.textColor }}>
+                          {entry.feelings.label}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 )}
                 {entry?.sleep && (
-                  <View className="mr-2 mb-1 px-2 py-1 rounded-full" style={{ backgroundColor: entry.sleep.color }}>
-                    <Text className="text-xs font-medium" style={{ color: entry.sleep.textColor }}>
-                      {entry.sleep.label}
-                    </Text>
+                  <View className="flex-row items-center mr-2 mb-2">
+                    <View className="flex-row items-center px-3 py-1.5 rounded-lg" style={{ backgroundColor: entry.sleep.color }}>
+                      <View className="mr-2">
+                        <Text className="text-xs font-medium opacity-70" style={{ color: entry.sleep.textColor }}>
+                          Sleep
+                        </Text>
+                      </View>
+                      <View className="w-px h-3 opacity-30" style={{ backgroundColor: entry.sleep.textColor }} />
+                      <View className="ml-2">
+                        <Text className="text-xs font-semibold" style={{ color: entry.sleep.textColor }}>
+                          {entry.sleep.label}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+                {entry?.pain && (
+                  <View className="flex-row items-center mr-2 mb-2">
+                    <View className="flex-row items-center px-3 py-1.5 rounded-lg" style={{ backgroundColor: entry.pain.color }}>
+                      <View className="mr-2">
+                        <Text className="text-xs font-medium opacity-70" style={{ color: entry.pain.textColor }}>
+                          Pain
+                        </Text>
+                      </View>
+                      <View className="w-px h-3 opacity-30" style={{ backgroundColor: entry.pain.textColor }} />
+                      <View className="ml-2">
+                        <Text className="text-xs font-semibold" style={{ color: entry.pain.textColor }}>
+                          {entry.pain.label}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                )}
+                {entry?.energy && (
+                  <View className="flex-row items-center mr-2 mb-2">
+                    <View className="flex-row items-center px-3 py-1.5 rounded-lg" style={{ backgroundColor: entry.energy.color }}>
+                      <View className="mr-2">
+                        <Text className="text-xs font-medium opacity-70" style={{ color: entry.energy.textColor }}>
+                          Energy
+                        </Text>
+                      </View>
+                      <View className="w-px h-3 opacity-30" style={{ backgroundColor: entry.energy.textColor }} />
+                      <View className="ml-2">
+                        <Text className="text-xs font-semibold" style={{ color: entry.energy.textColor }}>
+                          {entry.energy.label}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 )}
               </View>
             ) : (
-              <View className="flex-row items-center justify-center py-4">
+              <View className="flex-row items-center justify-center pt-1 pb-3">
                 <Activity size={16} color={isDark ? "#6b7280" : "#9ca3af"} />
                 <Text className={`ml-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                   Tap to add
@@ -350,8 +436,8 @@ const CalendarScreen: React.FC = () => {
         </View>
       </View>
     );
-  };
-  
+  });
+
   const flatListRef = useRef<FlatList>(null);
   const flatListData = monthsData.flatMap(monthData => [
     { type: 'header', monthData },
@@ -362,15 +448,18 @@ const CalendarScreen: React.FC = () => {
   useEffect(() => {
     if (flatListData.length === 0 || hasScrolledToToday.current) return;
 
-    const todayIndex = flatListData.findIndex(item =>
+    const index = flatListData.findIndex(item =>
       item.type === 'day' &&
       isToday(item.day.day, item.monthData.month, item.monthData.year)
     );
 
-    if (todayIndex !== -1 && flatListRef.current) {
-      flatListRef.current.scrollToIndex({ index: todayIndex, animated: false });
-      hasScrolledToToday.current = true;
+    if (index !== -1 && flatListRef.current) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({ index });
+        hasScrolledToToday.current = true;
+      }, 300);
     }
+
   }, [flatListData]);
 
   return (
@@ -379,15 +468,11 @@ const CalendarScreen: React.FC = () => {
         ref={flatListRef}
         data={flatListData}
         showsVerticalScrollIndicator={false}
-        initialScrollIndex={flatListData.findIndex(item =>
-          item.type === 'day' &&
-          isToday(item.day.day, item.monthData.month, item.monthData.year)
-        )}
-        getItemLayout={(data, index) => ({
-    length: 92, // estimate height for item
-    offset: 92 * index,
-    index,
-  })}
+        onScrollToIndexFailed={(info) => {
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({ index: info.index });
+          }, 100);
+        }}
         maintainVisibleContentPosition={{
           minIndexForVisible: 0,
         }}
@@ -431,7 +516,7 @@ const CalendarScreen: React.FC = () => {
           if (item.type === 'header') {
             return renderMonthHeader(item.monthData);
           } else {
-            return renderDayItem({ item: item.day, index, monthData: item.monthData });
+            return <DayItem item={item.day} index={index} monthData={item.monthData} />;
           }
         }}
         keyExtractor={(item, index) => {

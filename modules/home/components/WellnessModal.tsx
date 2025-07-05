@@ -1,4 +1,4 @@
-import { Droplet, Heart, Moon, X } from 'lucide-react-native';
+import { Activity, Droplet, Heart, Moon, X, Zap } from 'lucide-react-native';
 import React from 'react';
 import {
   Dimensions,
@@ -44,6 +44,10 @@ const getCategoryIcon = (category: WellnessCategory, isDark: boolean) => {
       return <Heart size={iconSize} color={iconColor} fill={iconColor} />;
     case 'sleep':
       return <Moon size={iconSize} color={iconColor} fill={iconColor} />;
+    case 'pain':
+      return <Activity size={iconSize} color={iconColor} fill={iconColor} />;
+    case 'energy':
+      return <Zap size={iconSize} color={iconColor} fill={iconColor} />;
     default:
       return null;
   }
@@ -107,6 +111,7 @@ const WellnessSection: React.FC<WellnessSectionProps> = ({
                   }}
                 >
                   <Text 
+                    numberOfLines={1}
                     className="text-sm font-semibold tracking-wide"
                     style={{ color: option.textColor }}
                   >
@@ -122,6 +127,7 @@ const WellnessSection: React.FC<WellnessSectionProps> = ({
                   }`}
                 >
                   <Text 
+                    numberOfLines={1}
                     className={`text-sm font-medium tracking-wide ${
                       isDark ? 'text-gray-300' : 'text-gray-700'
                     }`}
@@ -257,6 +263,24 @@ const WellnessModal: React.FC<WellnessModalProps> = ({
               title="Sleep"
               category="sleep"
               options={wellnessOptions.sleep}
+              selectedDate={selectedDate}
+              wellnessData={wellnessData}
+              onUpdateWellnessData={onUpdateWellnessData}
+              isDark={isDark}
+            />
+            <WellnessSection
+              title="Pain"
+              category="pain"
+              options={wellnessOptions.pain}
+              selectedDate={selectedDate}
+              wellnessData={wellnessData}
+              onUpdateWellnessData={onUpdateWellnessData}
+              isDark={isDark}
+            />
+            <WellnessSection
+              title="Energy"
+              category="energy"
+              options={wellnessOptions.energy}
               selectedDate={selectedDate}
               wellnessData={wellnessData}
               onUpdateWellnessData={onUpdateWellnessData}

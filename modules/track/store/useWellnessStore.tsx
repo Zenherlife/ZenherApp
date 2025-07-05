@@ -21,6 +21,8 @@ export interface WellnessEntry {
   flow?: WellnessOption;
   feelings?: WellnessOption;
   sleep?: WellnessOption;
+  pain?: WellnessOption;
+  energy?: WellnessOption;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -31,7 +33,7 @@ export interface WellnessOption {
   textColor: string;
 }
 
-export type WellnessCategory = 'flow' | 'feelings' | 'sleep';
+export type WellnessCategory = 'flow' | 'feelings' | 'sleep' | 'pain' | 'energy';
 
 export interface WellnessState {
   entries: Record<string, WellnessEntry>;

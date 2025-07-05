@@ -8,6 +8,8 @@ export interface WellnessOptions {
   flow: WellnessOption[];
   feelings: WellnessOption[];
   sleep: WellnessOption[];
+  pain: WellnessOption[];
+  energy: WellnessOption[];
 }
 
 export interface SelectedDate {
@@ -23,4 +25,4 @@ export interface WellnessData {
   };
 }
 
-export type WellnessCategory = 'flow' | 'feelings' | 'sleep';
+export type WellnessCategory = 'flow' | 'feelings' | 'sleep' | 'pain' | 'energy';

@@ -1,6 +1,10 @@
+import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
+import WellnessModal from '@/modules/home/components/WellnessModal';
+import { SelectedDate, WellnessCategory, WellnessOption, WellnessOptions } from '@/modules/home/utils/types';
+import { useWellnessStore } from '@/modules/track/store/useWellnessStore';
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Animated,
   Dimensions,
@@ -24,6 +28,57 @@ const TABS = [
 const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
+  
+  const wellnessOptions: WellnessOptions = {
+    flow: [
+      { label: "Light", color: "#fef7f0", textColor: "#d97706" },
+      { label: "Medium", color: "#fef3e2", textColor: "#ea580c" },
+      { label: "Heavy", color: "#fef2f2", textColor: "#dc2626" },
+      { label: "Super Heavy", color: "#fce7f3", textColor: "#be185d" },
+    ],
+    feelings: [
+      { label: "Mood Swings", color: "#f0f4ff", textColor: "#6366f1" },
+      { label: "Not in Control", color: "#fef7f0", textColor: "#ea580c" },
+      { label: "Fine", color: "#f0fdf4", textColor: "#059669" },
+      { label: "Happy", color: "#fffbeb", textColor: "#d97706" },
+      { label: "Sad", color: "#eff6ff", textColor: "#3b82f6" },
+      { label: "Confident", color: "#ecfdf5", textColor: "#059669" },
+      { label: "Excited", color: "#fdf2f8", textColor: "#ec4899" },
+      { label: "Irritable", color: "#fef2f2", textColor: "#dc2626" },
+      { label: "Anxious", color: "#f3e8ff", textColor: "#9333ea" },
+      { label: "Insecure", color: "#f8fafc", textColor: "#64748b" },
+      { label: "Grateful", color: "#f0f9ff", textColor: "#0284c7" },
+      { label: "Indifferent", color: "#f9fafb", textColor: "#6b7280" },
+    ],
+    sleep: [
+      { label: "Trouble Falling Asleep", color: "#fef7f0", textColor: "#dc2626" },
+      { label: "Woke Up Refreshed", color: "#f0fdf4", textColor: "#059669" },
+      { label: "Woke Up Tired", color: "#fffbeb", textColor: "#d97706" },
+      { label: "Restless Sleep", color: "#fdf4ff", textColor: "#c026d3" },
+      { label: "Vivid Dreams", color: "#eff6ff", textColor: "#2563eb" },
+      { label: "Night Sweats", color: "#fff7ed", textColor: "#ea580c" },
+    ],
+    pain: [
+      { label: "Pain Free", color: "#f0fdf4", textColor: "#059669" },
+      { label: "Cramps", color: "#fef2f2", textColor: "#dc2626" },
+      { label: "Ovulation", color: "#fdf2f8", textColor: "#ec4899" },
+      { label: "Breast Tenderness", color: "#fce7f3", textColor: "#be185d" },
+      { label: "Headache", color: "#fef7f0", textColor: "#ea580c" },
+      { label: "Migraine", color: "#fef2f2", textColor: "#b91c1c" },
+      { label: "Migraine with Aura", color: "#f3e8ff", textColor: "#9333ea" },
+      { label: "Lower Back", color: "#fffbeb", textColor: "#d97706" },
+      { label: "Leg", color: "#eff6ff", textColor: "#3b82f6" },
+      { label: "Joint", color: "#f8fafc", textColor: "#64748b" },
+      { label: "Vulvar", color: "#fdf4ff", textColor: "#c026d3" },
+    ],
+    energy: [
+      { label: "Exhausted", color: "#fef2f2", textColor: "#dc2626" },
+      { label: "Tired", color: "#fef7f0", textColor: "#ea580c" },
+      { label: "OK", color: "#fffbeb", textColor: "#d97706" },
+      { label: "Energetic", color: "#ecfdf5", textColor: "#059669" },
+      { label: "Fully Energized", color: "#f0fdf4", textColor: "#047857" },
+    ],
+  };
 
   const tabAnimations = React.useRef(
     TABS.map(() => ({
@@ -33,7 +88,6 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
       labelOpacity: new Animated.Value(0.7),
     }))
   ).current;
-
 
   const indicatorAnimation = React.useRef(new Animated.Value(0)).current;
 
@@ -52,6 +106,62 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const floatingButtonSpace = 55;
   const tabWidth = (availableWidth - floatingButtonSpace) / TABS.length;
   const prevTabIndexRef = React.useRef(0);
+  const [selectedDate, setSelectedDate] = useState<SelectedDate | null>(null);
+  const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const {
+    entries,
+    loading: wellnessLoading,
+    addOrUpdateEntry
+  } = useWellnessStore();
+
+  const { uid } = useUserDataStore();
+
+  const openModal = (): void => {
+    const today = new Date()
+    const monthStr = String(today.getMonth() + 1).padStart(2, "0");
+    const dayStr = String(today.getDate()).padStart(2, "0");
+    const dateKey =  `${today.getFullYear()}-${monthStr}-${dayStr}`;
+
+    setSelectedDate({
+      day: today.getDate(),
+      month: today.getMonth(),
+      year: today.getFullYear(),
+      key: dateKey,
+    });
+    setModalVisible(true);
+  };
+
+  const updateWellnessData = async (
+    category: WellnessCategory,
+    option: WellnessOption
+  ): Promise<void> => {
+    if (!selectedDate || !uid) return;
+
+    try {
+      await addOrUpdateEntry(uid, selectedDate.key, category, option);
+    } catch (error) {
+      console.error("Error updating wellness data:", error);
+    }
+  };
+
+  const closeModal = (): void => {
+    setModalVisible(false);
+    setSelectedDate(null);
+  };
+
+  const getWellnessData = () => {
+    const wellnessData: Record<string, any> = {};
+    Object.values(entries).forEach((entry) => {
+      wellnessData[entry.date] = {
+        flow: entry.flow,
+        feelings: entry.feelings,
+        sleep: entry.sleep,
+        pain: entry.pain,
+        energy: entry.energy
+      };
+    });
+    return wellnessData;
+  };
 
   useEffect(() => {
     const currentRouteKey = state.routes[state.index].name.toLowerCase();
@@ -84,6 +194,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   };
 
   const handleFloatingButtonPress = () => {
+    openModal()
     if (Platform.OS === 'ios') {
       try {
         const { HapticFeedback } = require('expo-haptics');
@@ -247,6 +358,15 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
 
   return (
     <SafeAreaView className="absolute bottom-0 left-0 right-0 bg-transparent">
+        <WellnessModal
+          visible={modalVisible}
+          selectedDate={selectedDate}
+          wellnessData={getWellnessData()}
+          wellnessOptions={wellnessOptions}
+          onClose={closeModal}
+          onUpdateWellnessData={updateWellnessData}
+          loading={wellnessLoading}
+        />
       <LinearGradient
         pointerEvents='none'
         colors={gradientColors}
