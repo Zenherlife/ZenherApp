@@ -108,16 +108,23 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const prevTabIndexRef = React.useRef(0);
   const [selectedDate, setSelectedDate] = useState<SelectedDate | null>(null);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const today = new Date()
   const {
     entries,
     loading: wellnessLoading,
-    addOrUpdateEntry
+    addOrUpdateEntry,
+    getMonthEntries
   } = useWellnessStore();
 
   const { uid } = useUserDataStore();
 
+  useEffect(() => {
+    if (uid) {
+        getMonthEntries(uid, today.getMonth(), today.getFullYear());
+      }
+  },[uid])
+
   const openModal = (): void => {
-    const today = new Date()
     const monthStr = String(today.getMonth() + 1).padStart(2, "0");
     const dayStr = String(today.getDate()).padStart(2, "0");
     const dateKey =  `${today.getFullYear()}-${monthStr}-${dayStr}`;

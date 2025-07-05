@@ -14,9 +14,12 @@ import WaterModal from './WaterModal';
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
-const formatDateKey = (date: Date) =>
-  `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-
+const formatDateKey = (date: Date) => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth()+1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+};
 
 const Wave = ({ progress }) => {
   const wavePhase = useSharedValue(0);

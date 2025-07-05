@@ -1,3 +1,5 @@
+import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
+import firestore from '@react-native-firebase/firestore';
 import { Activity, Droplet, Heart, Moon, X, Zap } from 'lucide-react-native';
 import React from 'react';
 import {
@@ -29,7 +31,7 @@ interface WellnessSectionProps {
   options: WellnessOption[];
   selectedDate: SelectedDate | null;
   wellnessData: Record<string, any>;
-  onUpdateWellnessData: (category: WellnessCategory, option: WellnessOption) => Promise<void>; // Added Promise<void>
+  onUpdateWellnessData: (category: WellnessCategory, option: WellnessOption) => Promise<void>;
   isDark: boolean;
 }
 
@@ -58,6 +60,16 @@ const months = [
   'July', 'August', 'September', 'October', 'November', 'December'
 ];
 
+const formatDateString = (date: Date): string => {
+  const monthStr = String(date.getMonth() + 1).padStart(2, "0");
+  const dayStr = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${monthStr}-${dayStr}`;
+};
+
+const createDateFromSelected = (selectedDate: SelectedDate): Date => {
+  return new Date(selectedDate.year, selectedDate.month, selectedDate.day);
+};
+
 const WellnessSection: React.FC<WellnessSectionProps> = ({
   title,
   category,
@@ -67,9 +79,36 @@ const WellnessSection: React.FC<WellnessSectionProps> = ({
   onUpdateWellnessData,
   isDark,
 }) => {
+
+  const { lastPeriodDate, uid } = useUserDataStore();
+
   const getCurrentData = (category: WellnessCategory): WellnessOption | null => {
     if (!selectedDate) return null;
     return wellnessData[selectedDate.key]?.[category] || null;
+  };
+
+  const handleFlowUpdate = async (category: WellnessCategory, option: WellnessOption) => {
+    await onUpdateWellnessData(category, option);
+
+    if (category === 'flow' && selectedDate) {
+      const currentSelectedDate = createDateFromSelected(selectedDate);
+      const currentSelectedDateString = formatDateString(currentSelectedDate);
+
+      const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date(currentSelectedDate);
+        date.setDate(date.getDate() - i);
+        return formatDateString(date);
+      });
+
+      if (!last7Days.includes(lastPeriodDate)) {
+        await firestore()
+          .collection('users')
+          .doc(uid)
+          .update({
+            lastPeriodDate: currentSelectedDateString,
+          });
+      }
+    }
   };
 
   return (
@@ -92,7 +131,7 @@ const WellnessSection: React.FC<WellnessSectionProps> = ({
           return (
             <TouchableOpacity
               key={index}
-              onPress={() => onUpdateWellnessData(category, option)}
+              onPress={() => handleFlowUpdate(category, option)}
               className="mr-3 mb-3 rounded-2xl overflow-hidden"
               style={{
                 shadowColor: isSelected ? option.color : 'transparent',
