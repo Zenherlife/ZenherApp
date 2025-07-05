@@ -112,11 +112,11 @@ export default function WaterTracker() {
 
   return (
     <View className="flex-row w-auto h-32 mx-4 bg-white dark:bg-gray-800 rounded-full my-4 items-center" style={{
-      shadowColor: isDark ? 'transparent' : '#888888',
+      shadowColor: isDark ? 'transparent' : '#bcbaba',
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.3,
       shadowRadius: 16,
-      elevation: 10,
+      elevation: 13,
     }}>
       <TouchableOpacity
         onPress={() => setWaterModalVisible(true)}

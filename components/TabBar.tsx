@@ -11,24 +11,28 @@ import {
   Platform,
   Pressable,
   View,
-  useColorScheme,
+  useColorScheme
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import ArticleIcon from './ArticleIcon';
+import CalendarIcon from './CalendarIcon';
+import ConsultIcon from './ConsultIcon';
+import HomeIcon from './HomeIcon';
 
 const { width: screenWidth } = Dimensions.get('window');
-
-const TABS = [
-  { key: 'index', label: 'Home', iconOutline: 'home-outline', iconFilled: 'home' },
-  { key: 'track', label: 'Track', iconOutline: 'calendar-outline', iconFilled: 'calendar' },
-  { key: 'consult', label: 'Consult', iconOutline: 'call-outline', iconFilled: 'call' },
-  { key: 'articles', label: 'Explore', iconOutline: 'newspaper-outline', iconFilled: 'newspaper' },
-];
 
 const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
   
+  const TABS = [
+    { key: 'index', label: 'Home', icon: (isDark: boolean, focused: boolean) => <HomeIcon isDark={isDark} focused={focused} /> },
+    { key: 'track', label: 'Track', icon: (isDark: boolean, focused: boolean) => <CalendarIcon isDark={isDark} focused={focused} /> },
+    { key: 'consult', label: 'Consult', icon: (isDark: boolean, focused: boolean) => <ConsultIcon isDark={isDark} focused={focused} /> },
+    { key: 'articles', label: 'Explore', icon: (isDark: boolean, focused: boolean) => <ArticleIcon isDark={isDark} focused={focused} /> },
+  ];
+
   const wellnessOptions: WellnessOptions = {
     flow: [
       { label: "Light", color: "#fef7f0", textColor: "#d97706" },
@@ -92,9 +96,9 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const indicatorAnimation = React.useRef(new Animated.Value(0)).current;
 
   const activeColor = isDark ? '#A5B4FC' : '#7C3AED';
-  const inactiveColor = isDark ? '#b3b6bd' : '#64748b';
+  const inactiveColor = isDark ? '#8e95a5' : '#64748b';
   const backgroundColor = isDark ? 'rgba(31, 41, 55, 1)' : 'rgba(255, 255, 255, 1)';
-  const highlightColor = isDark ? 'rgba(165, 180, 252, 0.2)' : 'rgba(124, 58, 237, 0.15)';
+  const highlightColor = isDark ? 'rgba(165, 180, 252, 0.2)' : 'rgba(124, 58, 237, 0.1)';
   const floatingButtonColor = isDark ? '#8B5CF6' : '#7C3AED';
   const floatingButtonGradient = isDark
     ? ['#6366F1', '#8B5CF6']
@@ -217,7 +221,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
     const routeIndex = state.routes.findIndex((r: any) => r.name.toLowerCase() === tab.key.toLowerCase());
     const isFocused = state.index === routeIndex;
     const color = isFocused ? activeColor : inactiveColor;
-    const iconName = isFocused ? tab.iconFilled : tab.iconOutline;
+    // const iconName = isFocused ? tab.icon : tab.icon;
 
     const onPress = () => {
       const event = navigation.emit({ type: 'tabPress', target: route.key, canPreventDefault: true });
@@ -248,10 +252,11 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
           className="items-center justify-center rounded-2xl"
         >
           <Animated.View
-            className="mb-1 rounded-xl"
+            className="mb-[3px] rounded-xl"
             style={{ transform: [{ scale: tabAnimations[index].iconScale }] }}
           >
-            <Ionicons name={iconName as any} size={22} color={color} />
+            {tab.icon?.(isDark, isFocused)}
+            {/* <Image source={iconName} resizeMode='contain' style={{tintColor: color, height: 19, width: 19}} /> */}
           </Animated.View>
           <Animated.Text
             className="text-[10px] text-center"

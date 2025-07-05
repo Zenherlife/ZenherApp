@@ -484,9 +484,7 @@ const CalendarScreen: React.FC = () => {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         showsVerticalScrollIndicator={false}
-        removeClippedSubviews={false}
         maxToRenderPerBatch={10}
-        windowSize={10}
         initialNumToRender={15}
         updateCellsBatchingPeriod={50}
         maintainVisibleContentPosition={{
