@@ -4,12 +4,15 @@ import { Dimensions, Text, useColorScheme, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
+  useAnimatedProps,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
   withTiming
 } from "react-native-reanimated";
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 const { width } = Dimensions.get("window");
 const SIZE = width * 0.88;
@@ -39,6 +42,7 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
   };
 
   const polarToCartesian = (cx, cy, radius, angleInDegrees) => {
+    'worklet';
     const rad = toRad(angleInDegrees);
     return {
       x: cx + radius * Math.cos(rad),
@@ -47,6 +51,7 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
   };
 
   const describeArc = (x, y, radius, startAngle, endAngle) => {
+    'worklet';
     const start = polarToCartesian(x, y, radius, startAngle);
     const end = polarToCartesian(x, y, radius, endAngle);
     const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
@@ -84,13 +89,13 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
     setDaysLeft(remainingDays);
 
     const diffSinceLast = today.getTime() - lastDate.getTime();
-    const diffDays = Math.max(0, Math.ceil(diffSinceLast / MS_IN_A_DAY));
+    const diffDays = Math.max(0, Math.round(diffSinceLast / MS_IN_A_DAY));
     const dayInCycle = (diffDays % cycleLength + cycleLength) % cycleLength;
     const arcSpan = (endAngle - startAngle + 360) % 360;
     const dayAngle = (dayInCycle / (cycleLength - 1)) * arcSpan;
 
     angle.value = startAngle + dayAngle;
-  }, [lastPeriodDate]);
+  }, [lastPeriodDate, cycleLength]);
 
   const panGesture = Gesture.Pan()
     .onBegin(() => {
@@ -140,6 +145,7 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
   });
 
   useDerivedValue(() => {
+    'worklet';
     const arcSpan = (endAngle - startAngle + 360) % 360;
     const adjusted = (angle.value - startAngle + 360) % 360;
     const clamped = Math.min(adjusted, arcSpan);
@@ -167,9 +173,17 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
       luteal: "#96CEB4"
     };
     runOnJS(setCurrentPhaseColor)(phaseColors[currentPhase]);
-  });
+  }, [angle, cycleLength, lastPeriodDate]);
 
   const currentPhaseInfo = getPhaseInfo(cyclePhase);
+
+  const animatedProgressProps = useAnimatedProps(() => {
+    'worklet';
+    const progressPath = describeArc(CENTER, CENTER, RADIUS, startAngle, angle.value);
+    return {
+      d: progressPath,
+    };
+  });
 
   return (
     <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 mb-16">
@@ -191,8 +205,8 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
               strokeLinecap="round"
             />
 
-            <Path
-              d={describeArc(CENTER, CENTER, RADIUS, startAngle, angle.value)}
+            <AnimatedPath
+              animatedProps={animatedProgressProps}
               stroke={currentPhaseColor}
               strokeWidth={STROKE_WIDTH - 4}
               fill="none"
@@ -225,7 +239,6 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
               <Ionicons name={currentPhaseInfo.icon} size={22} color={currentPhaseColor} />
             </View>
           </View>
-
           <View className="absolute items-center justify-center mt-5" style={{ width: SIZE, height: SIZE }}>
             <View className="items-center">
               <Text className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
