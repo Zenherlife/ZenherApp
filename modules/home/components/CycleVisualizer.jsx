@@ -43,17 +43,36 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
 
   const polarToCartesian = (cx, cy, radius, angleInDegrees) => {
     'worklet';
+    // Validate inputs
+    if (!isFinite(cx) || !isFinite(cy) || !isFinite(radius) || !isFinite(angleInDegrees)) {
+      return { x: cx || 0, y: cy || 0 };
+    }
+    
     const rad = toRad(angleInDegrees);
+    const x = cx + radius * Math.cos(rad);
+    const y = cy + radius * Math.sin(rad);
+    
     return {
-      x: cx + radius * Math.cos(rad),
-      y: cy + radius * Math.sin(rad),
+      x: isFinite(x) ? x : cx,
+      y: isFinite(y) ? y : cy,
     };
   };
 
   const describeArc = (x, y, radius, startAngle, endAngle) => {
     'worklet';
+    // Validate inputs to prevent NaN
+    if (!isFinite(x) || !isFinite(y) || !isFinite(radius) || !isFinite(startAngle) || !isFinite(endAngle)) {
+      return `M ${x} ${y}`;
+    }
+    
     const start = polarToCartesian(x, y, radius, startAngle);
     const end = polarToCartesian(x, y, radius, endAngle);
+    
+    // Validate calculated points
+    if (!isFinite(start.x) || !isFinite(start.y) || !isFinite(end.x) || !isFinite(end.y)) {
+      return `M ${x} ${y}`;
+    }
+    
     const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
     return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
   };
@@ -173,13 +192,16 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
       luteal: "#96CEB4"
     };
     runOnJS(setCurrentPhaseColor)(phaseColors[currentPhase]);
-  }, [angle, cycleLength, lastPeriodDate]);
+  }, [angle, cycleLength, lastPeriodDate]); // Added dependencies
 
   const currentPhaseInfo = getPhaseInfo(cyclePhase);
 
+  // Create animated props for the progress path
   const animatedProgressProps = useAnimatedProps(() => {
     'worklet';
-    const progressPath = describeArc(CENTER, CENTER, RADIUS, startAngle, angle.value);
+    // Ensure angle is valid before using it
+    const validAngle = isFinite(angle.value) ? angle.value : startAngle;
+    const progressPath = describeArc(CENTER, CENTER, RADIUS, startAngle, validAngle);
     return {
       d: progressPath,
     };
