@@ -1,4 +1,5 @@
 import useArticleStore from "@/modules/articles/store/useArticleStore";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   FlatList,
@@ -120,10 +121,11 @@ const ArticlesScreen = () => {
   };
 
   const renderRegularArticle = ({ item, index }) => {
+    const router = useRouter()
     if (index === 0) return null;
 
     return (
-      <TouchableOpacity className="mb-6">
+      <TouchableOpacity className="mb-6" onPress={() => router.push('../article/articleDetailScreen')}>
         <View className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl overflow-hidden">
           <View className="p-5">
             <View className="flex-row items-center mb-3">
