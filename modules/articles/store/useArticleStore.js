@@ -4,8 +4,9 @@ import { create } from 'zustand';
 
 const db = getFirestore(getApp());
 
-const useArticleStore = create((set) => ({
+const useArticleStore = create((set, get) => ({
   articles: [],
+  selectedArticle: null,
   loading: false,
   error: null,
 
@@ -22,6 +23,19 @@ const useArticleStore = create((set) => ({
     } catch (err) {
       set({ error: err.message, loading: false });
     }
+  },
+
+  setSelectedArticle: (article) => {
+    set({ selectedArticle: article });
+  },
+
+  getArticleById: (id) => {
+    const { articles } = get();
+    return articles.find(article => article.id === id);
+  },
+
+  clearSelectedArticle: () => {
+    set({ selectedArticle: null });
   },
 }));
 

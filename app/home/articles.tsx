@@ -11,13 +11,17 @@ import {
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 
-
-
 const ArticlesScreen = () => {
-  const { articles, fetchArticles } = useArticleStore();
+  const { articles, fetchArticles, setSelectedArticle } = useArticleStore();
   const [selected, setSelected] = useState("All");
+  const router = useRouter()
   const colorScheme = useColorScheme();
 
+  const handleArticlePress = (article) => {
+    setSelectedArticle(article);
+    
+    router.push('../article/articleDetailScreen');
+  };
   useEffect(() => {
     fetchArticles();
   }, []);
@@ -37,7 +41,7 @@ const ArticlesScreen = () => {
   const renderFeaturedArticle = ({ item, index }) => {
     if (index === 0) {
       return (
-        <TouchableOpacity className="mb-8">
+        <TouchableOpacity className="mb-8" onPress={() => handleArticlePress(item)}>
           <LinearGradient
             colors={
               colorScheme === "dark"
@@ -125,7 +129,7 @@ const ArticlesScreen = () => {
     if (index === 0) return null;
 
     return (
-      <TouchableOpacity className="mb-6" onPress={() => router.push('../article/articleDetailScreen')}>
+      <TouchableOpacity className="mb-6" onPress={() => handleArticlePress(item)}>
         <View className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-3xl overflow-hidden">
           <View className="p-5">
             <View className="flex-row items-center mb-3">
