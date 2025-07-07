@@ -1,13 +1,12 @@
 import { useUserDataStore } from "@/modules/auth/store/useUserDataStore";
 import auth from "@react-native-firebase/auth";
 import { useRouter } from "expo-router";
+import LottieView from "lottie-react-native";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Dimensions,
-  FlatList,
   Image,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
+  Animated as RNAnimated,
   StatusBar,
   Text,
   TouchableOpacity,
@@ -15,14 +14,12 @@ import {
   useColorScheme,
 } from "react-native";
 import Animated, {
-  Extrapolate,
-  interpolate,
   runOnJS,
-  useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import Carousel from "react-native-reanimated-carousel";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
@@ -30,178 +27,36 @@ const { width } = Dimensions.get("window");
 const carouselData = [
   {
     key: "1",
-    title: "Track Your CycleTrack Your Cycle & Symptoms",
-    description:
-      "Understand your body better with our advanced period and cycle tracker. Identify patterns and predict your next period with accuracy.",
-    image: require("@/assets/images/project/track.png"),
+    title: "Track Cycle",
+    description: "Monitor your period and symptoms easily.",
+    lottie: require("@/assets/animation/track-health.json"),
   },
   {
     key: "2",
-    title: "Consult a Doctor Online",
-    description:
-      "Get medical advice from certified professionals anytime, anywhere. Book a consultation and receive personalized healthcare guidance.",
-    image: require("@/assets/images/project/consult-doctor.png"),
+    title: "Consult Doctor",
+    description: "Talk to certified doctors anytime.",
+    lottie: require("@/assets/animation/doctor.json"),
   },
-  // {
-  //   key: "3",
-  //   title: "Gain Insights",
-  //   description: "Discover patterns and trends in your health.",
-  //   image: require("@/assets/images/project/hero-image.png"),
-  // },
   {
     key: "3",
-    title: "Daily Reminders",
-    description:
-      "Stay on track with smart daily reminders for your period, medication, hydration, and self-care — all tailored to your routine.",
-    image: require("@/assets/images/project/reminder.png"),
+    title: "Reminders",
+    description: "Get health reminders tailored to you.",
+    lottie: require("@/assets/animation/women-walking.json"),
   },
   {
     key: "4",
-    title: "Community Support",
-    description:
-      "Join a supportive community of women sharing experiences and valuable health insights to guide you through your journey.",
-    image: require("@/assets/images/project/community.png"),
+    title: "Community",
+    description: "Join a safe, helpful women’s community.",
+    lottie: require("@/assets/animation/community.json"),
   },
 ];
-
-const AnimatedTitle = ({
-  text,
-  index,
-  scrollX,
-}: {
-  text: string;
-  index: number;
-  scrollX: Animated.SharedValue<number>;
-}) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      (index - 1) * width,
-      index * width,
-      (index + 1) * width,
-    ];
-    const opacity = withTiming(
-      interpolate(scrollX.value, inputRange, [0, 1, 0], Extrapolate.CLAMP),
-      { duration: 500 }
-    );
-
-    const translateY = withTiming(
-      interpolate(scrollX.value, inputRange, [20, 0, -20], Extrapolate.CLAMP),
-      { duration: 500 }
-    );
-
-    return {
-      opacity,
-      transform: [{ translateY }],
-    };
-  });
-
-  return (
-    <Animated.Text
-      className="text-center text-2xl font-bold text-black dark:text-white px-8 mt-6 mb-2"
-      style={animatedStyle}
-    >
-      {text}
-    </Animated.Text>
-  );
-};
-
-const AnimatedDescription = ({
-  text,
-  index,
-  scrollX,
-}: {
-  text: string;
-  index: number;
-  scrollX: Animated.SharedValue<number>;
-}) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      (index - 1) * width,
-      index * width,
-      (index + 1) * width,
-    ];
-    const opacity = withTiming(
-      interpolate(scrollX.value, inputRange, [0, 1, 0], Extrapolate.CLAMP),
-      { duration: 500 }
-    );
-
-    const translateY = withTiming(
-      interpolate(scrollX.value, inputRange, [20, 0, -20], Extrapolate.CLAMP),
-      { duration: 500 }
-    );
-
-    return {
-      opacity,
-      transform: [{ translateY }],
-    };
-  });
-
-  return (
-    <Animated.Text
-      className="text-center text-lg font-medium text-black dark:text-gray-400 px-8 mb-4"
-      style={animatedStyle}
-    >
-      {text}
-    </Animated.Text>
-  );
-};
-
-const CarouselItem = ({
-  item,
-  index,
-  scrollX,
-}: {
-  item: any;
-  index: number;
-  scrollX: Animated.SharedValue<number>;
-}) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    const inputRange = [
-      (index - 1) * width,
-      index * width,
-      (index + 1) * width,
-    ];
-
-    const scale = withTiming(
-      interpolate(scrollX.value, inputRange, [0.8, 1, 0.8], Extrapolate.CLAMP),
-      { duration: 500 }
-    );
-
-    const opacity = withTiming(
-      interpolate(scrollX.value, inputRange, [0.5, 1, 0.5], Extrapolate.CLAMP),
-      { duration: 500 }
-    );
-
-    return {
-      transform: [{ scale }],
-      opacity,
-    };
-  });
-
-  return (
-    <Animated.View
-      style={[
-        { width, alignItems: "center", justifyContent: "center" },
-        animatedStyle,
-      ]}
-    >
-      <Image
-        source={item.image}
-        className="w-80 h-80 mb-6"
-        resizeMode="contain"
-      />
-    </Animated.View>
-  );
-};
 
 export default function WelcomeScreen() {
   const router = useRouter();
   const { listenToUser } = useUserDataStore((state) => state);
-
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showOptions, setShowOptions] = useState(false);
   const [initializing, setInitializing] = useState(true);
-  const flatListRef = useRef<FlatList>(null);
 
   const screenOpacity = useSharedValue(0);
   const screenTranslate = useSharedValue(20);
@@ -209,38 +64,12 @@ export default function WelcomeScreen() {
   const optionsOpacity = useSharedValue(0);
   const optionsTranslate = useSharedValue(15);
 
-  const scrollX = useSharedValue(0);
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollX.value = event.contentOffset.x;
-    },
-  });
-
-  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / width);
-    setCurrentIndex(index);
-  };
+  const animatedValues = useRef(
+    Array.from({ length: carouselData.length }, () => new RNAnimated.Value(0))
+  ).current;
 
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!showOptions && flatListRef.current) {
-        const nextIndex = (currentIndex + 1) % carouselData.length;
-        const offset = nextIndex * width;
-
-        flatListRef.current.scrollToOffset({
-          offset,
-          animated: true,
-        });
-
-        setCurrentIndex(nextIndex);
-      }
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [showOptions, currentIndex]);
 
   useEffect(() => {
     const unsubscribe = auth().onAuthStateChanged((authUser) => {
@@ -251,9 +80,8 @@ export default function WelcomeScreen() {
         setInitializing(false);
       }
     });
-
     return unsubscribe;
-  }, [router]);
+  }, []);
 
   useEffect(() => {
     if (!initializing) {
@@ -286,6 +114,63 @@ export default function WelcomeScreen() {
     });
   };
 
+  const renderItem = ({ item }: { item: any }) => {
+    const titleOpacity = useSharedValue(0);
+    const titleTranslate = useSharedValue(10);
+    const descriptionOpacity = useSharedValue(0);
+    const descriptionTranslate = useSharedValue(10);
+
+    useEffect(() => {
+      titleOpacity.value = withTiming(1, { duration: 500 });
+      titleTranslate.value = withTiming(0, { duration: 500 });
+      descriptionOpacity.value = withTiming(1, { duration: 600 });
+      descriptionTranslate.value = withTiming(0, { duration: 600 });
+    }, []);
+
+    const animatedTitleStyle = useAnimatedStyle(() => ({
+      opacity: titleOpacity.value,
+      transform: [{ translateY: titleTranslate.value }],
+    }));
+
+    const animatedDescriptionStyle = useAnimatedStyle(() => ({
+      opacity: descriptionOpacity.value,
+      transform: [{ translateY: descriptionTranslate.value }],
+    }));
+
+    return (
+      <View className="items-center justify-center px-6 pt-4">
+        <Animated.Text
+          style={animatedTitleStyle}
+          className="text-center text-2xl font-bold text-black dark:text-white mt-8"
+        >
+          {item.title}
+        </Animated.Text>
+        <Animated.Text
+          style={animatedDescriptionStyle}
+          className="text-center text-lg font-medium text-black dark:text-gray-400 mt-2"
+        >
+          {item.description}
+        </Animated.Text>
+        <LottieView
+          source={item.lottie}
+          autoPlay
+          loop
+          style={{ width: 300, height: 300 }}
+        />
+      </View>
+    );
+  };
+
+  useEffect(() => {
+    animatedValues.forEach((animValue, index) => {
+      RNAnimated.timing(animValue, {
+        toValue: index === currentIndex ? 1 : 0,
+        duration: 400,
+        useNativeDriver: false,
+      }).start();
+    });
+  }, [currentIndex]);
+
   if (initializing) return null;
 
   return (
@@ -308,86 +193,84 @@ export default function WelcomeScreen() {
           </Text>
         </View>
 
-        {/* Title & Description */}
-        <AnimatedTitle
-          index={currentIndex}
-          scrollX={scrollX}
-          text={carouselData[currentIndex]?.title}
-        />
-        <AnimatedDescription
-          index={currentIndex}
-          scrollX={scrollX}
-          text={carouselData[currentIndex]?.description}
-        />
-
         {/* Carousel */}
-        <View className="flex-1 justify-center">
-          <Animated.FlatList
-            ref={flatListRef}
-            onScroll={scrollHandler}
-            onMomentumScrollEnd={handleScroll}
-            scrollEventThrottle={16}
-            data={carouselData}
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            keyExtractor={(item) => item.key}
-            renderItem={({ item, index }) => (
-              <CarouselItem item={item} index={index} scrollX={scrollX} />
-            )}
-          />
+        <Carousel
+          width={width}
+          height={500}
+          autoPlay
+          loop
+          pagingEnabled
+          data={carouselData}
+          scrollAnimationDuration={800}
+          renderItem={renderItem}
+          onSnapToItem={(index) => setCurrentIndex(index)}
+        />
 
-          {/* Pagination Dots */}
-          {!showOptions && (
-            <View className="flex-row justify-center mt-2 mb-8">
-              {carouselData.map((_, index) => (
-                <View
+        {/* Pagination Dots */}
+        {!showOptions && (
+          <View className="flex-row justify-center mt-8 pt-16">
+            {carouselData.map((_, index) => {
+              const animatedValue = animatedValues[index];
+              const indicatorWidth = animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [8, 20],
+              });
+              const indicatorOpacity = animatedValue.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0.4, 1],
+              });
+
+              return (
+                <RNAnimated.View
                   key={index}
-                  className="w-2 h-2 mx-1 rounded-full"
                   style={{
-                    backgroundColor:
-                      currentIndex === index ? "#4F46E5" : "#CBD5E0",
+                    width: indicatorWidth,
+                    height: 8,
+                    marginHorizontal: 4,
+                    borderRadius: 4,
+                    backgroundColor: "#4F46E5",
+                    opacity: indicatorOpacity,
                   }}
                 />
-              ))}
-            </View>
-          )}
-
-          {/* Get Started / Options */}
-          <View className="px-8 pb-8">
-            {!showOptions ? (
-              <Animated.View style={getStartedStyle}>
-                <TouchableOpacity
-                  className="bg-indigo-800 py-3 rounded-full mb-16"
-                  onPress={handleGetStarted}
-                >
-                  <Text className="text-center text-white font-bold text-lg">
-                    Get Started
-                  </Text>
-                </TouchableOpacity>
-              </Animated.View>
-            ) : (
-              <Animated.View style={optionsStyle}>
-                <TouchableOpacity
-                  className="py-3 rounded-full border border-black dark:border-white mb-4"
-                  onPress={() => router.push("/auth/login")}
-                >
-                  <Text className="text-center text-black dark:text-white font-semibold text-lg">
-                    I have an account
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  className="bg-indigo-800 dark:bg-white py-3 rounded-full"
-                  onPress={() => router.push("/auth/onboard")}
-                >
-                  <Text className="text-center text-white dark:text-gray-900 font-bold text-lg">
-                    Create account
-                  </Text>
-                </TouchableOpacity>
-              </Animated.View>
-            )}
+              );
+            })}
           </View>
+        )}
+
+        {/* Buttons */}
+        <View className="px-8 pt-6 pb-8">
+          {!showOptions ? (
+            <Animated.View style={getStartedStyle}>
+              <TouchableOpacity
+                className="bg-indigo-800 py-3 rounded-full mb-16"
+                onPress={handleGetStarted}
+              >
+                <Text className="text-center text-white font-bold text-lg">
+                  Get Started
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          ) : (
+            <Animated.View style={optionsStyle}>
+              <TouchableOpacity
+                className="py-3 rounded-full border border-black dark:border-white mb-4 mt-16"
+                onPress={() => router.push("/auth/login")}
+              >
+                <Text className="text-center text-black dark:text-white font-semibold text-lg">
+                  I have an account
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                className="bg-indigo-800 dark:bg-white py-3 rounded-full"
+                onPress={() => router.push("/auth/onboard")}
+              >
+                <Text className="text-center text-white dark:text-gray-900 font-bold text-lg">
+                  Create account
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          )}
         </View>
       </Animated.View>
     </SafeAreaView>
