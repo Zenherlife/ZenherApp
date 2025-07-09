@@ -10,6 +10,7 @@ import {
   View
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ArticlesScreen = () => {
   const { articles, fetchArticles, setSelectedArticle } = useArticleStore();
@@ -219,9 +220,9 @@ const ArticlesScreen = () => {
   };
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
-      <View className="px-5 pt-4 pb-4">
-        <Text className="text-3xl font-black text-gray-900 dark:text-white mb-2">
+    <SafeAreaView edges={["top"]} className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <View className="px-5 pt-4 pb-2">
+        <Text className="text-3xl font-black text-gray-900 dark:text-white mb-1">
           Articles
         </Text>
         <Text className="text-gray-600 dark:text-gray-400 text-base">
@@ -276,7 +277,7 @@ const ArticlesScreen = () => {
         renderItem={renderRegularArticle}
         ItemSeparatorComponent={() => <View className="h-0" />}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

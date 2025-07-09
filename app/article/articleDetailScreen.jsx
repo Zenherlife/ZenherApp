@@ -197,7 +197,7 @@ const ArticleDetailScreen = () => {
         }}
       >
         <View className="flex-row items-center justify-between">
-          <TouchableOpacity onPress={() => navigation.goBack()} className="p-2">
+          <TouchableOpacity onPress={() => router.back()} className="p-2">
             <Feather name="arrow-left" size={24} color={colorScheme === 'dark' ? '#fff' : '#000'} />
           </TouchableOpacity>
           <Text className="text-lg font-semibold text-gray-900 dark:text-white flex-1 text-center" numberOfLines={1}>
@@ -363,7 +363,7 @@ const ArticleDetailScreen = () => {
       </Animated.ScrollView>
 
       <View className="absolute bottom-8 right-6">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => router.back()}>
           <LinearGradient
             colors={['#6366f1', '#a855f7']}
             start={{ x: 0, y: 0 }}

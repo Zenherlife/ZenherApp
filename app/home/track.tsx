@@ -17,6 +17,7 @@ import {
   useColorScheme,
   View
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface MonthData {
   month: number;
@@ -80,6 +81,162 @@ const MONTHS = [
   "July", "August", "September", "October", "November", "December",
 ];
 
+const WellnessTag = React.memo(({ type, entry, textColor, backgroundColor }: {
+  type: string;
+  entry: any;
+  textColor: string;
+  backgroundColor: string;
+}) => (
+  <View className="flex-row items-center mr-2 mb-2">
+    <View className="flex-row items-center px-3 py-1.5 rounded-lg" style={{ backgroundColor }}>
+      <View className="mr-2">
+        <Text className="text-xs font-medium opacity-70" style={{ color: textColor }}>
+          {type}
+        </Text>
+      </View>
+      <View className="w-px h-3 opacity-30" style={{ backgroundColor: textColor }} />
+      <View className="ml-2">
+        <Text className="text-xs font-semibold" style={{ color: textColor }}>
+          {entry.label}
+        </Text>
+      </View>
+    </View>
+  </View>
+));
+
+const MonthHeader = React.memo(({ monthData, isDark }: { monthData: MonthData; isDark: boolean }) => (
+  <View className="mx-4 mb-6 mt-4">
+    <View className={`p-4 rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
+      <View className="flex-row items-center justify-center">
+        <Calendar size={20} color={isDark ? "#60a5fa" : "#3b82f6"} />
+        <Text className={`ml-2 text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          {MONTHS[monthData.month]} {monthData.year}
+        </Text>
+      </View>
+    </View>
+  </View>
+));
+
+const DayItem = React.memo(({ 
+  day, 
+  monthData, 
+  isDark, 
+  onDayPress, 
+  formatDate, 
+  getEntry, 
+  isToday, 
+  isAfterToday, 
+  hasWellnessData 
+}: { 
+  day: any; 
+  monthData: MonthData; 
+  isDark: boolean;
+  onDayPress: (day: number, month: number, year: number) => void;
+  formatDate: (day: number, month: number, year: number) => string;
+  getEntry: (dateKey: string) => any;
+  isToday: (day: number, month: number, year: number) => boolean;
+  isAfterToday: (day: number, month: number, year: number) => boolean;
+  hasWellnessData: (day: number, month: number, year: number) => boolean;
+}) => {
+  const dateKey = formatDate(day.day, monthData.month, monthData.year);
+  const entry = getEntry(dateKey);
+  const isCurrentDay = isToday(day.day, monthData.month, monthData.year);
+  const isFutureDay = isAfterToday(day.day, monthData.month, monthData.year);
+  const hasData = hasWellnessData(day.day, monthData.month, monthData.year);
+
+  const handlePress = useCallback(() => {
+    onDayPress(day.day, monthData.month, monthData.year);
+  }, [day.day, monthData.month, monthData.year, onDayPress]);
+
+  return (
+    <View className="mx-4 mb-3">
+      <View className="flex-row items-center">
+        <View className="w-10 mr-4">
+          <Text className={`text-xs text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            {day.dayName}
+          </Text>
+          <View
+            className={`h-10 w-10 rounded-full items-center justify-center self-center ${
+              isCurrentDay ? 'bg-blue-500' : 'bg-transparent'
+            }`}
+          >
+            <Text className={`text-lg font-medium ${
+              isCurrentDay ? 'text-white' : isDark ? 'text-gray-100' : 'text-gray-900'
+            }`}>
+              {day.day}
+            </Text>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          disabled={isFutureDay}
+          onPress={handlePress}
+          className={`flex-1 rounded-2xl px-3 pt-3 pb-1 ${
+            isFutureDay ? 'opacity-50' : 'opacity-100'
+          } ${
+            hasData
+              ? `${isDark ? 'bg-gray-800' : 'bg-white border-2 border-gray-100'}`
+              : `border-[1.5px] border-dashed ${isDark ? 'border-gray-600/70' : 'border-gray-300'}`
+          }`}
+          activeOpacity={0.7}
+        >
+          {hasData ? (
+            <View className="flex-row flex-wrap">
+              {entry?.flow && (
+                <WellnessTag
+                  type="Flow"
+                  entry={entry.flow}
+                  textColor={entry.flow.textColor}
+                  backgroundColor={entry.flow.color}
+                />
+              )}
+              {entry?.feelings && (
+                <WellnessTag
+                  type="Mood"
+                  entry={entry.feelings}
+                  textColor={entry.feelings.textColor}
+                  backgroundColor={entry.feelings.color}
+                />
+              )}
+              {entry?.sleep && (
+                <WellnessTag
+                  type="Sleep"
+                  entry={entry.sleep}
+                  textColor={entry.sleep.textColor}
+                  backgroundColor={entry.sleep.color}
+                />
+              )}
+              {entry?.pain && (
+                <WellnessTag
+                  type="Pain"
+                  entry={entry.pain}
+                  textColor={entry.pain.textColor}
+                  backgroundColor={entry.pain.color}
+                />
+              )}
+              {entry?.energy && (
+                <WellnessTag
+                  type="Energy"
+                  entry={entry.energy}
+                  textColor={entry.energy.textColor}
+                  backgroundColor={entry.energy.color}
+                />
+              )}
+            </View>
+          ) : (
+            <View className="flex-row items-center justify-center pt-1 pb-3">
+              <Activity size={16} color={isDark ? "#6b7280" : "#9ca3af"} />
+              <Text className={`ml-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                Tap to add
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+});
+
 const CalendarScreen: React.FC = () => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -99,7 +256,6 @@ const CalendarScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [dataVersion, setDataVersion] = useState(0);
 
   const flatListRef = useRef<FlatList>(null);
 
@@ -161,14 +317,10 @@ const CalendarScreen: React.FC = () => {
     initializeCalendar(currentMonth, currentYear);
   }, [uid]);
 
-  useEffect(() => {
-    setDataVersion(prev => prev + 1);
-  }, [entries]);
-
   const initializeCalendar = useCallback(async (month: number, year: number) => {
     const initialMonths = [
       { month, year },
-      { month: month + 1, year: month === 11 ? year + 1 : year },
+      // { month: month + 1, year: month === 11 ? year + 1 : year },
     ];
 
     const monthsWithDays = initialMonths.map(({ month, year }) => ({
@@ -199,7 +351,6 @@ const CalendarScreen: React.FC = () => {
       year: prevYear,
       days: getDaysInMonth(new Date(prevYear, prevMonth, 1)),
     };
-
 
     await getMonthEntries(uid, prevMonth, prevYear);
     
@@ -262,7 +413,6 @@ const CalendarScreen: React.FC = () => {
 
     try {
       await addOrUpdateEntry(uid, selectedDate.key, category, option);
-      setDataVersion(prev => prev + 1);
     } catch (error) {
       console.error("Error updating wellness data:", error);
     }
@@ -282,138 +432,6 @@ const CalendarScreen: React.FC = () => {
     return wellnessData;
   }, [entries]);
 
-  const MonthHeader = ({ monthData }: { monthData: MonthData }) => (
-    <View className="mx-4 mb-6 mt-4">
-      <View className={`p-4 rounded-2xl ${isDark ? 'bg-gray-800' : 'bg-white'} shadow-sm`}>
-        <View className="flex-row items-center justify-center">
-          <Calendar size={20} color={isDark ? "#60a5fa" : "#3b82f6"} />
-          <Text className={`ml-2 text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {MONTHS[monthData.month]} {monthData.year}
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  const WellnessTag = ({ type, entry, textColor, backgroundColor }: {
-    type: string;
-    entry: any;
-    textColor: string;
-    backgroundColor: string;
-  }) => (
-    <View className="flex-row items-center mr-2 mb-2">
-      <View className="flex-row items-center px-3 py-1.5 rounded-lg" style={{ backgroundColor }}>
-        <View className="mr-2">
-          <Text className="text-xs font-medium opacity-70" style={{ color: textColor }}>
-            {type}
-          </Text>
-        </View>
-        <View className="w-px h-3 opacity-30" style={{ backgroundColor: textColor }} />
-        <View className="ml-2">
-          <Text className="text-xs font-semibold" style={{ color: textColor }}>
-            {entry.label}
-          </Text>
-        </View>
-      </View>
-    </View>
-  );
-
-  const DayItem = ({ item: day, monthData }: { item: any; monthData: MonthData }) => {
-    const dateKey = formatDate(day.day, monthData.month, monthData.year);
-    const entry = getEntry(dateKey);
-    const isCurrentDay = isToday(day.day, monthData.month, monthData.year);
-    const isFutureDay = isAfterToday(day.day, monthData.month, monthData.year);
-    const hasData = hasWellnessData(day.day, monthData.month, monthData.year);
-
-    return (
-      <View className="mx-4 mb-3">
-        <View className="flex-row items-center">
-          <View className="w-10 mr-4">
-            <Text className={`text-xs text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              {day.dayName}
-            </Text>
-            <View
-              className={`h-10 w-10 rounded-full items-center justify-center self-center ${
-                isCurrentDay ? 'bg-blue-500' : 'bg-transparent'
-              }`}
-            >
-              <Text className={`text-lg font-medium ${
-                isCurrentDay ? 'text-white' : isDark ? 'text-gray-100' : 'text-gray-900'
-              }`}>
-                {day.day}
-              </Text>
-            </View>
-          </View>
-
-          <TouchableOpacity
-            disabled={isFutureDay}
-            onPress={() => handleDayPress(day.day, monthData.month, monthData.year)}
-            className={`flex-1 rounded-2xl px-3 pt-3 pb-1 ${
-              isFutureDay ? 'opacity-50' : 'opacity-100'
-            } ${
-              hasData
-                ? `${isDark ? 'bg-gray-800' : 'bg-white border-2 border-gray-100'}`
-                : `border-[1.5px] border-dashed ${isDark ? 'border-gray-600/70' : 'border-gray-300'}`
-            }`}
-            activeOpacity={0.7}
-          >
-            {hasData ? (
-              <View className="flex-row flex-wrap">
-                {entry?.flow && (
-                  <WellnessTag
-                    type="Flow"
-                    entry={entry.flow}
-                    textColor={entry.flow.textColor}
-                    backgroundColor={entry.flow.color}
-                  />
-                )}
-                {entry?.feelings && (
-                  <WellnessTag
-                    type="Mood"
-                    entry={entry.feelings}
-                    textColor={entry.feelings.textColor}
-                    backgroundColor={entry.feelings.color}
-                  />
-                )}
-                {entry?.sleep && (
-                  <WellnessTag
-                    type="Sleep"
-                    entry={entry.sleep}
-                    textColor={entry.sleep.textColor}
-                    backgroundColor={entry.sleep.color}
-                  />
-                )}
-                {entry?.pain && (
-                  <WellnessTag
-                    type="Pain"
-                    entry={entry.pain}
-                    textColor={entry.pain.textColor}
-                    backgroundColor={entry.pain.color}
-                  />
-                )}
-                {entry?.energy && (
-                  <WellnessTag
-                    type="Energy"
-                    entry={entry.energy}
-                    textColor={entry.energy.textColor}
-                    backgroundColor={entry.energy.color}
-                  />
-                )}
-              </View>
-            ) : (
-              <View className="flex-row items-center justify-center pt-1 pb-3">
-                <Activity size={16} color={isDark ? "#6b7280" : "#9ca3af"} />
-                <Text className={`ml-2 text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  Tap to add
-                </Text>
-              </View>
-            )}
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  };
-
   const flatListData = useMemo(() => {
     return monthsData.flatMap(monthData => [
       { type: 'header', monthData, id: `header-${monthData.month}-${monthData.year}` },
@@ -422,10 +440,9 @@ const CalendarScreen: React.FC = () => {
         day, 
         monthData,
         id: `day-${monthData.month}-${monthData.year}-${day.day}`,
-        dataVersion
       }))
     ]);
-  }, [monthsData, dataVersion]);
+  }, [monthsData]);
 
   const ListHeaderComponent = useMemo(() => (
     <View className="flex-row justify-center py-4">
@@ -468,32 +485,57 @@ const CalendarScreen: React.FC = () => {
 
   const renderItem = useCallback(({ item }: { item: any }) => {
     if (item.type === 'header') {
-      return <MonthHeader monthData={item.monthData} />;
+      return <MonthHeader monthData={item.monthData} isDark={isDark} />;
     } else {
-      return <DayItem item={item.day} monthData={item.monthData} />;
+      return (
+        <DayItem 
+          day={item.day} 
+          monthData={item.monthData} 
+          isDark={isDark}
+          onDayPress={handleDayPress}
+          formatDate={formatDate}
+          getEntry={getEntry}
+          isToday={isToday}
+          isAfterToday={isAfterToday}
+          hasWellnessData={hasWellnessData}
+        />
+      );
     }
-  }, []);
+  }, [isDark, handleDayPress, formatDate, getEntry, isToday, isAfterToday, hasWellnessData]);
 
-  const keyExtractor = useCallback((item: any) => `${item.id}-${dataVersion}`, [dataVersion]);
+  const keyExtractor = useCallback((item: any) => item.id, []);
+
+  const extraData = useMemo(() => ({ entries, isDark }), [entries, isDark]);
 
   return (
-    <View className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <View className="px-5 pt-4 pb-2">
+        <Text className="text-3xl font-black text-gray-900 dark:text-white mb-1">
+          Your Wellness Space
+        </Text>
+        <Text className="text-gray-600 dark:text-gray-400 text-base">
+          Monitor your cycle and daily wellness effortlessly
+        </Text>
+      </View>
       <FlatList
         ref={flatListRef}
         data={flatListData}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
         showsVerticalScrollIndicator={false}
-        maxToRenderPerBatch={10}
-        initialNumToRender={15}
+        maxToRenderPerBatch={20}
+        initialNumToRender={20}
+        windowSize={10}
         updateCellsBatchingPeriod={50}
+        removeClippedSubviews={true}
         maintainVisibleContentPosition={{
           minIndexForVisible: 0,
         }}
         refreshControl={refreshControl}
         ListHeaderComponent={ListHeaderComponent}
         ListFooterComponent={ListFooterComponent}
-        extraData={dataVersion}
+        extraData={extraData}
+        getItemLayout={undefined}
       />
 
       {wellnessError && (
@@ -513,7 +555,7 @@ const CalendarScreen: React.FC = () => {
         onUpdateWellnessData={updateWellnessData}
         loading={wellnessLoading}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

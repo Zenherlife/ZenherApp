@@ -85,6 +85,10 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
     return "luteal";
   };
 
+  function stripTime(date) {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  }
+
   const getPhaseInfo = (phase) => {
     const phases = {
       menstrual: { phase: "menstrual", color: "#FF6B6B", icon: "water" },
@@ -96,7 +100,7 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
   };
 
   useEffect(() => {
-    const today = new Date();
+    const today = stripTime(new Date());
     const lastDate = new Date(lastPeriodDate);
     const nextPeriod = new Date(lastDate);
     nextPeriod.setDate(lastDate.getDate() + cycleLength);
@@ -104,11 +108,11 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
     const MS_IN_A_DAY = 1000 * 60 * 60 * 24;
 
     const diffTime = nextPeriod.getTime() - today.getTime();
-    const remainingDays = Math.max(0, Math.ceil(diffTime / MS_IN_A_DAY));
+    const remainingDays = Math.max(0, diffTime / MS_IN_A_DAY);
     setDaysLeft(remainingDays);
 
     const diffSinceLast = today.getTime() - lastDate.getTime();
-    const diffDays = Math.max(0, Math.round(diffSinceLast / MS_IN_A_DAY));
+    const diffDays = Math.max(0, diffSinceLast / MS_IN_A_DAY);
     const dayInCycle = (diffDays % cycleLength + cycleLength) % cycleLength;
     const arcSpan = (endAngle - startAngle + 360) % 360;
     const dayAngle = (dayInCycle / (cycleLength - 1)) * arcSpan;
@@ -192,14 +196,12 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
       luteal: "#96CEB4"
     };
     runOnJS(setCurrentPhaseColor)(phaseColors[currentPhase]);
-  }, [angle, cycleLength, lastPeriodDate]); // Added dependencies
+  }, [angle, cycleLength, lastPeriodDate]);
 
   const currentPhaseInfo = getPhaseInfo(cyclePhase);
 
-  // Create animated props for the progress path
   const animatedProgressProps = useAnimatedProps(() => {
     'worklet';
-    // Ensure angle is valid before using it
     const validAngle = isFinite(angle.value) ? angle.value : startAngle;
     const progressPath = describeArc(CENTER, CENTER, RADIUS, startAngle, validAngle);
     return {
@@ -276,7 +278,7 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
                 {currentPhaseInfo.phase} phase
               </Text>
               
-              <View className="px-4 py-2 rounded-full shadow-sm" 
+              <View className="px-4 py-2 rounded-full" 
                    style={{ backgroundColor: currentPhaseColor + '15' }}>
                 <Text className="text-sm font-medium" style={{ color: currentPhaseColor }}>
                   {daysLeft > 0 ? `${daysLeft} days left` : "Period expected"}
@@ -286,18 +288,17 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
           </View>
 
           <Animated.View
-            className={`rounded-full shadow-lg border-[3px] absolute items-center justify-center  bg-white dark:bg-gray-700 ${
-              isToday ? "border-blue-500" : "border-white dark:border-gray-800"
-            }`}
+            className="rounded-full shadow-lg border-[3px] absolute items-center justify-center  bg-white dark:bg-gray-700"
             style={[
               knobStyle,
               {
                 width: KNOB_RADIUS * 2,
                 height: KNOB_RADIUS * 2,
                 borderRadius: KNOB_RADIUS,
+                borderColor: isToday ? "#9ac9ff" : isDark ? "#1f2937" : currentPhaseColor + "15",
                 elevation: 12,
                 shadowColor: currentPhaseColor,
-                shadowOpacity: 0.3,
+                shadowOpacity: 0.5,
                 shadowRadius: 12,
                 shadowOffset: { width: 0, height: 4 },
               },

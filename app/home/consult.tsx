@@ -13,6 +13,7 @@ import {
   useColorScheme,
 } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function ConsultScreen() {
   const doctors = useDoctorDataStore((state) => state.doctors);
@@ -172,8 +173,8 @@ export default function ConsultScreen() {
   );
 
   return (
-    <View className="flex-1 bg-gray-50 dark:bg-gray-900">
-      <View className="px-6 pt-4 pb-2">
+    <SafeAreaView edges={["top"]} className="flex-1 bg-gray-50 dark:bg-gray-900">
+      <View className="px-5 pt-4 pb-2">
         <Text className="text-3xl font-black text-gray-900 dark:text-white mb-1">
           Doctors
         </Text>
@@ -230,6 +231,6 @@ export default function ConsultScreen() {
           showsVerticalScrollIndicator={false}
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 }
