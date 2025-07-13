@@ -54,16 +54,17 @@ export default function ViewDoctorProfileScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50 dark:bg-gray-900">
-        <Pressable onPress={router.back} className="mb-4 px-6 mt-4">
-          <Ionicons
-            name="arrow-back"
-            size={24}
-            color={isDark ? "white" : "black"}
-          />
-        </Pressable>
-      <ScrollView className="flex-1 bg-gray-50 dark:bg-gray-900 mb-2 px-6 "
-      showsVerticalScrollIndicator={false}>
-
+      <Pressable onPress={router.back} className="mb-4 px-6 mt-4">
+        <Ionicons
+          name="arrow-back"
+          size={24}
+          color={isDark ? "white" : "black"}
+        />
+      </Pressable>
+      <ScrollView
+        className="flex-1 bg-gray-50 dark:bg-gray-900 mb-2 px-6 "
+        showsVerticalScrollIndicator={false}
+      >
         <View className="items-center mb-6">
           <Image
             source={
