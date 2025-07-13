@@ -10,7 +10,7 @@ import Animated, {
   useSharedValue,
   withTiming
 } from "react-native-reanimated";
-import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
+import Svg, { Circle, Path } from "react-native-svg";
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
@@ -214,16 +214,9 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
       <GestureDetector gesture={panGesture}>
         <Animated.View className="relative" style={{ width: SIZE, height: SIZE }}>
           <Svg width={SIZE} height={SIZE}>
-            <Defs>
-              <LinearGradient id="trackGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <Stop offset="0%" stopColor={isDark ? "#374151" : "#E5E7EB"} />
-                <Stop offset="100%" stopColor={isDark ? "#4B5563" : "#F3F4F6"} />
-              </LinearGradient>
-            </Defs>
-            
             <Path
               d={arcPath}
-              stroke="url(#trackGradient)"
+              stroke={isDark ? "#374151" : "#E5E7EB"}
               strokeWidth={STROKE_WIDTH}
               fill="none"
               strokeLinecap="round"
@@ -252,7 +245,6 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
               );
             })}
           </Svg>
-
           <View className="absolute" style={{ 
             left: CENTER - 20, 
             top: CENTER - 90,

@@ -1,5 +1,5 @@
 import { useUserDataStore } from "@/modules/auth/store/useUserDataStore";
-import WellnessModal from "@/modules/home/components/WellnessModal";
+import WellnessScreen, { WellnessBottomSheetRef } from "@/modules/home/components/WellnessBottomSheet";
 import {
   SelectedDate,
   WellnessCategory,
@@ -241,7 +241,7 @@ const CalendarScreen: React.FC = () => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
   const { uid } = useUserDataStore();
-
+  const [isWellnessScreenOpen, setIsWellnessFabOpen] = useState(false);
   const {
     entries,
     loading: wellnessLoading,
@@ -258,7 +258,16 @@ const CalendarScreen: React.FC = () => {
   const [loadingMore, setLoadingMore] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
+  const wellnessBottomSheetRef = useRef<WellnessBottomSheetRef>(null);
 
+  const openWellnessSheet = () => {
+    wellnessBottomSheetRef.current?.open();
+  };
+
+  const closeWellnessSheet = () => {
+    wellnessBottomSheetRef.current?.close();
+  };
+  
   const formatDate = useCallback((day: number, month: number, year: number) => {
     const monthStr = String(month + 1).padStart(2, "0");
     const dayStr = String(day).padStart(2, "0");
@@ -397,7 +406,7 @@ const CalendarScreen: React.FC = () => {
       year,
       key: dateKey,
     });
-    setModalVisible(true);
+    openWellnessSheet();
   }, [formatDate]);
 
   const closeModal = useCallback((): void => {
@@ -545,16 +554,15 @@ const CalendarScreen: React.FC = () => {
           </Text>
         </View>
       )}
-
-      <WellnessModal
-        visible={modalVisible}
-        selectedDate={selectedDate}
-        wellnessData={getWellnessData()}
-        wellnessOptions={WELLNESS_OPTIONS}
-        onClose={closeModal}
-        onUpdateWellnessData={updateWellnessData}
-        loading={wellnessLoading}
-      />
+      
+        <WellnessScreen
+          selectedDate={selectedDate}
+          wellnessData={getWellnessData()}
+          wellnessOptions={WELLNESS_OPTIONS}
+          onUpdateWellnessData={updateWellnessData}
+          loading={wellnessLoading}
+          onGoBack={() => {}}
+        />
     </SafeAreaView>
   );
 };

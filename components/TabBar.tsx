@@ -1,5 +1,5 @@
 import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
-import WellnessModal from '@/modules/home/components/WellnessModal';
+import WellnessScreen from '@/modules/home/components/WellnessBottomSheet';
 import { SelectedDate, WellnessCategory, WellnessOption, WellnessOptions } from '@/modules/home/utils/types';
 import { useWellnessStore } from '@/modules/track/store/useWellnessStore';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import ArticleIcon from './ArticleIcon';
 import CalendarIcon from './CalendarIcon';
 import ConsultIcon from './ConsultIcon';
+import { FloatingContent } from './FABWithAnimatedContent';
 import HomeIcon from './HomeIcon';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -25,7 +26,7 @@ const { width: screenWidth } = Dimensions.get('window');
 const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === 'dark';
-  
+  const [isOpen, setIsOpen] = useState(false);
   const TABS = [
     { key: 'index', label: 'Home', icon: (isDark: boolean, focused: boolean) => <HomeIcon isDark={isDark} focused={focused} /> },
     { key: 'track', label: 'Track', icon: (isDark: boolean, focused: boolean) => <CalendarIcon isDark={isDark} focused={focused} /> },
@@ -102,7 +103,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const floatingButtonColor = isDark ? '#8B5CF6' : '#7C3AED';
   const floatingButtonGradient = isDark
     ? ['#6366F1', '#8B5CF6']
-    : ['#93C5FD', '#C084FC'];
+    : ['#Ffc0cb', '#600FFF'];
 
   const containerPadding = 16;
   const tabBarWidth = screenWidth - containerPadding;
@@ -111,7 +112,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const tabWidth = (availableWidth - floatingButtonSpace) / TABS.length;
   const prevTabIndexRef = React.useRef(0);
   const [selectedDate, setSelectedDate] = useState<SelectedDate | null>(null);
-  const [modalVisible, setModalVisible] = useState<boolean>(false);
+
   const today = new Date()
   const {
     entries,
@@ -128,20 +129,6 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
       }
   },[uid])
 
-  const openModal = (): void => {
-    const monthStr = String(today.getMonth() + 1).padStart(2, "0");
-    const dayStr = String(today.getDate()).padStart(2, "0");
-    const dateKey =  `${today.getFullYear()}-${monthStr}-${dayStr}`;
-
-    setSelectedDate({
-      day: today.getDate(),
-      month: today.getMonth(),
-      year: today.getFullYear(),
-      key: dateKey,
-    });
-    setModalVisible(true);
-  };
-
   const updateWellnessData = async (
     category: WellnessCategory,
     option: WellnessOption
@@ -153,11 +140,6 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
     } catch (error) {
       console.error("Error updating wellness data:", error);
     }
-  };
-
-  const closeModal = (): void => {
-    setModalVisible(false);
-    setSelectedDate(null);
   };
 
   const getWellnessData = () => {
@@ -205,7 +187,17 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   };
 
   const handleFloatingButtonPress = () => {
-    openModal()
+    const monthStr = String(today.getMonth() + 1).padStart(2, "0");
+    const dayStr = String(today.getDate()).padStart(2, "0");
+    const dateKey =  `${today.getFullYear()}-${monthStr}-${dayStr}`;
+
+    setSelectedDate({
+      day: today.getDate(),
+      month: today.getMonth(),
+      year: today.getFullYear(),
+      key: dateKey,
+    });
+    setIsOpen(!isOpen)
     if (Platform.OS === 'ios') {
       try {
         const { HapticFeedback } = require('expo-haptics');
@@ -315,7 +307,12 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
                 alignItems: 'center',
               }}
             >
-              <Ionicons name="add" size={28} color="white" />
+              {isOpen ? (
+                <Ionicons name="close-outline" size={28} color="white" />
+              ):
+              (
+                <Ionicons name="add" size={28} color="white" />
+              )}
             </View>
           </LinearGradient>
         </Pressable>
@@ -368,17 +365,21 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
     </View>
   );
 
+
   return (
-    <SafeAreaView className="absolute bottom-0 left-0 right-0 bg-transparent">
-        <WellnessModal
-          visible={modalVisible}
+    <>
+      <FloatingContent visible={isOpen} onClose={() => setIsOpen(false)}>
+        <WellnessScreen
           selectedDate={selectedDate}
           wellnessData={getWellnessData()}
           wellnessOptions={wellnessOptions}
-          onClose={closeModal}
           onUpdateWellnessData={updateWellnessData}
           loading={wellnessLoading}
+          onGoBack={() => setIsOpen(false)}
         />
+      </FloatingContent>
+    
+    <SafeAreaView className="absolute bottom-0 left-0 right-0 bg-transparent">
       <LinearGradient
         pointerEvents='none'
         colors={gradientColors}
@@ -433,6 +434,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
         <TabBarContainer />
       )}
     </SafeAreaView>
+    </>
   );
 };
 

@@ -9,7 +9,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
+import Svg, { ClipPath, Defs, Path, Rect } from "react-native-svg";
 import WaterModal from "./WaterModal";
 
 const AnimatedPath = Animated.createAnimatedComponent(Path);
@@ -21,72 +21,97 @@ const formatDateKey = (date: Date) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-const Wave = ({ progress }) => {
+const Glass = ({ progress, width = 55, height = 70 }) => {
   const wavePhase = useSharedValue(0);
-  const wavePhase2 = useSharedValue(0);
-
+  const colorScheme = useColorScheme();
+  const isDark = colorScheme === "dark";
   useEffect(() => {
     wavePhase.value = withRepeat(
-      withTiming(1000, { duration: 20000, easing: Easing.linear }),
-      -1,
-      false
-    );
-    wavePhase2.value = withRepeat(
-      withTiming(1000, { duration: 24000, easing: Easing.linear }),
+      withTiming(1000, { duration: 50000, easing: Easing.linear }),
       -1,
       false
     );
   }, []);
 
   const animatedProps = useAnimatedProps(() => {
-    const waveWidth = 180;
-    const waveHeight = 4;
-    const waveLength = waveWidth / 2;
+    const waveHeight = 3;
+    const waveLength = width / 1.2;
 
-    let path = `M0 ${100}`;
-    for (let x = 0; x <= waveWidth; x += 1) {
+    let path = `M0 ${height}`;
+    for (let x = 0; x <= width; x += 1) {
       const y =
         Math.sin(((x - wavePhase.value) / waveLength) * Math.PI * 2) *
           waveHeight +
-        140 -
-        progress.value;
+        height - (progress.value / 100) * height;
       path += ` L${x} ${y}`;
     }
-    path += ` L${waveWidth} 200 L0 200 Z`;
+    path += ` L${width} ${height} L0 ${height} Z`;
     return { d: path };
   });
 
-  const animatedProps2 = useAnimatedProps(() => {
-    const waveWidth = 180;
-    const waveHeight = 4;
-    const waveLength = waveWidth / 2;
+  const glassPath = `
+    M${width * 0.05} 0
+    L${width * 0.95} 0
+    L${width * 0.85} ${height - 10}
+    Q${width * 0.85} ${height} ${width * 0.85 - 10} ${height}
+    L${width * 0.15 + 10} ${height}
+    Q${width * 0.15} ${height} ${width * 0.15} ${height - 10}
+    Z
+  `;
 
-    let path = `M0 ${100}`;
-    for (let x = 0; x <= waveWidth; x += 1) {
-      const y =
-        Math.sin(((x + wavePhase2.value) / waveLength) * Math.PI * 2) *
-          waveHeight +
-        140 -
-        progress.value;
-      path += ` L${x} ${y}`;
-    }
-    path += ` L${waveWidth} 200 L0 200 Z`;
-    return { d: path };
-  });
-
+  const basePath = `
+    M${width * 0.15} ${height - 10}
+    L${width * 0.85} ${height - 10}
+    L${width * 0.81} ${height + 6}
+    Q${width * 0.81} ${height + 6} ${width * 0.81 - 4} ${height + 6}
+    L${width * 0.19 + 4} ${height + 6}
+    Q${width * 0.19} ${height + 6} ${width * 0.19} ${height + 6}
+    Z
+  `;
+  
   return (
-    <Svg height="200" width="100%">
+    <Svg width={width} height={height + 8}>
       <Defs>
-        <LinearGradient id="waterGradient" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0%" stopColor="#5fb3fc" stopOpacity="0.6" />
-          <Stop offset="100%" stopColor="#0f6ae0" stopOpacity="0.6" />
-        </LinearGradient>
+        <ClipPath id="glassClip">
+          <Path d={glassPath} />
+        </ClipPath>
       </Defs>
-      <AnimatedPath animatedProps={animatedProps} fill="url(#waterGradient)" />
-      <AnimatedPath animatedProps={animatedProps2} fill="url(#waterGradient)" />
+      <Path
+        d={basePath}
+        fill={isDark ? "rgba(96, 165, 250, 0.15)" : "rgba(44, 147, 219, 0.12)"}
+      />
+      <AnimatedPath
+        animatedProps={animatedProps}
+        fill={isDark ? "#3b82f6" : "#bee2f5"}
+        clipPath="url(#glassClip)"
+      />
+      {/* <Path
+        d={glassPath}
+        stroke="#5fb3fc"
+        strokeWidth={2}
+        fill="none"
+      /> */}
+      <Rect
+        x="0"
+        y="0"
+        width={width / 2}
+        height={height}
+        fill={isDark ? "rgba(59, 130, 246, 0.08)" : "rgba(7, 42, 89, 0.02)"}
+        clipPath="url(#glassClip)"
+      />
+
+      <Rect
+        x={width / 2}
+        y="0"
+        width={width / 2}
+        height={height}
+        fill={isDark ? "rgba(96, 165, 250, 0.18)" : "rgba(44, 147, 219, 0.12)"}
+        clipPath="url(#glassClip)"
+      />
     </Svg>
   );
 };
+
 
 export default function WaterTracker() {
   const { uid, water, setWaterField, setUser } = useUserDataStore();
@@ -109,7 +134,7 @@ export default function WaterTracker() {
 
   return (
     <View
-      className="flex-row w-auto h-32 mx-4 bg-white dark:bg-gray-800 rounded-full my-4 items-center"
+      className="flex-row w-auto h-40 mx-4 bg-white dark:bg-gray-800 rounded-full my-4 items-center"
       style={{
         shadowColor: isDark ? "transparent" : "#bcbaba",
         shadowOffset: { width: 0, height: 8 },
@@ -120,7 +145,7 @@ export default function WaterTracker() {
     >
       <TouchableOpacity
         onPress={() => setWaterModalVisible(true)}
-        className="absolute top-4 right-8 bg-gray-200 dark:bg-gray-700 p-3 rounded-full"
+        className="absolute top-4 right-8 bg-gray-200 dark:bg-gray-700 p-4 rounded-full"
       >
         <Ionicons
           name="arrow-forward"
@@ -128,8 +153,8 @@ export default function WaterTracker() {
           color={isDark ? "#fff" : "#000"}
         />
       </TouchableOpacity>
-      <View className="w-32 h-32 rounded-full overflow-hidden justify-center items-center border-[8px] border-white dark:border-gray-800 relative">
-        <Wave progress={progress} />
+      <View className="w-40 justify-center items-center relative">
+        <Glass progress={progress} />
       </View>
       <View className="flex-1 ml-4 justify-center">
         <Text className="text-black dark:text-white text-base font-semibold mb-2">
@@ -156,11 +181,9 @@ export default function WaterTracker() {
                 },
               });
             }}
-            className="bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600"
+            className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full border border-gray-300 dark:border-gray-600"
           >
-            <Text className="text-black dark:text-white font-semibold">
-              - {water.cupSize}ml
-            </Text>
+             <Ionicons name="remove" color={isDark ? "white" : "black"} size={24} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -179,11 +202,9 @@ export default function WaterTracker() {
                 },
               });
             }}
-            className="bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600"
+            className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full border border-gray-300 dark:border-gray-600"
           >
-            <Text className="text-black dark:text-white font-semibold">
-              + {water.cupSize}ml
-            </Text>
+            <Ionicons name="add" color={isDark ? "white" : "black"} size={24} />
           </TouchableOpacity>
         </View>
       </View>

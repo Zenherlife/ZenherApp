@@ -33,6 +33,7 @@ export interface UserState {
   water: WaterData;
 
   setField: <T extends keyof UserState>(field: T, value: UserState[T]) => void;
+  updateUserData: (data: Partial<UserState>) => Promise<void>;
   setWaterField: <K extends keyof WaterData>(field: K, value: WaterData[K]) => void;
   setUser: (user: Partial<UserState> & { uid?: string }) => void;
   listenToUser: (uid: string) => () => void;
@@ -102,6 +103,18 @@ export const useUserDataStore = create<UserState>((set, get) => ({
       await setDoc(doc(db, 'users', user.uid), user, { merge: true });
     } catch (error) {
       console.error('Error writing user to Firestore:', error);
+    }
+  },
+
+  updateUserData: async (data: Partial<UserState>) => {
+    const { uid } = get();
+    if (!uid) return;
+
+    try {
+      const userRef = doc(db, 'users', uid);
+      await setDoc(userRef, data, { merge: true });
+    } catch (error) {
+      console.error('Error updating user field(s):', error);
     }
   },
   

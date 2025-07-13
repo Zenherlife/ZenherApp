@@ -15,8 +15,7 @@ export default function LayoutHeader({ right }: { right?: React.ReactNode }) {
   return (
     <SafeAreaView
       edges={["top"]}
-      className="left-0 right-0 z-10 bg-white dark:bg-gray-900 flex-row items-center justify-between px-6 shadow-md pt-2 pb-4"
-      style={{ elevation: 2 }}
+      className="left-0 right-0 z-10 bg-gray-50 dark:bg-gray-900 flex-row items-center justify-between px-6 pt-2 pb-4"
     >
       <View className="flex-row items-center">
         <Image source={logo} className="h-8 w-8" resizeMode="contain" />
