@@ -1,6 +1,8 @@
+import BMI from "@/components/BMI";
 import LayoutHeader from "@/components/LayoutHeader";
+import MoodTracker from '@/components/MoodTracker';
+import PeriodCycle from '@/components/PeriodCycle';
 import { useUserDataStore } from "@/modules/auth/store/useUserDataStore";
-import BMI from "@/modules/home/components/BMI";
 import CycleVisualizer from "@/modules/home/components/CycleVisualizer";
 import WaterTracker from "@/modules/home/components/WaterProgress";
 import { useRouter } from "expo-router";
@@ -14,16 +16,20 @@ export default function App() {
   const isDark = colorScheme === 'dark';
 	const router = useRouter()
   return (
-    <View className='flex-1 dark:bg-gray-900 bg-gray-50' >
+    <View className='flex-1 dark:bg-gray-900 bg-backLight' >
       <LayoutHeader />
       <GestureHandlerRootView className="flex-1 bg-white">
         <ScrollView
-          contentContainerStyle={{ paddingBottom: 80 }}
+          contentContainerStyle={{ paddingBottom: 120 }}
           showsVerticalScrollIndicator={false}
         >
           <CycleVisualizer cycleLength={user.averageCycle - 1} lastPeriodDate={user.lastPeriodDate} />
-          <View className="flex-row flex-wrap mx-4 gap-4">
+          <View className="flex-row flex-wrap mx-4 gap-4 mb-4">
+            <PeriodCycle />
             <WaterTracker />
+          </View>
+          <View className="flex-row flex-wrap mx-4 gap-4">
+            <MoodTracker />
             <BMI onPress={() => router.push('../setting/BMI')}/>
           </View>
         </ScrollView>

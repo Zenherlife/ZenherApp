@@ -1,6 +1,6 @@
 import { FloatingContent } from "@/components/FABWithAnimatedContent";
 import { useUserDataStore } from "@/modules/auth/store/useUserDataStore";
-import WellnessScreen, { WellnessBottomSheetRef } from "@/modules/home/components/WellnessBottomSheet";
+import WellnessScreen from "@/modules/home/components/WellnessBottomSheet";
 import {
   SelectedDate,
   WellnessCategory,
@@ -176,7 +176,7 @@ const DayItem = React.memo(({
             isFutureDay ? 'opacity-50' : 'opacity-100'
           } ${
             hasData
-              ? `${isDark ? 'bg-gray-800' : 'bg-white border-2 border-gray-100'}`
+              ? `${isDark ? 'bg-gray-800' : 'bg-white border-2 border-backLight'}`
               : `border-[1.5px] border-dashed ${isDark ? 'border-gray-600/70' : 'border-gray-300'}`
           }`}
           activeOpacity={0.7}
@@ -260,7 +260,6 @@ const CalendarScreen: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
-  const wellnessBottomSheetRef = useRef<WellnessBottomSheetRef>(null);
   
   const formatDate = useCallback((day: number, month: number, year: number) => {
     const monthStr = String(month + 1).padStart(2, "0");
@@ -511,7 +510,7 @@ const CalendarScreen: React.FC = () => {
   const extraData = useMemo(() => ({ entries, isDark }), [entries, isDark]);
 
   return (
-    <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+    <SafeAreaView className={`flex-1 ${isDark ? 'bg-gray-900' : 'bg-backLight'}`}>
       <View className="px-5 pt-4 pb-2">
         <Text className="text-3xl font-black text-gray-900 dark:text-white mb-1">
           Your Wellness Space

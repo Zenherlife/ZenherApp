@@ -208,15 +208,7 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
 
   return (
     <View className="flex-1 items-center justify-center px-4 pb-6">
-      <View className="bg-white dark:bg-gray-800 rounded-3xl px-6 pb-24 pt-16" 
-        style={{
-          shadowColor: isDark ? "transparent" : "rgba(0, 0, 0, 0.2)",
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 1,
-          shadowRadius: 24,
-          elevation: 12,
-        }}
-      >
+      <View className="bg-white dark:bg-gray-800 rounded-3xl px-6 pb-24 pt-16" >
         <GestureDetector gesture={panGesture}>
           <Animated.View className="relative" style={{ width: SIZE, height: SIZE }}>
             <Svg width={SIZE} height={SIZE}>

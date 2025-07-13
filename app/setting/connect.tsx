@@ -30,7 +30,7 @@ export default function ConnectScreen() {
     StatusBar.setBarStyle(isDark ? "light-content" : "dark-content");
   }, [isDark]);
   return (
-    <SafeAreaView className="flex-1 dark:bg-gray-900 bg-gray-50 ">
+    <SafeAreaView className="flex-1 dark:bg-gray-900 bg-backLight ">
       <View className="flex-row justify-between items-center mb-2 px-6">
         <TouchableOpacity
           className="flex-row items-center mt-4"

@@ -1,6 +1,6 @@
 import useArticleStore from "@/modules/articles/store/useArticleStore";
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FlatList,
   ScrollView,
@@ -220,7 +220,7 @@ const ArticlesScreen = () => {
   };
 
   return (
-    <SafeAreaView edges={["top"]} className="flex-1 bg-gray-50 dark:bg-gray-900">
+    <SafeAreaView edges={["top"]} className="flex-1 bg-backLight dark:bg-gray-900">
       <View className="px-5 pt-4 pb-2">
         <Text className="text-3xl font-black text-gray-900 dark:text-white mb-1">
           Articles

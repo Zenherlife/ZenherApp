@@ -138,28 +138,13 @@ export default function WaterTracker() {
     <TouchableOpacity
       onPress={() => setWaterModalVisible(true)}
       className="flex-1 aspect-[0.95] bg-white dark:bg-gray-800 rounded-[1.9rem] items-center relative overflow-hidden"
-      style={{
-        shadowColor: isDark ? "transparent" : 'rgba(0, 0, 0, 0.2)',
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 1,
-        shadowRadius: 16,
-        elevation: 13,
-      }}
     >
-      <View 
-        className="absolute top-0 left-0 right-0 h-1"
-        style={{ 
-          backgroundColor: progressPercent >= 100 ? '#10b981' : '#3b82f6',
-          opacity: 0.4
-        }}
-      />
-      
       <Text className="text-[#888] dark:text-[#bbb] text-base mt-4 font-medium">
         Stay hydrated
       </Text>
       
       <View className="flex-1 items-center justify-center">
-        <Text className="text-[#333] dark:text-[#eee] text-4xl font-bold text-center">
+        <Text className={`${progressPercent >= 100 ? "text-[#7dc5f2]" : "text-neutral-800"} text-4xl font-bold text-center dark:text-[#eee]`}>
           {intake}
           <Text className="text-[#9e9e9e] dark:text-[#aaa] text-xl font-medium"> ml</Text>
         </Text>
