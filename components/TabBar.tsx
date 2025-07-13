@@ -30,7 +30,7 @@ const CustomTabBar = ({ state, descriptors, navigation }: any) => {
   const TABS = [
     { key: 'index', label: 'Home', icon: (isDark: boolean, focused: boolean) => <HomeIcon isDark={isDark} focused={focused} /> },
     { key: 'track', label: 'Track', icon: (isDark: boolean, focused: boolean) => <CalendarIcon isDark={isDark} focused={focused} /> },
-    { key: 'consult', label: 'Consult', icon: (isDark: boolean, focused: boolean) => <ConsultIcon isDark={isDark} focused={focused} /> },
+    { key: 'shop', label: 'Shop', icon: (isDark: boolean, focused: boolean) => <ConsultIcon isDark={isDark} focused={focused} /> },
     { key: 'articles', label: 'Explore', icon: (isDark: boolean, focused: boolean) => <ArticleIcon isDark={isDark} focused={focused} /> },
   ];
 
