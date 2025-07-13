@@ -168,6 +168,7 @@ const ArticleDetailScreen = () => {
             width: SCREEN_WIDTH,
             height: HEADER_HEIGHT,
             resizeMode: 'cover',
+            backgroundColor: 'white'
           }}
         />
         <LinearGradient

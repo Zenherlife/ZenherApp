@@ -15,11 +15,11 @@ import Svg, { Circle, Path } from "react-native-svg";
 const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 const { width } = Dimensions.get("window");
-const SIZE = width * 0.88;
+const SIZE = width * 0.83;
 const CENTER = SIZE / 2;
 const RADIUS = SIZE / 2.5;
-const STROKE_WIDTH = 28;
-const KNOB_RADIUS = 24;
+const STROKE_WIDTH = 24;
+const KNOB_RADIUS = 22;
 const startAngle = -90;
 const endAngle = 230;
 
@@ -43,7 +43,6 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
 
   const polarToCartesian = (cx, cy, radius, angleInDegrees) => {
     'worklet';
-    // Validate inputs
     if (!isFinite(cx) || !isFinite(cy) || !isFinite(radius) || !isFinite(angleInDegrees)) {
       return { x: cx || 0, y: cy || 0 };
     }
@@ -60,7 +59,6 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
 
   const describeArc = (x, y, radius, startAngle, endAngle) => {
     'worklet';
-    // Validate inputs to prevent NaN
     if (!isFinite(x) || !isFinite(y) || !isFinite(radius) || !isFinite(startAngle) || !isFinite(endAngle)) {
       return `M ${x} ${y}`;
     }
@@ -68,7 +66,6 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
     const start = polarToCartesian(x, y, radius, startAngle);
     const end = polarToCartesian(x, y, radius, endAngle);
     
-    // Validate calculated points
     if (!isFinite(start.x) || !isFinite(start.y) || !isFinite(end.x) || !isFinite(end.y)) {
       return `M ${x} ${y}`;
     }
@@ -91,10 +88,10 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
 
   const getPhaseInfo = (phase) => {
     const phases = {
-      menstrual: { phase: "menstrual", color: "#FF6B6B", icon: "water" },
-      follicular: { phase: "follicular", color: "#4ECDC4", icon: "leaf" },
-      ovulation: { phase: "ovulation", color: "#45B7D1", icon: "egg" },
-      luteal: { phase: "luteal", color: "#96CEB4", icon: "moon" }
+      menstrual: { phase: "menstrual", color: "#E53E3E", icon: "water" },
+      follicular: { phase: "follicular", color: "#06B6D4", icon: "leaf" },
+      ovulation: { phase: "ovulation", color: "#3B82F6", icon: "egg" },
+      luteal: { phase: "luteal", color: "#10B981", icon: "moon" }
     };
     return phases[phase] || phases.menstrual;
   };
@@ -190,10 +187,10 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
     runOnJS(setCyclePhase)(currentPhase);
     
     const phaseColors = {
-      menstrual: "#FF6B6B",
-      follicular: "#4ECDC4", 
-      ovulation: "#45B7D1",
-      luteal: "#96CEB4"
+      menstrual: "#F87171",
+      follicular: "#22D3EE",
+      ovulation: "#60A5FA",
+      luteal: "#34D399"
     };
     runOnJS(setCurrentPhaseColor)(phaseColors[currentPhase]);
   }, [angle, cycleLength, lastPeriodDate]);
@@ -210,99 +207,111 @@ const CycleVisualizer = ({ cycleLength, lastPeriodDate }) => {
   });
 
   return (
-    <View className="flex-1 items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 mb-16">
-      <GestureDetector gesture={panGesture}>
-        <Animated.View className="relative" style={{ width: SIZE, height: SIZE }}>
-          <Svg width={SIZE} height={SIZE}>
-            <Path
-              d={arcPath}
-              stroke={isDark ? "#374151" : "#E5E7EB"}
-              strokeWidth={STROKE_WIDTH}
-              fill="none"
-              strokeLinecap="round"
-            />
+    <View className="flex-1 items-center justify-center px-4 pb-6">
+      <View className="bg-white dark:bg-gray-800 rounded-3xl px-6 pb-24 pt-16" 
+        style={{
+          shadowColor: isDark ? "transparent" : "rgba(0, 0, 0, 0.2)",
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 1,
+          shadowRadius: 24,
+          elevation: 12,
+        }}
+      >
+        <GestureDetector gesture={panGesture}>
+          <Animated.View className="relative" style={{ width: SIZE, height: SIZE }}>
+            <Svg width={SIZE} height={SIZE}>
+              <Path
+                d={arcPath}
+                stroke={isDark ? "#374151" : "#F1F5F9"}
+                strokeWidth={STROKE_WIDTH}
+                fill="none"
+                strokeLinecap="round"
+              />
 
-            <AnimatedPath
-              animatedProps={animatedProgressProps}
-              stroke={currentPhaseColor}
-              strokeWidth={STROKE_WIDTH - 4}
-              fill="none"
-              strokeLinecap="round"
-              opacity={0.85}
-            />
+              <AnimatedPath
+                animatedProps={animatedProgressProps}
+                stroke={currentPhaseColor}
+                strokeWidth={STROKE_WIDTH - 2}
+                fill="none"
+                strokeLinecap="round"
+                opacity={0.9}
+              />
 
-            {[5, 13, 15].map((phaseDay, index) => {
-              const phaseAngle = startAngle + (phaseDay / cycleLength) * (endAngle - startAngle);
-              const { x, y } = polarToCartesian(CENTER, CENTER, RADIUS, phaseAngle);
-              return (
-                <Circle
-                  key={index}
-                  cx={x}
-                  cy={y}
-                  r={2.5}
-                  fill={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.3)"}
-                />
-              );
-            })}
-          </Svg>
-          <View className="absolute" style={{ 
-            left: CENTER - 20, 
-            top: CENTER - 90,
-            alignItems: 'center' 
-          }}>
-            <View className="w-10 h-10 rounded-full items-center justify-center" 
-                  style={{ backgroundColor: currentPhaseColor + '25' }}>
-              <Ionicons name={currentPhaseInfo.icon} size={22} color={currentPhaseColor} />
-            </View>
-          </View>
-          <View className="absolute items-center justify-center mt-5" style={{ width: SIZE, height: SIZE }}>
-            <View className="items-center">
-              <Text className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
-                {isToday ? "Today" : selectedDate}
-              </Text>
-              
-              <Text className="text-5xl font-bold text-gray-800 dark:text-white mb-1">
-                {day}
-              </Text>
-              
-              <Text className="text-sm text-gray-600 dark:text-gray-300 capitalize mb-3" 
-                    style={{ color: currentPhaseColor }}>
-                {currentPhaseInfo.phase} phase
-              </Text>
-              
-              <View className="px-4 py-2 rounded-full" 
-                   style={{ backgroundColor: currentPhaseColor + '15' }}>
-                <Text className="text-sm font-medium" style={{ color: currentPhaseColor }}>
-                  {daysLeft > 0 ? `${daysLeft} days left` : "Period expected"}
-                </Text>
+              {[5, 13, 15].map((phaseDay, index) => {
+                const phaseAngle = startAngle + (phaseDay / cycleLength) * (endAngle - startAngle);
+                const { x, y } = polarToCartesian(CENTER, CENTER, RADIUS, phaseAngle);
+                return (
+                  <Circle
+                    key={index}
+                    cx={x}
+                    cy={y}
+                    r={2}
+                    fill={isDark ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.2)"}
+                  />
+                );
+              })}
+            </Svg>
+            
+            <View className="absolute" style={{ 
+              left: CENTER - 18, 
+              top: CENTER - 85,
+              alignItems: 'center' 
+            }}>
+              <View className="w-9 h-9 rounded-xl items-center justify-center" 
+                    style={{ backgroundColor: currentPhaseColor + '20' }}>
+                <Ionicons name={currentPhaseInfo.icon} size={20} color={currentPhaseColor} />
               </View>
             </View>
-          </View>
+            
+            <View className="absolute items-center justify-center mt-4" style={{ width: SIZE, height: SIZE }}>
+              <View className="items-center">
+                <Text className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">
+                  {isToday ? "Today" : selectedDate}
+                </Text>
+                
+                <Text className="text-5xl font-bold text-gray-900 dark:text-white mb-1">
+                  {day}
+                </Text>
+                
+                <Text className="text-sm text-gray-600 dark:text-gray-300 capitalize mb-3" 
+                      style={{ color: currentPhaseColor }}>
+                  {currentPhaseInfo.phase} phase
+                </Text>
+                
+                <View className="px-4 py-2 rounded-full" 
+                     style={{ backgroundColor: currentPhaseColor + '15' }}>
+                  <Text className="text-sm font-medium" style={{ color: currentPhaseColor }}>
+                    {daysLeft > 0 ? `${Math.ceil(daysLeft)} days left` : "Period expected"}
+                  </Text>
+                </View>
+              </View>
+            </View>
 
-          <Animated.View
-            className="rounded-full shadow-lg border-[3px] absolute items-center justify-center  bg-white dark:bg-gray-700"
-            style={[
-              knobStyle,
-              {
-                width: KNOB_RADIUS * 2,
-                height: KNOB_RADIUS * 2,
-                borderRadius: KNOB_RADIUS,
-                borderColor: isToday ? "#9ac9ff" : isDark ? "#1f2937" : currentPhaseColor + "15",
-                elevation: 12,
-                shadowColor: currentPhaseColor,
-                shadowOpacity: 0.5,
-                shadowRadius: 12,
-                shadowOffset: { width: 0, height: 4 },
-              },
-            ]}
-          >
-            <View className="w-4 h-4 rounded-full" 
-                 style={{ backgroundColor: currentPhaseColor, opacity: 0.9 }} />
+            <Animated.View
+              className="rounded-full shadow-lg border-2 absolute items-center justify-center bg-white dark:bg-gray-800"
+              style={[
+                knobStyle,
+                {
+                  width: KNOB_RADIUS * 2,
+                  height: KNOB_RADIUS * 2,
+                  borderRadius: KNOB_RADIUS,
+                  borderColor: isToday ? "#60A5FA" : currentPhaseColor,
+                  elevation: 8,
+                  shadowColor: currentPhaseColor,
+                  shadowOpacity: 0.3,
+                  shadowRadius: 8,
+                  shadowOffset: { width: 0, height: 4 },
+                },
+              ]}
+            >
+              <View className="w-3 h-3 rounded-full" 
+                   style={{ backgroundColor: currentPhaseColor }} />
+            </Animated.View>
           </Animated.View>
-        </Animated.View>
-      </GestureDetector>
+        </GestureDetector>
+      </View>
 
-      <View className="absolute flex-row justify-between w-full" style={{ width: SIZE + 15, height: SIZE + 60}}>
+      <View className="absolute flex-row justify-between w-full" style={{ width: SIZE, height: SIZE + 50}}>
         {[
           { phase: "Menstrual", color: "#FF6B6B", days: "1-5", position: { bottom: '17%', left: '1%' } },
           { phase: "Follicular", color: "#4ECDC4", days: "6-13", position: { bottom: '0%', left: '22%' } },

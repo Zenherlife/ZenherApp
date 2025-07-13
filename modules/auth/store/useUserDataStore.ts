@@ -37,7 +37,7 @@ export interface UserState {
   setWaterField: <K extends keyof WaterData>(field: K, value: WaterData[K]) => void;
   setUser: (user: Partial<UserState> & { uid?: string }) => void;
   listenToUser: (uid: string) => () => void;
-  getUser: () => Omit<UserState, 'setField' | 'setUser' | 'listenToUser' | 'reset' | 'getUser' | 'setWaterField'>;
+  getUser: () => Omit<UserState, 'setField' | 'setUser' | 'listenToUser' | 'reset' | 'getUser' | 'setWaterField' | 'updateUserData'>;
   reset: () => void;
 }
 

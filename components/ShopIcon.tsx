@@ -7,26 +7,31 @@ interface CallIconProps {
   size?: number;
 }
 
-const ConsultIcon = ({ isDark, focused, size = 24 }: CallIconProps) => {
+const ShopIcon = ({ isDark, focused, size = 24 }: CallIconProps) => {
   const gradientColors = focused
     ? isDark
       ? ['#8b92f4', '#A78BFA']
       : ['#b6aaf7', '#D8B4FE']
     : isDark
-      ? ['#6B7280', '#6B7280']
-      : ['#dbdae8', '#dbdae8']
+    ? ['#6B7280', '#6B7280']
+    : ['#dbdae8', '#dbdae8'];
 
   return (
-    <Svg viewBox="0 0 256 256" width={size} height={size} fill="none">
+    <Svg viewBox="0 0 24 24" width={size} height={size} fill="none">
       <Defs>
         <LinearGradient id="callGradient" x1="0" y1="0" x2="1" y2="0">
           <Stop offset="0%" stopColor={gradientColors[0]} />
           <Stop offset="100%" stopColor={gradientColors[1]} />
         </LinearGradient>
       </Defs>
-      <G transform="scale(1.1) translate(-1.1, -1.1)">
+
+      <G>
         <Path
-          d="M222,158.4l-46.9-20a15.6,15.6,0,0,0-15.1,1.3l-25.1,16.7a76.5,76.5,0,0,1-35.2-35h0L116.3,96a15.9,15.9,0,0,0,1.4-15.1L97.6,34a16.3,16.3,0,0,0-16.7-9.6A56.2,56.2,0,0,0,32,80c0,79.4,64.6,144,144,144a56.2,56.2,0,0,0,55.6-48.9A16.3,16.3,0,0,0,222,158.4Z"
+          d="M18.6,23H5.4a3,3,0,0,1-2.98-3.37l1.25-10A3.01,3.01,0,0,1,6.65,7H7v3a1,1,0,0,0,2,0V7h6v3a1,1,0,0,0,2,0V7h.35a3.01,3.01,0,0,1,2.98,2.63l1.25,10A3,3,0,0,1,18.6,23Z"
+          fill="url(#callGradient)"
+        />
+        <Path
+          d="M17,5H15A3,3,0,0,0,9,5H7A5,5,0,0,1,17,5Z"
           fill="url(#callGradient)"
         />
       </G>
@@ -34,4 +39,4 @@ const ConsultIcon = ({ isDark, focused, size = 24 }: CallIconProps) => {
   );
 };
 
-export default ConsultIcon;
+export default ShopIcon;

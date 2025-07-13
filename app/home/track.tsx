@@ -1,3 +1,4 @@
+import { FloatingContent } from "@/components/FABWithAnimatedContent";
 import { useUserDataStore } from "@/modules/auth/store/useUserDataStore";
 import WellnessScreen, { WellnessBottomSheetRef } from "@/modules/home/components/WellnessBottomSheet";
 import {
@@ -256,17 +257,10 @@ const CalendarScreen: React.FC = () => {
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const flatListRef = useRef<FlatList>(null);
   const wellnessBottomSheetRef = useRef<WellnessBottomSheetRef>(null);
-
-  const openWellnessSheet = () => {
-    wellnessBottomSheetRef.current?.open();
-  };
-
-  const closeWellnessSheet = () => {
-    wellnessBottomSheetRef.current?.close();
-  };
   
   const formatDate = useCallback((day: number, month: number, year: number) => {
     const monthStr = String(month + 1).padStart(2, "0");
@@ -406,7 +400,7 @@ const CalendarScreen: React.FC = () => {
       year,
       key: dateKey,
     });
-    openWellnessSheet();
+    setIsOpen(true);
   }, [formatDate]);
 
   const closeModal = useCallback((): void => {
@@ -555,14 +549,16 @@ const CalendarScreen: React.FC = () => {
         </View>
       )}
       
+      <FloatingContent visible={isOpen} onClose={() => setIsOpen(false)}>
         <WellnessScreen
           selectedDate={selectedDate}
           wellnessData={getWellnessData()}
           wellnessOptions={WELLNESS_OPTIONS}
           onUpdateWellnessData={updateWellnessData}
           loading={wellnessLoading}
-          onGoBack={() => {}}
+          onGoBack={() => setIsOpen(false)}
         />
+      </FloatingContent>
     </SafeAreaView>
   );
 };

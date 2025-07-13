@@ -21,7 +21,7 @@ const formatDateKey = (date: Date) => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-const Glass = ({ progress, width = 55, height = 70 }) => {
+const Glass = ({ progress, width = 40, height = 48 }) => {
   const wavePhase = useSharedValue(0);
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -35,7 +35,7 @@ const Glass = ({ progress, width = 55, height = 70 }) => {
 
   const animatedProps = useAnimatedProps(() => {
     const waveHeight = 3;
-    const waveLength = width / 1.2;
+    const waveLength = width;
 
     let path = `M0 ${height}`;
     for (let x = 0; x <= width; x += 1) {
@@ -132,82 +132,97 @@ export default function WaterTracker() {
     }
   }, [intake, goal]);
 
+  const progressPercent = Math.round((intake / goal) * 100);
+
   return (
-    <View
-      className="flex-row w-auto h-40 mx-4 bg-white dark:bg-gray-800 rounded-full my-4 items-center"
+    <TouchableOpacity
+      onPress={() => setWaterModalVisible(true)}
+      className="flex-1 aspect-[0.95] bg-white dark:bg-gray-800 rounded-[1.9rem] items-center relative overflow-hidden"
       style={{
-        shadowColor: isDark ? "transparent" : "#bcbaba",
+        shadowColor: isDark ? "transparent" : 'rgba(0, 0, 0, 0.2)',
         shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.3,
+        shadowOpacity: 1,
         shadowRadius: 16,
         elevation: 13,
       }}
     >
-      <TouchableOpacity
-        onPress={() => setWaterModalVisible(true)}
-        className="absolute top-4 right-8 bg-gray-200 dark:bg-gray-700 p-4 rounded-full"
-      >
-        <Ionicons
-          name="arrow-forward"
-          size={16}
-          color={isDark ? "#fff" : "#000"}
-        />
-      </TouchableOpacity>
-      <View className="w-40 justify-center items-center relative">
-        <Glass progress={progress} />
+      <View 
+        className="absolute top-0 left-0 right-0 h-1"
+        style={{ 
+          backgroundColor: progressPercent >= 100 ? '#10b981' : '#3b82f6',
+          opacity: 0.4
+        }}
+      />
+      
+      <Text className="text-[#888] dark:text-[#bbb] text-base mt-4 font-medium">
+        Stay hydrated
+      </Text>
+      
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-[#333] dark:text-[#eee] text-4xl font-bold text-center">
+          {intake}
+          <Text className="text-[#9e9e9e] dark:text-[#aaa] text-xl font-medium"> ml</Text>
+        </Text>
+        
+        <Text className="text-sm text-[#666] dark:text-[#ccc] mt-2">
+          {progressPercent}% of {goal}ml
+        </Text>
       </View>
-      <View className="flex-1 ml-4 justify-center">
-        <Text className="text-black dark:text-white text-base font-semibold mb-2">
-          Stay hydrated
-        </Text>
-        <Text className="text-[#5fb3fc] text-sm mb-2 font-medium">
-          {Math.round((intake / goal) * 100)}% of daily goal
-        </Text>
-
-        <View className="flex-row gap-x-3">
-          <TouchableOpacity
-            onPress={() => {
-              const newIntake = Math.max(intake - water.cupSize, 0);
-              setWaterField("intake", newIntake);
-              setUser({
-                uid,
-                water: {
-                  ...water,
-                  intake: newIntake,
-                  history: {
-                    ...water.history,
-                    [formatDateKey(new Date())]: newIntake,
+      
+      <View className="flex-1 flex-row items-end mb-5 justify-center">
+        <Glass progress={progress} />
+        
+        <View className="ml-3 gap-3">
+          <View className="flex-row gap-x-3 justify-center">
+            <TouchableOpacity
+              onPress={() => {
+                const newIntake = Math.max(intake - water.cupSize, 0);
+                setWaterField("intake", newIntake);
+                setUser({
+                  uid,
+                  water: {
+                    ...water,
+                    intake: newIntake,
+                    history: {
+                      ...water.history,
+                      [formatDateKey(new Date())]: newIntake,
+                    },
                   },
-                },
-              });
-            }}
-            className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full border border-gray-300 dark:border-gray-600"
-          >
-             <Ionicons name="remove" color={isDark ? "white" : "black"} size={24} />
-          </TouchableOpacity>
+                });
+              }}
+              className="bg-[#F1F5F9] dark:bg-gray-700 p-2.5 rounded-full active:scale-95"
+            >
+              <Ionicons name="remove" color={isDark ? "white" : "#666"} size={16} />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => {
-              const newIntake = Math.min(intake + water.cupSize, goal);
-              setWaterField("intake", newIntake);
-              setUser({
-                uid,
-                water: {
-                  ...water,
-                  intake: newIntake,
-                  history: {
-                    ...water.history,
-                    [formatDateKey(new Date())]: newIntake,
+            <TouchableOpacity
+              onPress={() => {
+                const newIntake = Math.min(intake + water.cupSize, goal);
+                setWaterField("intake", newIntake);
+                setUser({
+                  uid,
+                  water: {
+                    ...water,
+                    intake: newIntake,
+                    history: {
+                      ...water.history,
+                      [formatDateKey(new Date())]: newIntake,
+                    },
                   },
-                },
-              });
-            }}
-            className="bg-gray-100 dark:bg-gray-700 p-3 rounded-full border border-gray-300 dark:border-gray-600"
-          >
-            <Ionicons name="add" color={isDark ? "white" : "black"} size={24} />
-          </TouchableOpacity>
+                });
+              }}
+              className="bg-[#85c9ee] dark:bg-[#3b82f6] p-2.5 rounded-full active:scale-95"
+            >
+              <Ionicons name="add" color="white" size={16} />
+            </TouchableOpacity>
+          </View>
+          
+          <Text className="text-xs text-[#888] dark:text-[#aaa] text-center">
+            {water.cupSize}ml per cup
+          </Text>
         </View>
       </View>
+      
       <WaterModal
         visible={waterModalVisible}
         onClose={() => setWaterModalVisible(false)}
@@ -224,6 +239,6 @@ export default function WaterTracker() {
         }}
         intake={water.intake}
       />
-    </View>
+    </TouchableOpacity>
   );
 }

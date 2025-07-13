@@ -16,7 +16,9 @@ export default function Layout() {
             animation: 'simple_push',
             headerShown: false,
           }}
-        />
+        >
+          <Stack.Screen name="home" options={{ animation: 'fade' }} />
+        </Stack>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   );
