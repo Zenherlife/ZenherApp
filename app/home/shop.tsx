@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useShopStore } from "@/modules/shop/store/useShopStore";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   Linking,
@@ -17,51 +18,13 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const products = [
-  {
-    id: 1,
-    title: "Organic Cotton Pads",
-    image:
-      "https://images.pexels.com/photos/8532612/pexels-photo-8532612.jpeg?auto=compress&cs=tinysrgb&w=400",
-    amazonLink: "https://www.amazon.in/dp/B07X6C9RMF?tag=your-affiliate-tag-20",
-    category: "Hygiene",
-    originalPrice: 300,
-    discountedPrice: 200,
-  },
-  {
-    id: 2,
-    title: "Period Relief Patch",
-    image:
-      "https://images.pexels.com/photos/8532613/pexels-photo-8532613.jpeg?auto=compress&cs=tinysrgb&w=400",
-    amazonLink: "https://www.amazon.in/dp/B08L5WH6QZ?tag=your-affiliate-tag-20",
-    category: "Pain Relief",
-    originalPrice: 3122341,
-    discountedPrice: 2492344,
-  },
-  {
-    id: 3,
-    title: "Monthly Subscription",
-    image:
-      "https://images.pexels.com/photos/8532614/pexels-photo-8532614.jpeg?auto=compress&cs=tinysrgb&w=400",
-    amazonLink: "https://www.amazon.in/dp/B07X6C9RMF?tag=your-affiliate-tag-20",
-    category: "Subscription",
-    originalPrice: 500,
-    discountedPrice: 222,
-  },
-  {
-    id: 4,
-    title: "Wellness Tea",
-    image:
-      "https://images.pexels.com/photos/1417945/pexels-photo-1417945.jpeg?auto=compress&cs=tinysrgb&w=400",
-    amazonLink: "https://www.amazon.in/dp/B08L5WH6QZ?tag=your-affiliate-tag-20",
-    category: "Herbal",
-    originalPrice: 666,
-    discountedPrice: 333,
-  },
-];
-
 export default function ShopScreen() {
+  const { products, fetchProducts } = useShopStore();
   const [selectedCategory, setSelectedCategory] = useState("All");
+
+  useEffect(() => {
+  fetchProducts();
+}, []);
 
   const categories = [
     "All",
@@ -71,6 +34,7 @@ export default function ShopScreen() {
     selectedCategory === "All"
       ? products
       : products.filter((p) => p.category === selectedCategory);
+
 
   return (
     <SafeAreaView

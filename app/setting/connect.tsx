@@ -145,6 +145,15 @@ export default function ConnectScreen() {
                 }),
             },
             {
+              title: "Period Tracking",
+              icon: "water-outline",
+              onPress: () =>
+                router.push({
+                  pathname: "/auth/onboard/PeriodDate",
+                  params: {mode: "edit"},
+                })
+            },
+            {
               title: "Smart Reminders",
               icon: "notifications-outline",
               onPress: () =>
