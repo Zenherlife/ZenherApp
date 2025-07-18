@@ -7,6 +7,7 @@ import {
   Image as RNImage,
   ScrollView,
   Text,
+  TouchableOpacity,
   View,
   useColorScheme,
 } from "react-native";
@@ -23,8 +24,8 @@ export default function ShopScreen() {
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   useEffect(() => {
-  fetchProducts();
-}, []);
+    fetchProducts();
+  }, []);
 
   const categories = [
     "All",
@@ -34,7 +35,6 @@ export default function ShopScreen() {
     selectedCategory === "All"
       ? products
       : products.filter((p) => p.category === selectedCategory);
-
 
   return (
     <SafeAreaView
@@ -144,7 +144,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <Animated.View style={[{ width: "48%", marginBottom: 20 }, animatedStyle]}>
       <Pressable
-        onPress={handleRedirectPress}
+        // onPress={handleRedirectPress}
         onPressIn={() => (scale.value = withSpring(0.96))}
         onPressOut={() => (scale.value = withSpring(1))}
         className="rounded-2xl bg-white dark:bg-gray-800 p-3"
@@ -167,11 +167,11 @@ function ProductCard({ product }: { product: Product }) {
             }}
           />
 
-          <View className="absolute top-2 right-2 bg-red-400 px-2 py-1 rounded-full">
+          {/* <View className="absolute top-2 right-2 bg-red-400 px-2 py-1 rounded-full">
             <Text style={{ color: "white", fontWeight: "bold", fontSize: 8 }}>
               {discountPercent}% OFF
             </Text>
-          </View>
+          </View> */}
         </View>
 
         <LinearGradient
@@ -199,15 +199,23 @@ function ProductCard({ product }: { product: Product }) {
         >
           {product.title}
         </Text>
+        <TouchableOpacity
+          onPress={handleRedirectPress}
+          className="bg-gray-200 dark:bg-[#2d3748] py-3 px-8 rounded-2xl items-center justify-center min-h-[40px] min-w-[140px] shadow-lg active:opacity-80"
+        >
+          <Text className="text-gray-800 dark:text-white text-base font-bold uppercase tracking-wide">
+            Buy Now
+          </Text>
+        </TouchableOpacity>
 
-        <View className="flex-row items-center space-x-2">
+        {/* <View className="flex-row items-center space-x-2">
           <Text className="text-green-600 dark:text-green-400 font-bold text-base mr-1">
             {formatPrice(product.discountedPrice)}
           </Text>
           <Text className="text-gray-500 line-through text-sm">
             {formatPrice(product.originalPrice)}
           </Text>
-        </View>
+        </View> */}
       </Pressable>
     </Animated.View>
   );

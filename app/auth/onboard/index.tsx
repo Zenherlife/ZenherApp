@@ -1,8 +1,9 @@
 import { useUserDataStore } from '@/modules/auth/store/useUserDataStore';
+import WheelSpinner from '@/modules/home/components/WheelSpinner';
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Modal, ScrollView, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
+import { Modal, ScrollView, Text, TouchableOpacity, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BirthdateScreen() {
@@ -10,6 +11,7 @@ export default function BirthdateScreen() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [showYearPicker, setShowYearPicker] = useState(false);
+  const [tempSelectedYear, setTempSelectedYear] = useState(new Date().getFullYear()); 
   const [showParentalConsent, setShowParentalConsent] = useState(false);
   const setField = useUserDataStore((state) => state.setField);
   const router = useRouter();
@@ -33,7 +35,7 @@ export default function BirthdateScreen() {
 
   const getFirstDayOfMonth = (month, year) => {
     const firstDay = new Date(year, month, 1).getDay();
-    return firstDay === 0 ? 6 : firstDay - 1; // Convert Sunday (0) to 6, Monday (1) to 0, etc.
+    return firstDay === 0 ? 6 : firstDay - 1;
   };
 
   const generateCalendarDays = () => {
@@ -41,12 +43,10 @@ export default function BirthdateScreen() {
     const firstDay = getFirstDayOfMonth(currentMonth, currentYear);
     const days = [];
 
-    // Add empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
 
-    // Add days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
@@ -93,8 +93,22 @@ export default function BirthdateScreen() {
   };
 
   const handleYearSelect = (year) => {
-    setCurrentYear(year);
+    setTempSelectedYear(parseInt(year)); 
+  };
+
+  const handleYearPickerDone = () => {
+    setCurrentYear(tempSelectedYear); 
     setShowYearPicker(false);
+  };
+
+  const handleYearPickerCancel = () => {
+    setTempSelectedYear(currentYear); 
+    setShowYearPicker(false);
+  };
+
+  const handleYearPickerOpen = () => {
+    setTempSelectedYear(currentYear); 
+    setShowYearPicker(true);
   };
 
   const isSelected = (day) => {
@@ -125,7 +139,6 @@ export default function BirthdateScreen() {
       router.push('/auth/onboard/Policies')
       setShowParentalConsent(false);
     } 
-    
   };
 
   const calendarDays = generateCalendarDays();
@@ -154,7 +167,7 @@ export default function BirthdateScreen() {
           </TouchableOpacity>
           
           <TouchableOpacity 
-            onPress={() => setShowYearPicker(true)}
+            onPress={handleYearPickerOpen}
             className="flex-row items-center"
           >
             <Text className="text-black dark:text-white text-lg font-medium">
@@ -231,12 +244,11 @@ export default function BirthdateScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Year Picker Modal */}
       <Modal
         visible={showYearPicker}
         transparent={true}
         animationType="slide"
-        onRequestClose={() => setShowYearPicker(false)}
+        onRequestClose={handleYearPickerCancel}
       >
         <View style={{ 
           flex: 1, 
@@ -244,7 +256,7 @@ export default function BirthdateScreen() {
           justifyContent: 'flex-end'
         }}>
           <View style={{ 
-            backgroundColor: isDark ? '#1f2937' : '#f9fafb',
+            backgroundColor: isDark ? '#111827' : 'white',
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
             height: 400
@@ -255,49 +267,28 @@ export default function BirthdateScreen() {
               alignItems: 'center', 
               padding: 16,
               borderBottomWidth: 1,
-              borderBottomColor: isDark ? '#374151' : '#878d96',
+              borderBottomColor: isDark ? '#111827' : 'white',
             }}>
-              <TouchableOpacity onPress={() => setShowYearPicker(false)}>
+              <TouchableOpacity onPress={handleYearPickerCancel}>
                 <Text style={{ color: isDark ? '#9ca3af' : '#4e5157', fontSize: 18 }}>Cancel</Text>
               </TouchableOpacity>
               <Text style={{ color: isDark ? 'white' : 'black', fontSize: 18, fontWeight: '600' }}>Select Year</Text>
-              <TouchableOpacity onPress={() => setShowYearPicker(false)}>
-                <Text style={{ color: isDark? '#22d3ee' : '#283593', fontSize: 18, fontWeight: 'bold' }}>Done</Text>
+              <TouchableOpacity onPress={handleYearPickerDone}>
+                <Text style={{ color: isDark? '#9ca3af' : '#4e5157', fontSize: 18, fontWeight: 'bold' }}>Done</Text>
               </TouchableOpacity>
             </View>
+            <View className="w-full h-[1.4px] bg-neutral-800 dark:bg-white/10" />
             
-            <FlatList
-              data={years}
-              keyExtractor={(item) => item.toString()}
-              showsVerticalScrollIndicator={true}
-              style={{ flex: 1 }}
-              renderItem={({ item: year }) => (
-                <TouchableOpacity
-                  onPress={() => handleYearSelect(year)}
-                  style={{
-                    padding: 16,
-                    backgroundColor: year === currentYear ? isDark ? 'rgba(34, 211, 238, 0.2)' :'#bec2de' : 'transparent',
-                    borderBottomWidth: 0.5,
-                    borderBottomColor: isDark ? '#374151' : '#c3c6ca',
-                  }}
-                >
-                  <Text style={{
-                    textAlign: 'center',
-                    fontSize: 18,
-                    color: year === currentYear ? isDark? '#22d3ee' : '#283593' : isDark ? 'white' : 'black' ,
-                    fontWeight: year === currentYear ? '600' : 'normal'
-                  }}>
-                    {year}
-                  </Text>
-                </TouchableOpacity>
-              )}
-              initialScrollIndex={years.findIndex(y => y === currentYear)}
-              getItemLayout={(data, index) => ({
-                length: 57,
-                offset: 57 * index,
-                index,
-              })}
-            />
+            <View style={{ flex: 1, paddingVertical: 20 }}>
+              <WheelSpinner
+                data={years.map(String)} 
+                initialIndex={years.indexOf(tempSelectedYear)} 
+                onValueChange={handleYearSelect}
+                itemHeight={50}
+                visibleCount={5}
+                textClassName={isDark ? 'text-white text-xl font-medium' : 'text-black text-xl font-medium'}
+              />
+            </View>
           </View>
         </View>
       </Modal>
@@ -370,3 +361,4 @@ export default function BirthdateScreen() {
     </SafeAreaView>
   );
 }
+
