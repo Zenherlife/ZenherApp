@@ -32,16 +32,20 @@ const WheelSpinner: React.FC<WheelSpinnerProps> = ({
   const flatListRef = useRef<FlatList>(null);
   const colorScheme = useColorScheme();
   
+  const [initialScrollDone, setInitialScrollDone] = React.useState(false);
+
   useEffect(() => {
-    if (initialIndex != null && flatListRef.current) {
-      setTimeout(() => {
+    if (initialIndex != null && flatListRef.current && !initialScrollDone) {
+      if (data.length > 0) {
+        const offset = initialIndex * itemHeight;
         flatListRef.current?.scrollToOffset({
-          offset: initialIndex * itemHeight,
+          offset: offset,
           animated: false,
         });
-      }, 0);
+        setInitialScrollDone(true); 
+      }
     }
-  }, [initialIndex]);
+  }, [initialIndex, data, itemHeight, initialScrollDone]);
 
   const handleMomentumScrollEnd = (event: any) => {
     const offsetY = event.nativeEvent.contentOffset.y;
@@ -112,9 +116,9 @@ const WheelSpinner: React.FC<WheelSpinnerProps> = ({
           className="absolute top-1/2 left-0 right-0 -translate-y-1/2 z-20"
           pointerEvents="none"
         >
-          <View className="w-full h-[1.4px] bg-neutral-800 dark:bg-white/55" />
+          <View className="w-full h-[1.4px] bg-neutral-800 dark:bg-white/35" />
           <View style={{ height: itemHeight }} />
-          <View className="w-full h-[1.4px] bg-neutral-800 dark:bg-white/55" />
+          <View className="w-full h-[1.4px] bg-neutral-800 dark:bg-white/35" />
         </View>
         <LinearGradient
           colors={
